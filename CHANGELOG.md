@@ -1,3 +1,30 @@
+## [1.0.1] - 2026-02-17
+
+### Summary
+
+feat(goal): configuration management system
+
+### Test
+
+- update tests/app.spec.js
+
+### Build
+
+- deps: update package.json
+
+### Config
+
+- config: update goal.yaml
+
+### Other
+
+- update .gitignore
+- update index.html
+- update index.jsx
+- update package-lock.json
+- update playwright.config.js
+
+
 ## [1.0.2] - 2026-02-17
 
 ### Summary

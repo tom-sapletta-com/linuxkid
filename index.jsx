@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+const { useState, useEffect, useRef, useCallback } = React;
 
 const COMPUTERS = [
   { name: "auto-ani", ip: "192.168.1.10", emoji: "🚗", user: "ania", color: "#ef4444" },
@@ -94,9 +94,9 @@ const LESSONS = [
           },
           {
             instruction: "Nadaj komunikat przez radio do WSZYSTKICH aut:",
-            command: 'echo "Uwaga, objazd!" | nc --broadcast 1234',
+            command: 'echo "Uwaga, objazd!" | nc -b -u 192.168.1.255 1234',
             expectedOutput: () => `📻 Nadano do wszystkich:\n  ${COMPUTERS.slice(1).map(c => `${c.emoji} ${c.name}`).join("\n  ")}`,
-            tip: "📻 Broadcast = radio FM. Jedna stacja nadaje, wszystkie auta słyszą ten sam komunikat!",
+            tip: "📻 Broadcast = radio FM. -b = nadaj do wszystkich, -u = przez radio (UDP). Jedna stacja nadaje, wszystkie auta słyszą!",
           },
         ],
       },
@@ -380,32 +380,37 @@ function Terminal({ pc, step, onSuccess, aliases }) {
     setInput(""); setHint(false);
   }, [input, step, pc, aliases, onSuccess]);
   const prompt = `${pc.user}@${pc.name}:~$`;
+  const copyCmd = () => { setInput(step.command); inputRef.current?.focus(); };
   return (
-    <div style={{background:"#0c0e14",borderRadius:14,overflow:"hidden",fontFamily:"'JetBrains Mono','Fira Code',monospace",fontSize:13,border:"1px solid #1e2030"}}>
-      <div style={{background:"#161822",padding:"7px 14px",display:"flex",alignItems:"center",gap:7,borderBottom:"1px solid #1e2030"}}>
-        <div style={{width:11,height:11,borderRadius:"50%",background:"#ff5f57"}}/>
-        <div style={{width:11,height:11,borderRadius:"50%",background:"#febc2e"}}/>
-        <div style={{width:11,height:11,borderRadius:"50%",background:"#28c840"}}/>
-        <span style={{color:"#5a6082",marginLeft:8,fontSize:11}}>{pc.emoji} {pc.name}</span>
+    <div className="terminal" data-testid="terminal">
+      <div className="bar">
+        <div className="dot" style={{background:"#ff5f57"}}/>
+        <div className="dot" style={{background:"#febc2e"}}/>
+        <div className="dot" style={{background:"#28c840"}}/>
+        <span className="bar-label">{pc.emoji} {pc.name}</span>
       </div>
-      <div ref={bodyRef} onClick={()=>inputRef.current?.focus()} style={{padding:14,minHeight:180,maxHeight:280,overflowY:"auto",cursor:"text"}}>
-        <div style={{color:"#3b3f56",fontSize:11,marginBottom:6}}>Wpisz komendę i naciśnij Enter ⏎</div>
+      <div className="body" ref={bodyRef} onClick={()=>inputRef.current?.focus()}>
+        <div className="placeholder">Wpisz komendę i naciśnij Enter ⏎</div>
         {history.map((e,i)=>(
-          <div key={i} style={{marginBottom:3}}>
-            {e.t==="in"?(<div><span style={{color:"#73daca"}}>{prompt} </span><span style={{color:"#c0caf5"}}>{e.v}</span></div>)
-            :(<div style={{color:e.ok?"#a9b1d6":"#f7768e",whiteSpace:"pre-wrap",paddingLeft:8,borderLeft:`2px solid ${e.ok?"#73daca":"#f7768e"}`,marginLeft:4}}>{e.v}</div>)}
+          <div key={i} style={{marginBottom:4}}>
+            {e.t==="in"?(<div><span className="prompt">{prompt} </span><span className="cmd">{e.v}</span></div>)
+            :(<div className={`output ${e.ok?"ok":"err"}`}>{e.v}</div>)}
           </div>
         ))}
-        <div style={{display:"flex"}}>
-          <span style={{color:"#73daca"}}>{prompt} </span>
-          <input ref={inputRef} value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&run()}
-            style={{background:"transparent",border:"none",color:"#c0caf5",fontFamily:"inherit",fontSize:"inherit",outline:"none",flex:1,caretColor:"#7aa2f7"}} autoFocus spellCheck={false}/>
+        <div className="input-row">
+          <span className="prompt">{prompt} </span>
+          <input ref={inputRef} value={input} onChange={e=>setInput(e.target.value)}
+            onKeyDown={e=>e.key==="Enter"&&run()} autoFocus spellCheck={false}
+            data-testid="terminal-input" autoComplete="off" autoCapitalize="off"/>
         </div>
       </div>
       {step&&(
-        <div style={{background:"#161822",padding:"7px 14px",borderTop:"1px solid #1e2030",display:"flex",justifyContent:"space-between"}}>
-          {hint?(<button onClick={()=>{setInput(step.command);inputRef.current?.focus()}} style={{background:"#2a2e44",color:"#c0caf5",border:"none",borderRadius:7,padding:"4px 12px",cursor:"pointer",fontFamily:"inherit",fontSize:11}}>📋 {step.command}</button>)
-          :(<button onClick={()=>setHint(true)} style={{background:"transparent",color:"#3b3f56",border:"1px solid #2a2e44",borderRadius:7,padding:"4px 12px",cursor:"pointer",fontFamily:"inherit",fontSize:11}}>💡 Podpowiedź</button>)}
+        <div className="footer">
+          {hint?(
+            <button className="hint-btn hint-show" onClick={copyCmd} data-testid="hint-copy">📋 {step.command}</button>
+          ):(
+            <button className="hint-btn hint-ask" onClick={()=>setHint(true)} data-testid="hint-btn">💡 Podpowiedź</button>
+          )}
         </div>
       )}
     </div>
@@ -414,24 +419,21 @@ function Terminal({ pc, step, onSuccess, aliases }) {
 
 function CityMap({computers,active}){
   return(
-    <div style={{background:"#12141e",borderRadius:14,padding:16,border:"1px solid #1e2030"}}>
-      <div style={{fontSize:12,color:"#7aa2f7",marginBottom:10,fontWeight:700}}>🛣️ Nasza sieć (miasto)</div>
-      <div style={{height:3,background:"#2a2e44",borderRadius:2,margin:"6px 0 10px",position:"relative"}}>
-        <div style={{position:"absolute",top:-3,left:"50%",transform:"translateX(-50%)",width:9,height:9,background:"#f59e0b",borderRadius:"50%",boxShadow:"0 0 8px #f59e0b55"}}/>
-      </div>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+    <div className="city-map" data-testid="city-map">
+      <div className="title">🛣️ Nasza sieć (miasto)</div>
+      <div className="road"><div className="router-dot"/></div>
+      <div className="grid">
         {computers.map(pc=>(
-          <div key={pc.name} style={{background:pc.name===active.name?`${pc.color}18`:"#161822",borderRadius:10,padding:10,textAlign:"center",border:pc.name===active.name?`2px solid ${pc.color}`:"1px solid #1e2030",transition:"all 0.3s"}}>
-            <div style={{fontSize:24}}>{pc.emoji}</div>
-            <div style={{fontSize:10,fontWeight:700,color:pc.name===active.name?pc.color:"#5a6082",marginTop:2}}>{pc.name}</div>
-            <div style={{fontSize:9,color:"#3b3f56",fontFamily:"monospace"}}>{pc.ip}</div>
-            {pc.name===active.name&&<div style={{fontSize:8,color:"#73daca",marginTop:2,fontWeight:700}}>● TY</div>}
+          <div key={pc.name} className="car"
+            style={{background:pc.name===active.name?`${pc.color}18`:"#161822",border:pc.name===active.name?`2px solid ${pc.color}`:"2px solid #1e2030"}}>
+            <div className="emoji">{pc.emoji}</div>
+            <div className="name" style={{color:pc.name===active.name?pc.color:"#5a6082"}}>{pc.name}</div>
+            <div className="ip">{pc.ip}</div>
+            {pc.name===active.name&&<div className="you">● TY</div>}
           </div>
         ))}
       </div>
-      <div style={{textAlign:"center",marginTop:8}}>
-        <span style={{background:"#f59e0b22",color:"#f59e0b",fontSize:10,padding:"2px 10px",borderRadius:20,border:"1px solid #f59e0b44"}}>🔀 Router (skrzyżowanie)</span>
-      </div>
+      <div className="router-label"><span>🔀 Router (skrzyżowanie)</span></div>
     </div>
   );
 }
@@ -445,12 +447,12 @@ function AnalogyCard(){
     ["🅿️","Grupa","Parking z kartą"],["🚧","Brak uprawnień","Zamknięty szlaban"],["🔧","root","Główny mechanik"],
   ];
   return(
-    <div style={{background:"#12141e",borderRadius:14,padding:14,border:"1px solid #1e2030",marginTop:14}}>
-      <div style={{fontSize:12,fontWeight:700,color:"#f59e0b",marginBottom:8}}>🗺️ Słowniczek</div>
+    <div className="glossary" data-testid="glossary">
+      <div className="title">🗺️ Słowniczek</div>
       {items.map(([icon,term,meaning],i)=>(
-        <div key={i} style={{display:"flex",alignItems:"center",gap:5,fontSize:10,color:"#5a6082",marginBottom:3}}>
-          <span style={{width:16,textAlign:"center"}}>{icon}</span>
-          <span style={{color:"#7982a9",fontWeight:600,minWidth:62}}>{term}</span>
+        <div key={i} className="row">
+          <span className="icon">{icon}</span>
+          <span className="term">{term}</span>
           <span>=</span>
           <span>{meaning}</span>
         </div>
@@ -459,7 +461,7 @@ function AnalogyCard(){
   );
 }
 
-export default function App(){
+function App(){
   const[pc,setPC]=useState(COMPUTERS[0]);
   const[li,setLI]=useState(0);
   const[lai,setLAI]=useState(0);
@@ -468,6 +470,7 @@ export default function App(){
   const[aliases,setAliases]=useState([]);
   const[picking,setPicking]=useState(true);
   const[celebrate,setCelebrate]=useState(false);
+  const[menuOpen,setMenuOpen]=useState(false);
   const lesson=LESSONS[li],layer=lesson?.layers[lai],step=layer?.steps[si];
   const layerDone=si>=layer.steps.length-1&&done.has(`${li}-${lai}-${layer.steps.length-1}`);
   const onSuccess=()=>{
@@ -477,28 +480,28 @@ export default function App(){
     if(si<layer.steps.length-1)setSI(si+1);else{setCelebrate(true);setTimeout(()=>setCelebrate(false),3000);}
   };
   const nextLayer=()=>{setCelebrate(false);if(lai<lesson.layers.length-1){setLAI(lai+1);setSI(0);}else if(li<LESSONS.length-1){setLI(li+1);setLAI(0);setSI(0);}};
-  const goTo=(l,la)=>{setLI(l);setLAI(la);setSI(0);setCelebrate(false);};
+  const goTo=(l,la)=>{setLI(l);setLAI(la);setSI(0);setCelebrate(false);setMenuOpen(false);};
 
   if(picking){
     return(
-      <div style={{minHeight:"100vh",background:"#0a0b10",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Nunito',system-ui,sans-serif",padding:20}}>
-        <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
-        <div style={{maxWidth:560,textAlign:"center"}}>
-          <div style={{fontSize:56}}>🚗</div>
-          <h1 style={{color:"#c0caf5",fontSize:30,fontWeight:900,margin:"8px 0"}}>Szkoła Terminala</h1>
-          <p style={{color:"#73daca",fontSize:14,fontWeight:700,marginBottom:4}}>Naucz się rozmawiać z komputerem!</p>
-          <p style={{color:"#5a6082",fontSize:12,marginBottom:24}}>Sieć = drogi 🛣️ • Komputery = samochody 🚗 • Ty = kierowca 🧑</p>
-          <p style={{color:"#7982a9",fontSize:13,marginBottom:16}}>Wybierz swój samochód:</p>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
+      <div className="pick-screen" style={{fontFamily:"'Nunito',system-ui,sans-serif"}}>
+        <div className="inner" data-testid="pick-screen">
+          <div className="big-icon">🚗</div>
+          <h1>Szkoła Terminala</h1>
+          <p className="subtitle">Naucz się rozmawiać z komputerem!</p>
+          <p className="meta">Sieć = drogi 🛣️ • Komputery = samochody 🚗 • Ty = kierowca 🧑</p>
+          <p className="choose">Wybierz swój samochód:</p>
+          <div className="grid">
             {COMPUTERS.map(c=>(
-              <button key={c.name} onClick={()=>{setPC(c);setPicking(false)}}
-                style={{background:"#12141e",border:`2px solid ${c.color}33`,borderRadius:14,padding:20,cursor:"pointer",textAlign:"center",transition:"all 0.2s"}}
+              <button key={c.name} className="car-card" data-testid={`car-${c.user}`}
+                onClick={()=>{setPC(c);setPicking(false)}}
+                style={{border:`2px solid ${c.color}33`}}
                 onMouseEnter={e=>{e.currentTarget.style.borderColor=c.color;e.currentTarget.style.transform="translateY(-3px)";}}
                 onMouseLeave={e=>{e.currentTarget.style.borderColor=c.color+"33";e.currentTarget.style.transform="";}}>
-                <div style={{fontSize:44}}>{c.emoji}</div>
-                <div style={{color:c.color,fontWeight:800,fontSize:15,marginTop:6}}>{c.name}</div>
-                <div style={{color:"#3b3f56",fontSize:11,fontFamily:"monospace",marginTop:2}}>🏷️ {c.ip}</div>
-                <div style={{color:"#5a6082",fontSize:11,marginTop:2}}>🧑 {c.user}</div>
+                <div className="emoji">{c.emoji}</div>
+                <div className="name" style={{color:c.color}}>{c.name}</div>
+                <div className="ip">🏷️ {c.ip}</div>
+                <div className="user">🧑 {c.user}</div>
               </button>
             ))}
           </div>
@@ -508,82 +511,86 @@ export default function App(){
   }
 
   return(
-    <div style={{minHeight:"100vh",background:"#0a0b10",fontFamily:"'Nunito',system-ui,sans-serif",color:"#c0caf5"}}>
-      <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
-      <div style={{background:"#0f1019",borderBottom:"1px solid #1e2030",padding:"8px 18px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:100}}>
-        <div style={{display:"flex",alignItems:"center",gap:10}}><span style={{fontSize:20}}>🚗</span><span style={{fontWeight:900,fontSize:15}}>Szkoła Terminala</span></div>
+    <div style={{minHeight:"100vh",background:"#0a0b10",fontFamily:"'Nunito',system-ui,sans-serif",color:"#c0caf5"}} data-testid="app-main">
+      <div className="app-nav">
+        <div className="logo">
+          <button className="menu-toggle" onClick={()=>setMenuOpen(!menuOpen)} data-testid="menu-toggle">☰</button>
+          <span className="logo-icon">🚗</span>
+          <span className="logo-text">Szkoła Terminala</span>
+        </div>
         <div style={{display:"flex",alignItems:"center",gap:14}}>
-          <span style={{fontSize:11,color:"#3b3f56"}}>{done.size}/{TOTAL_STEPS}</span>
-          <div style={{width:100,height:5,background:"#1e2030",borderRadius:100,overflow:"hidden"}}><div style={{height:"100%",width:`${(done.size/TOTAL_STEPS)*100}%`,background:"linear-gradient(90deg,#7aa2f7,#73daca)",borderRadius:100,transition:"width 0.5s"}}/></div>
-          <button onClick={()=>setPicking(true)} style={{background:"#161822",border:"1px solid #1e2030",borderRadius:7,padding:"3px 10px",color:"#7982a9",cursor:"pointer",fontSize:11,fontFamily:"inherit"}}>{pc.emoji} {pc.name}</button>
+          <span className="progress-text">{done.size}/{TOTAL_STEPS}</span>
+          <div className="progress-bar"><div className="progress-fill" style={{width:`${(done.size/TOTAL_STEPS)*100}%`}}/></div>
+          <button className="car-btn" onClick={()=>setPicking(true)} data-testid="change-car">{pc.emoji} {pc.name}</button>
         </div>
       </div>
-      <div style={{display:"flex",maxWidth:1100,margin:"0 auto",padding:18,gap:18}}>
-        <div style={{width:240,flexShrink:0}}>
+      <div className="main-layout">
+        <div className={`sidebar${menuOpen?" open":""}`} data-testid="sidebar">
           {LESSONS.map((les,l)=>(
-            <div key={les.id} style={{marginBottom:14}}>
-              <div style={{fontSize:12,fontWeight:800,color:les.color,marginBottom:4,display:"flex",alignItems:"center",gap:5}}>{les.icon} {les.title}</div>
+            <div key={les.id} style={{marginBottom:16}}>
+              <div className="lesson-title" style={{color:les.color}}>{les.icon} {les.title}</div>
               {les.layers.map((lay,la)=>{
                 const active=l===li&&la===lai,ct=lay.steps.filter((_,s)=>done.has(`${l}-${la}-${s}`)).length,full=ct===lay.steps.length;
-                return(<button key={lay.id} onClick={()=>goTo(l,la)} style={{display:"block",width:"100%",textAlign:"left",background:active?"#161822":"transparent",border:active?`1px solid ${les.color}44`:"1px solid transparent",borderRadius:9,padding:"7px 10px",cursor:"pointer",marginBottom:3,fontFamily:"inherit"}}>
-                  <div style={{fontSize:12,fontWeight:active?700:600,color:active?"#c0caf5":"#5a6082",display:"flex",alignItems:"center",gap:5}}>{full?"✅":active?"▶":"○"} {lay.title}</div>
-                  <div style={{fontSize:9,color:"#3b3f56",marginTop:1,marginLeft:18}}>{ct}/{lay.steps.length}</div>
+                return(<button key={lay.id} onClick={()=>goTo(l,la)} className="layer-btn"
+                  style={{background:active?"#161822":"transparent",border:active?`2px solid ${les.color}44`:"2px solid transparent"}}>
+                  <div className="name" style={{fontWeight:active?700:600,color:active?"#c0caf5":"#7982a9"}}>{full?"✅":active?"▶":"○"} {lay.title}</div>
+                  <div className="count">{ct}/{lay.steps.length}</div>
                 </button>);
               })}
             </div>
           ))}
         </div>
-        <div style={{flex:1,minWidth:0}}>
-          <div style={{background:`${lesson.color}08`,borderRadius:14,padding:20,marginBottom:16,border:`1px solid ${lesson.color}22`}}>
-            <div style={{fontSize:10,fontWeight:800,color:lesson.color,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>{layer.categoryLabel}</div>
-            <h2 style={{fontSize:22,fontWeight:900,margin:"0 0 6px",color:"#c0caf5"}}>{layer.title}</h2>
-            <p style={{fontSize:13,color:"#7982a9",lineHeight:1.6,margin:0}}>{layer.description}</p>
-            {layer.analogy&&(<div style={{background:"#0a0b1088",borderRadius:10,padding:12,marginTop:10,fontSize:12,color:"#a9b1d6",lineHeight:1.6,borderLeft:`3px solid ${lesson.color}`,whiteSpace:"pre-wrap"}}>{layer.analogy}</div>)}
+        <div className="content">
+          <div className="lesson-header" style={{background:`${lesson.color}08`,border:`2px solid ${lesson.color}22`}}>
+            <div className="cat" style={{color:lesson.color}}>{layer.categoryLabel}</div>
+            <h2>{layer.title}</h2>
+            <p className="desc">{layer.description}</p>
+            {layer.analogy&&(<div className="analogy" style={{borderLeft:`4px solid ${lesson.color}`}}>{layer.analogy}</div>)}
           </div>
-          <div style={{display:"flex",gap:5,marginBottom:14,alignItems:"center"}}>
-            <span style={{fontSize:11,color:"#3b3f56",marginRight:4}}>Krok:</span>
-            {layer.steps.map((_,s)=>{const d=done.has(`${li}-${lai}-${s}`),a=s===si;return<button key={s} onClick={()=>setSI(s)} style={{width:a?28:20,height:6,borderRadius:100,background:d?"#73daca":a?"#7aa2f7":"#1e2030",border:"none",cursor:"pointer",transition:"all 0.3s"}}/>;
+          <div className="step-dots">
+            <span className="label">Krok:</span>
+            {layer.steps.map((_,s)=>{const d=done.has(`${li}-${lai}-${s}`),a=s===si;return<button key={s} onClick={()=>setSI(s)} className={`step-dot${a?" active":""}`} style={{background:d?"#73daca":a?"#7aa2f7":"#1e2030"}} data-testid={`step-${s}`}/>;
             })}
-            <span style={{fontSize:11,color:"#3b3f56",marginLeft:4}}>{si+1}/{layer.steps.length}</span>
+            <span className="label">{si+1}/{layer.steps.length}</span>
           </div>
           {step&&!layerDone&&(
-            <div style={{background:"#7aa2f708",borderRadius:11,padding:14,marginBottom:14,border:"1px solid #7aa2f722"}}>
-              <div style={{fontSize:14,fontWeight:700,color:"#c0caf5",marginBottom:6}}>👉 {step.instruction}</div>
-              <code style={{display:"inline-block",background:"#0c0e14",color:"#73daca",padding:"5px 12px",borderRadius:7,fontFamily:"'JetBrains Mono',monospace",fontSize:13,border:"1px solid #1e2030"}}>{step.command}</code>
+            <div className="instruction-box" style={{background:"#7aa2f708",border:"2px solid #7aa2f722"}} data-testid="instruction">
+              <div className="text">👉 {step.instruction}</div>
+              <code>{step.command}</code>
             </div>
           )}
           {(celebrate||layerDone)&&(
-            <div style={{background:"#73daca10",borderRadius:14,padding:20,marginBottom:14,border:"1px solid #73daca33",textAlign:"center"}}>
-              <div style={{fontSize:44}}>🎉</div>
-              <div style={{fontSize:18,fontWeight:800,color:"#73daca",marginBottom:6}}>Brawo!</div>
-              <div style={{fontSize:12,color:"#7982a9",marginBottom:14}}>Ukończono: {layer.title}</div>
-              <button onClick={nextLayer} style={{background:"linear-gradient(135deg,#7aa2f7,#73daca)",color:"#0a0b10",border:"none",borderRadius:10,padding:"10px 28px",fontWeight:800,fontSize:14,cursor:"pointer",fontFamily:"inherit"}}>Następny etap →</button>
+            <div className="celebrate" style={{background:"#73daca10",border:"2px solid #73daca33"}} data-testid="celebrate">
+              <div className="icon">🎉</div>
+              <div className="title" style={{color:"#73daca"}}>Brawo!</div>
+              <div className="sub" style={{color:"#7982a9"}}>Ukończono: {layer.title}</div>
+              <button className="next-btn" onClick={nextLayer} data-testid="next-layer">Następny etap →</button>
             </div>
           )}
           <Terminal pc={pc} step={layerDone?null:step} onSuccess={onSuccess} aliases={aliases}/>
           {step&&done.has(`${li}-${lai}-${si}`)&&(
-            <div style={{background:"#73daca08",borderRadius:11,padding:14,marginTop:14,border:"1px solid #73daca22"}}>
-              <div style={{fontSize:13,color:"#73daca",fontWeight:700,marginBottom:4}}>✅ Co to znaczy:</div>
-              <div style={{fontSize:13,color:"#a9b1d6",lineHeight:1.7,whiteSpace:"pre-wrap"}}>{step.tip}</div>
+            <div className="tip-box" style={{background:"#73daca08",border:"2px solid #73daca22"}}>
+              <div className="title" style={{color:"#73daca"}}>✅ Co to znaczy:</div>
+              <div className="text" style={{color:"#a9b1d6"}}>{step.tip}</div>
             </div>
           )}
           {aliases.length>0&&(
-            <div style={{background:"#f59e0b0a",borderRadius:11,padding:12,marginTop:14,border:"1px solid #f59e0b22"}}>
-              <div style={{fontSize:12,fontWeight:700,color:"#f59e0b",marginBottom:6}}>🏷️ Twoje naklejki</div>
-              {aliases.map((a,i)=>(<div key={i} style={{fontFamily:"monospace",fontSize:11,color:"#5a6082",marginBottom:3}}><span style={{color:"#73daca"}}>{a.name}</span> <span style={{color:"#3b3f56"}}>→</span> {a.exp}</div>))}
+            <div className="aliases-box" style={{background:"#f59e0b0a",border:"2px solid #f59e0b22"}}>
+              <div className="title" style={{color:"#f59e0b"}}>🏷️ Twoje naklejki</div>
+              {aliases.map((a,i)=>(<div key={i} className="item"><span style={{color:"#73daca"}}>{a.name}</span> <span style={{color:"#5a6082"}}>→</span> {a.exp}</div>))}
             </div>
           )}
         </div>
-        <div style={{width:200,flexShrink:0}}>
+        <div className="right-panel">
           <CityMap computers={COMPUTERS} active={pc}/>
           <AnalogyCard/>
-          <div style={{background:"#12141e",borderRadius:14,padding:14,border:"1px solid #1e2030",marginTop:14}}>
-            <div style={{fontSize:11,fontWeight:700,color:"#06b6d4",marginBottom:6}}>🏎️ Systemy = marki aut</div>
-            <table style={{width:"100%",fontSize:9,color:"#5a6082"}}>
+          <div className="os-table">
+            <div className="title">🏎️ Systemy = marki aut</div>
+            <table>
               <thead><tr><td></td><td>🐧</td><td>🪟</td><td>🍎</td></tr></thead>
               <tbody>
                 {[["Pliki","ls","dir","ls"],["Ping","ping","ping","ping"],["Kim?","whoami","whoami","whoami"],["Terminal","bash","cmd","zsh"]].map(([l,...v],i)=>(
-                  <tr key={i}><td style={{color:"#7982a9",fontWeight:600,padding:2}}>{l}</td>{v.map((x,j)=><td key={j} style={{fontFamily:"monospace",padding:2}}>{x}</td>)}</tr>
+                  <tr key={i}><td style={{color:"#a9b1d6",fontWeight:600}}>{l}</td>{v.map((x,j)=><td key={j} style={{fontFamily:"monospace"}}>{x}</td>)}</tr>
                 ))}
               </tbody>
             </table>
@@ -593,3 +600,5 @@ export default function App(){
     </div>
   );
 }
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);

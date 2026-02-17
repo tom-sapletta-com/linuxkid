@@ -1,0 +1,23 @@
+{
+  "name": "linuxkid",
+  "version": "1.0.1",
+  "description": "Interactive terminal learning app for kids 10+ using car/city analogies",
+  "main": "index.jsx",
+  "scripts": {
+    "start": "python3 -m http.server 3001",
+    "test": "npx playwright test",
+    "test:desktop": "npx playwright test --project=desktop",
+    "test:mobile": "npx playwright test --project=mobile"
+  },
+  "keywords": [
+    "education",
+    "linux",
+    "terminal",
+    "kids"
+  ],
+  "author": "Tom Sapletta <tom@sapletta.com>",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@playwright/test": "^1.58.2"
+  }
+}
