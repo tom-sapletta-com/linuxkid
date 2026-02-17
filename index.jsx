@@ -7,6 +7,27 @@ const COMPUTERS = [
   { name: "auto-maxa", ip: "192.168.1.13", emoji: "🛻", user: "max", color: "#22c55e" },
 ];
 
+const INTRO_STORY = {
+  title: "🚀 Witamy na pokładzie statku kosmicznego!",
+  story: `Jesteś podróżnikiem z dalekiej galaktyki. Twój statek właśnie wylądował na Planecie X - świecie, gdzie mieszkańcy porozumiewają się tajemniczym językiem poleceń.
+
+Aby poruszać się po tym świecie i komunikować się z miejscowymi systemami, musisz nauczyć się ich języka - języka terminala.
+
+Na tej planecie wszystko działa jak w sieci drogowej:
+• Komputery to samochody jeżdżące po drogach
+• Adresy IP to tablice rejestracyjne
+• Routery to skrzyżowania kierujące ruchem
+• Komendy to polecenia, które mówią samochodom, co mają robić
+
+Wybierz swój samochód (komputer), którym będziesz podróżować po Planecie X i naucz się języka terminala!`,
+  tips: [
+    "🎯 Każde zadanie ma cel - dowiedz się, co musisz zrobić",
+    "📚 Najpierw teoria, potem praktyka",
+    "💡 Podpowiedzi są dostępne, gdy utkniesz",
+    "🏆 Ukończ wszystkie etapy, by stać się mistrzem terminala"
+  ]
+};
+
 const LESSONS = [
   {
     id: "intro",
@@ -21,6 +42,37 @@ const LESSONS = [
         categoryLabel: "🚗 Podstawy",
         description: "Terminal to kierownica i pedały w Twoim samochodzie. Sterujesz nimi, aby powiedzieć komputerowi, co ma robić.",
         analogy: "🎮 Terminal = kierownica i pedały.",
+        theory: [
+          {
+            title: "🔀 Jak działa router?",
+            content: "Router to skrzyżowanie w mieście. Każdy samochód (komputer) podjeżdża do skrzyżowania i mówi dokąd chce jechać. Router sprawdza swoją mapę (tablicę routingową) i wskazuje właściwą drogę.",
+            examples: [
+              "🚗 auto-ani chce jechać do auto-kuby (192.168.1.11)",
+              "🔀 Router sprawdza: 192.168.1.11 jest w sieci lokalnej",
+              "➡️ Wskazuje drogę prosto do auto-kuby"
+            ]
+          },
+          {
+            title: "📋 Każdy ma swoją książkę telefoniczną (/etc/hosts)",
+            content: "Zamiast pamiętać numery IP, każdy komputer ma swoją książkę telefoniczną. Wpiszesz 'auto-kuby' i komputer wie, że to 192.168.1.11.",
+            examples: [
+              "📝 Plik /etc/hosts na każdym komputerze:",
+              "192.168.1.10  auto-ani",
+              "192.168.1.11  auto-kuby",
+              "192.168.1.12  auto-oli",
+              "192.168.1.13  auto-maxa"
+            ]
+          },
+          {
+            title: "🌐 DNS - wspólna książka telefoniczna internetu",
+            content: "Gdy nie ma wpisu w /etc/hosts, komputer pyta wspólną książkę telefoniczną (DNS). Dlatego wpisujesz 'google.pl' a nie 142.250.185.78.",
+            examples: [
+              "🌐 Pytasz: gdzie jest 'google.pl'?",
+              "📚 DNS odpowiada: 142.250.185.78",
+              "🚗 Komputer jedzie pod adres 142.250.185.78"
+            ]
+          }
+        ],
         steps: [
           {
             instruction: "Sprawdź nazwę swojego samochodu (potocznie):",
@@ -57,9 +109,40 @@ const LESSONS = [
         categoryLabel: "🛣️ Sieć",
         description: "Sieć to drogi w mieście. Każdy samochód (komputer) ma tablicę rejestracyjną (IP). Skrzyżowania (routery) kierują ruch.",
         analogy: "🛣️ Sieć = drogi w mieście. Drogi mają numery (adresy IP).",
+        theory: [
+          {
+            title: "🔀 Jak działa router?",
+            content: "Router to skrzyżowanie w mieście. Każdy samochód (komputer) podjeżdża do skrzyżowania i mówi dokąd chce jechać. Router sprawdza swoją mapę (tablicę routingową) i wskazuje właściwą drogę.",
+            examples: [
+              "🚗 auto-ani chce jechać do auto-kuby (192.168.1.11)",
+              "🔀 Router sprawdza: 192.168.1.11 jest w sieci lokalnej",
+              "➡️ Wskazuje drogę prosto do auto-kuby"
+            ]
+          },
+          {
+            title: "📋 Każdy ma swoją książkę telefoniczną (/etc/hosts)",
+            content: "Zamiast pamiętać numery IP, każdy komputer ma swoją książkę telefoniczną. Wpiszesz 'auto-kuby' i komputer wie, że to 192.168.1.11.",
+            examples: [
+              "📝 Plik /etc/hosts na każdym komputerze:",
+              "192.168.1.10  auto-ani",
+              "192.168.1.11  auto-kuby", 
+              "192.168.1.12  auto-oli",
+              "192.168.1.13  auto-maxa"
+            ]
+          },
+          {
+            title: "🌐 DNS - wspólna książka telefoniczna internetu",
+            content: "Gdy nie ma wpisu w /etc/hosts, komputer pyta wspólną książkę telefoniczną (DNS). Dlatego wpisujesz 'google.pl' a nie 142.250.185.78.",
+            examples: [
+              "🌐 Pytasz: gdzie jest 'google.pl'?",
+              "📚 DNS odpowiada: 142.250.185.78",
+              "🚗 Komputer jedzie pod adres 142.250.185.78"
+            ]
+          }
+        ],
         steps: [
           {
-            instruction: "Zobaczmy, jakie samochody jeżdżą po naszych drogach:",
+            instruction: "Zobaczmy, jakie samochody jeźdżą po naszych drogach:",
             command: "arp -a",
             expectedOutput: () => COMPUTERS.map(c => `${c.emoji} ${c.name} (${c.ip})`).join("\n"),
             tip: "📋 To lista aut, które Twój samochód widział na drodze. Jak spis tablic rejestracyjnych!",
@@ -79,6 +162,35 @@ const LESSONS = [
         categoryLabel: "🛣️ Sieć",
         description: "Samochody mogą się porozumiewać – wysyłać paczki (dane) pod konkretny adres i numer bramy (port).",
         analogy: "🚪 Port = numer bramy w garażu.",
+        theory: [
+          {
+            title: "🚪 Porty - bramy w garażach",
+            content: "Każdy samochód ma wiele garaży (portów). Garaż 22 dla WWW, garaż 25 dla poczty, garaż 1234 dla naszej rozmowy. Musisz wiedzieć zarówno adres auta, jak i numer garażu.",
+            examples: [
+              "🏠 adres: auto-kuby (192.168.1.11)",
+              "🚪 port: 1234 (nasza rozmowa)",
+              "📦 pełny adres: auto-kuby:1234"
+            ]
+          },
+          {
+            title: "📡 TCP vs UDP - list vs radio",
+            content: "TCP to list polecony - pewnie dotrze, potwierdzenie odbioru. UDP to radio - szybko, ale może nie dotrzeć. Do rozmowy używamy TCP, do ogłoszeń UDP.",
+            examples: [
+              "📧 TCP: echo 'Cześć' | nc auto-kuby 1234 (pewne)",
+              "📻 UDP: echo 'Cześć' | nc -u auto-kuby 1234 (szybkie)",
+              "📢 Broadcast: echo 'Wszyscy!' | nc -b -u 192.168.1.255 1234"
+            ]
+          },
+          {
+            title: "🔄 Pipe (|) - taśma transportowa",
+            content: "Znak | to taśma między maszynami. Lewa strona produkuje, prawa strona konsumuje. Idealne do automatyzacji!",
+            examples: [
+              "📝 echo 'Hej' produkuje tekst",
+              "📦 | nc auto-kuby 1234 dostarcza",
+              "🔄 Całość: echo 'Hej' | nc auto-kuby 1234"
+            ]
+          }
+        ],
         steps: [
           {
             instruction: "Włącz megafon – niech Twoje auto coś powie:",
@@ -497,34 +609,100 @@ function App(){
   const[done,setDone]=useState(new Set());
   const[aliases,setAliases]=useState([]);
   const[picking,setPicking]=useState(true);
+  const[showTheoryIntro,setShowTheoryIntro]=useState(false);
   const[celebrate,setCelebrate]=useState(false);
   const[showNextConfirm,setShowNextConfirm]=useState(false);
   const[menuOpen,setMenuOpen]=useState(false);
+  
+  // URL routing
+  const updateURL = useCallback((lessonIdx, layerIdx, stepIdx, isIntro = false) => {
+    if (isIntro) {
+      window.history.pushState(null, '', '/intro/theory/0');
+    } else {
+      const lesson = LESSONS[lessonIdx];
+      const layer = lesson?.layers[layerIdx];
+      const hash = `/${lesson?.id || 'intro'}/${layer?.id || 'basics'}/${stepIdx}`;
+      window.history.pushState(null, '', hash);
+    }
+  }, []);
+  
+  const parseURL = useCallback(() => {
+    const hash = window.location.hash.slice(1) || '/intro/theory/0';
+    const parts = hash.split('/').filter(Boolean);
+    
+    // Check if it's intro/theory page
+    if (parts[0] === 'intro' && parts[1] === 'theory') {
+      return { isIntro: true, li: 0, lai: 0, si: 0 };
+    }
+    
+    if (parts.length >= 3) {
+      const lessonIdx = LESSONS.findIndex(l => l.id === parts[0]);
+      if (lessonIdx >= 0) {
+        const layerIdx = LESSONS[lessonIdx].layers.findIndex(lay => lay.id === parts[1]);
+        if (layerIdx >= 0) {
+          const stepIdx = parseInt(parts[2]) || 0;
+          return { isIntro: false, li: lessonIdx, lai: layerIdx, si: stepIdx };
+        }
+      }
+    }
+    return { isIntro: true, li: 0, lai: 0, si: 0 };
+  }, []);
+  
+  useEffect(() => {
+    const { isIntro: isIntroPage, li: l, lai: la, si: s } = parseURL();
+    if (!isIntroPage) {
+      setLI(l);
+      setLAI(la);
+      setSI(s);
+      setShowTheoryIntro(false);
+    }
+  }, [parseURL]);
+  
   const lesson=LESSONS[li],layer=lesson?.layers[lai],step=layer?.steps[si];
   const layerDone=si>=layer.steps.length-1&&done.has(`${li}-${lai}-${layer.steps.length-1}`);
+  
   const onSuccess=()=>{
     const key=`${li}-${lai}-${si}`;
     setDone(p=>new Set([...p,key]));
     if(step?.command?.startsWith("alias ")){const m=step.command.match(/alias\s+(\w+)='(.+)'/);if(m)setAliases(p=>[...p.filter(a=>a.name!==m[1]),{name:m[1],exp:m[2]}]);}
     if(si<layer.steps.length-1)setShowNextConfirm(true);else{setCelebrate(true);setTimeout(()=>setCelebrate(false),3000);}
   };
-  const nextLayer=()=>{setCelebrate(false);if(lai<lesson.layers.length-1){setLAI(lai+1);setSI(0);}else if(li<LESSONS.length-1){setLI(li+1);setLAI(0);setSI(0);}};
-  const goTo=(l,la)=>{setLI(l);setLAI(la);setSI(0);setCelebrate(false);setMenuOpen(false);};
-  const proceedToNext=()=>{setShowNextConfirm(false);setSI(si+1);};
+  
+  const nextLayer=()=>{
+    setCelebrate(false);
+    if(lai<lesson.layers.length-1){
+      setLAI(lai+1);setSI(0);
+      updateURL(li, lai+1, 0);
+    }else if(li<LESSONS.length-1){
+      setLI(li+1);setLAI(0);setSI(0);
+      updateURL(li+1, 0, 0);
+    }
+  };
+  
+  const goTo=(l,la)=>{
+    setLI(l);setLAI(la);setSI(0);setCelebrate(false);setMenuOpen(false);
+    updateURL(l, la, 0);
+  };
+  
+  const proceedToNext=()=>{
+    setShowNextConfirm(false);
+    setSI(si+1);
+    updateURL(li, lai, si+1);
+  };
 
   if(picking){
     return(
       <div className="pick-screen" style={{fontFamily:"'Nunito',system-ui,sans-serif"}}>
         <div className="inner" data-testid="pick-screen">
           <div className="big-icon">🚗</div>
-          <h1>Szkoła Terminala</h1>
+          <h1>Planeta X</h1>
           <p className="subtitle">Naucz się rozmawiać z komputerem!</p>
           <p className="meta">Sieć = drogi 🛣️ • Komputery = samochody 🚗 • Ty = kierowca 🧑</p>
           <p className="choose">Wybierz swój samochód:</p>
           <div className="grid">
             {COMPUTERS.map(c=>(
               <button key={c.name} className="car-card" data-testid={`car-${c.user}`}
-                onClick={()=>{setPC(c);setPicking(false)}}
+                onClick={()=>{setPC(c);setPicking(false);setShowTheoryIntro(true);updateURL(0,0,0,true);}}
                 style={{border:`2px solid ${c.color}33`}}
                 onMouseEnter={e=>{e.currentTarget.style.borderColor=c.color;e.currentTarget.style.transform="translateY(-3px)";}}
                 onMouseLeave={e=>{e.currentTarget.style.borderColor=c.color+"33";e.currentTarget.style.transform="";}}>
@@ -540,13 +718,57 @@ function App(){
     );
   }
 
+  // Theory intro page after car selection
+  if(showTheoryIntro){
+    const currentLesson = LESSONS[li];
+    const currentLayer = currentLesson?.layers[lai];
+    return(
+      <div style={{minHeight:"100vh",background:"linear-gradient(135deg,#0a0b10 0%,#1a1b2e 100%)",fontFamily:"'Nunito',system-ui,sans-serif",color:"#c0caf5",display:"flex",alignItems:"center",justifyContent:"center",padding:"24px"}}>
+        <div style={{maxWidth:"800px",width:"100%"}}>
+          <div style={{textAlign:"center",marginBottom:"24px"}}>
+            <div style={{fontSize:"48px",marginBottom:"12px"}}>{pc.emoji}</div>
+            <div style={{color:pc.color,fontSize:"20px",fontWeight:"800"}}>{pc.name}</div>
+            <div style={{color:"#7982a9",fontSize:"14px"}}>Wybrałeś swój samochód!</div>
+          </div>
+          
+          {/* Story introduction */}
+          <div style={{background:"#161822",border:"2px solid #1e2030",borderRadius:"16px",padding:"20px",marginBottom:"20px"}}>
+            <div style={{fontSize:"20px",fontWeight:"800",color:"#c0caf5",marginBottom:"12px",textAlign:"center"}}>{INTRO_STORY.title}</div>
+            <div style={{fontSize:"15px",color:"#a9b1d6",lineHeight:"1.7",whiteSpace:"pre-wrap"}}>{INTRO_STORY.story}</div>
+          </div>
+          
+          {/* Theory section */}
+          <div style={{background:`${currentLesson.color}05`,border:`2px solid ${currentLesson.color}15`,borderRadius:"16px",padding:"24px",marginBottom:"20px"}}>
+            <div style={{fontSize:"22px",fontWeight:"800",color:currentLesson.color,marginBottom:"16px",textAlign:"center"}}>📚 Teoria - zrozumiej jak to działa</div>
+            
+            {currentLayer?.theory?.map((item,i)=>(
+              <div key={i} style={{marginBottom:"24px"}}>
+                <div style={{fontSize:"18px",fontWeight:"700",color:"#c0caf5",marginBottom:"10px"}}>{item.title}</div>
+                <div style={{fontSize:"16px",color:"#a9b1d6",lineHeight:"1.7",marginBottom:"14px"}}>{item.content}</div>
+                <div style={{background:"#0c0e14",borderRadius:"10px",padding:"14px",borderLeft:`3px solid ${currentLesson.color}`}}>
+                  {item.examples.map((ex,j)=>(
+                    <div key={j} style={{fontSize:"15px",color:"#7982a9",fontFamily:"monospace",marginBottom:"6px"}}>{ex}</div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <button onClick={()=>{setShowTheoryIntro(false);updateURL(li,lai,si);}} style={{width:"100%",background:"linear-gradient(135deg,#7aa2f7,#73daca)",color:"#0a0b10",border:"none",borderRadius:"12px",padding:"16px",fontWeight:"800",fontSize:"18px",cursor:"pointer",fontFamily:"inherit"}}>
+            Rozpocznij praktykę! 🚀
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return(
     <div style={{minHeight:"100vh",background:"#0a0b10",fontFamily:"'Nunito',system-ui,sans-serif",color:"#c0caf5"}} data-testid="app-main">
       <div className="app-nav">
         <div className="logo">
           <button className="menu-toggle" onClick={()=>setMenuOpen(!menuOpen)} data-testid="menu-toggle">☰</button>
           <span className="logo-icon">🚗</span>
-          <span className="logo-text">Szkoła Terminala</span>
+          <span className="logo-text">Planeta X</span>
         </div>
         <div style={{display:"flex",alignItems:"center",gap:14}}>
           <span className="progress-text">{done.size}/{TOTAL_STEPS}</span>
@@ -601,12 +823,6 @@ function App(){
             <div className="confirm-dialog" style={{background:"#7aa2f708",border:"2px solid #7aa2f722",borderRadius:"14px",padding:"16px",marginBottom:"16px",textAlign:"center"}}>
               <div className="text" style={{fontSize:"16px",fontWeight:"700",color:"#c0caf5",marginBottom:"12px"}}>✅ Komenda poprawna!</div>
               <button className="next-btn" onClick={proceedToNext} style={{background:"linear-gradient(135deg,#7aa2f7,#73daca)",color:"#0a0b10",border:"none",borderRadius:"12px",padding:"12px 24px",fontWeight:"800",fontSize:"16px",cursor:"pointer",fontFamily:"inherit"}}>Następny krok →</button>
-            </div>
-          )}
-          {step&&done.has(`${li}-${lai}-${si}`)&&(
-            <div className="tip-box" style={{background:"#73daca08",border:"2px solid #73daca22"}}>
-              <div className="title" style={{color:"#73daca"}}>✅ Co to znaczy:</div>
-              <div className="text" style={{color:"#a9b1d6"}}>{step.tip}</div>
             </div>
           )}
           {aliases.length>0&&(

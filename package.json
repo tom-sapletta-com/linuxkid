@@ -1,7 +1,7 @@
 {
-  "name": "linuxkid",
+  "name": "planetax",
   "version": "1.0.2",
-  "description": "Interactive terminal learning app for kids 10+ using car/city analogies",
+  "description": "Planeta X - Interactive terminal learning app using car/city analogies",
   "main": "index.jsx",
   "scripts": {
     "start": "python3 -m http.server 3001",
@@ -13,7 +13,8 @@
     "education",
     "linux",
     "terminal",
-    "kids"
+    "kids",
+    "planetax"
   ],
   "author": "Tom Sapletta <tom@sapletta.com>",
   "license": "Apache-2.0",
