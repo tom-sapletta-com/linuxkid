@@ -1,3 +1,23 @@
+## [1.0.3] - 2026-02-17
+
+### Summary
+
+feat(docs): deep code analysis engine with 2 supporting modules
+
+### Docs
+
+- docs: update README
+
+### Build
+
+- deps: update package.json
+
+### Other
+
+- update index.html
+- update index.jsx
+
+
 ## [1.0.2] - 2026-02-17
 
 ### Summary
