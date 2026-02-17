@@ -16,17 +16,17 @@ const LESSONS = [
     layers: [
       {
         id: "what-is-terminal",
-        title: "Radio w samochodzie",
+        title: "Kierownica i pedały",
         category: "basics",
         categoryLabel: "🚗 Podstawy",
-        description: "Terminal to radio w Twoim samochodzie. Mówisz do niego komendy, a samochód je wykonuje.",
-        analogy: "🎙️ Terminal = radio w samochodzie. Mówisz do niego, a samochód wykonuje polecenia.",
+        description: "Terminal to kierownica i pedały w Twoim samochodzie. Sterujesz nimi, aby powiedzieć komputerowi, co ma robić.",
+        analogy: "🎮 Terminal = kierownica i pedały.",
         steps: [
           {
-            instruction: "Sprawdź markę swojego samochodu (nazwę komputera):",
+            instruction: "Sprawdź nazwę swojego samochodu (potocznie):",
             command: "hostname",
             expectedOutput: (pc) => pc.name,
-            tip: "🚗 Marka auta = hostname komputera. Każde auto ma swoją nazwę!",
+            tip: "🚗 Nazwa auta = hostname komputera. To potoczna nazwa, jaką wszyscy nazywają Twój samochód.",
           },
           {
             instruction: "Sprawdź tablicę rejestracyjną (adres IP):",
@@ -56,7 +56,7 @@ const LESSONS = [
         category: "network",
         categoryLabel: "🛣️ Sieć",
         description: "Sieć to drogi w mieście. Każdy samochód (komputer) ma tablicę rejestracyjną (IP). Skrzyżowania (routery) kierują ruch.",
-        analogy: "🛣️ Sieć = drogi w mieście. Drogi mają numery (adresy IP). Skrzyżowania to routery – kierują ruch.",
+        analogy: "🛣️ Sieć = drogi w mieście. Drogi mają numery (adresy IP).",
         steps: [
           {
             instruction: "Zobaczmy, jakie samochody jeżdżą po naszych drogach:",
@@ -78,7 +78,7 @@ const LESSONS = [
         category: "network",
         categoryLabel: "🛣️ Sieć",
         description: "Samochody mogą się porozumiewać – wysyłać paczki (dane) pod konkretny adres i numer bramy (port).",
-        analogy: "🚪 Port = numer bramy w garażu. Paczka trafia pod właściwy adres ORAZ do właściwej bramy.",
+        analogy: "🚪 Port = numer bramy w garażu.",
         steps: [
           {
             instruction: "Włącz megafon – niech Twoje auto coś powie:",
@@ -114,7 +114,7 @@ const LESSONS = [
         category: "system",
         categoryLabel: "📋 System",
         description: "Każde auto ma schowek z dokumentami: dowód rejestracyjny, ubezpieczenie, mapa. Komputer też – to zmienne ENV.",
-        analogy: "📋 ENV = dokumenty w schowku auta. Dowód rejestracyjny, ubezpieczenie, mapa – wszystko o Twoim samochodzie.",
+        analogy: "📋 ENV = dokumenty w schowku auta.",
         steps: [
           {
             instruction: "Otwórz schowek – zobacz wszystkie dokumenty:",
@@ -380,7 +380,35 @@ function Terminal({ pc, step, onSuccess, aliases }) {
     setInput(""); setHint(false);
   }, [input, step, pc, aliases, onSuccess]);
   const prompt = `${pc.user}@${pc.name}:~$`;
-  const copyCmd = () => { setInput(step.command); inputRef.current?.focus(); };
+  const copyCmd = () => { 
+    setInput(step.command); 
+    inputRef.current?.focus();
+    setTimeout(() => {
+      const cmd = step.command;
+      setInput(cmd);
+      setTimeout(() => {
+        // Execute the command directly
+        let out = "", ok = false;
+        if (step) {
+          const norm = s => s.replace(/\s+/g, " ").trim();
+          if (norm(cmd) === norm(step.command) || cmd.startsWith(step.command.split(" ")[0])) { 
+            out = step.expectedOutput(pc); 
+            ok = true; 
+          }
+          else { 
+            const a = aliases.find(x => x.name === cmd.split(" ")[0]); 
+            if (a) { 
+              out = `→ ${a.exp} ${cmd.split(" ").slice(1).join(" ")}\n${step.expectedOutput(pc)||"✅"}`; 
+              ok = true; 
+            } else out = `❓ Wpisz: ${step.command}`; 
+          }
+        }
+        setHistory(h => [...h, { t:"in", v:cmd }, ...(out?[{t:"out",v:out,ok}]:[])]);
+        if (ok && onSuccess) setTimeout(onSuccess, 500);
+        setInput(""); setHint(false);
+      }, 100);
+    }, 50);
+  };
   return (
     <div className="terminal" data-testid="terminal">
       <div className="bar">
@@ -398,7 +426,7 @@ function Terminal({ pc, step, onSuccess, aliases }) {
           </div>
         ))}
         <div className="input-row">
-          <span className="prompt">{prompt} </span>
+          <span className="prompt">{prompt}&nbsp;</span>
           <input ref={inputRef} value={input} onChange={e=>setInput(e.target.value)}
             onKeyDown={e=>e.key==="Enter"&&run()} autoFocus spellCheck={false}
             data-testid="terminal-input" autoComplete="off" autoCapitalize="off"/>
@@ -470,6 +498,7 @@ function App(){
   const[aliases,setAliases]=useState([]);
   const[picking,setPicking]=useState(true);
   const[celebrate,setCelebrate]=useState(false);
+  const[showNextConfirm,setShowNextConfirm]=useState(false);
   const[menuOpen,setMenuOpen]=useState(false);
   const lesson=LESSONS[li],layer=lesson?.layers[lai],step=layer?.steps[si];
   const layerDone=si>=layer.steps.length-1&&done.has(`${li}-${lai}-${layer.steps.length-1}`);
@@ -477,10 +506,11 @@ function App(){
     const key=`${li}-${lai}-${si}`;
     setDone(p=>new Set([...p,key]));
     if(step?.command?.startsWith("alias ")){const m=step.command.match(/alias\s+(\w+)='(.+)'/);if(m)setAliases(p=>[...p.filter(a=>a.name!==m[1]),{name:m[1],exp:m[2]}]);}
-    if(si<layer.steps.length-1)setSI(si+1);else{setCelebrate(true);setTimeout(()=>setCelebrate(false),3000);}
+    if(si<layer.steps.length-1)setShowNextConfirm(true);else{setCelebrate(true);setTimeout(()=>setCelebrate(false),3000);}
   };
   const nextLayer=()=>{setCelebrate(false);if(lai<lesson.layers.length-1){setLAI(lai+1);setSI(0);}else if(li<LESSONS.length-1){setLI(li+1);setLAI(0);setSI(0);}};
   const goTo=(l,la)=>{setLI(l);setLAI(la);setSI(0);setCelebrate(false);setMenuOpen(false);};
+  const proceedToNext=()=>{setShowNextConfirm(false);setSI(si+1);};
 
   if(picking){
     return(
@@ -564,10 +594,15 @@ function App(){
               <div className="icon">🎉</div>
               <div className="title" style={{color:"#73daca"}}>Brawo!</div>
               <div className="sub" style={{color:"#7982a9"}}>Ukończono: {layer.title}</div>
-              <button className="next-btn" onClick={nextLayer} data-testid="next-layer">Następny etap →</button>
             </div>
           )}
           <Terminal pc={pc} step={layerDone?null:step} onSuccess={onSuccess} aliases={aliases}/>
+          {showNextConfirm&&(
+            <div className="confirm-dialog" style={{background:"#7aa2f708",border:"2px solid #7aa2f722",borderRadius:"14px",padding:"16px",marginBottom:"16px",textAlign:"center"}}>
+              <div className="text" style={{fontSize:"16px",fontWeight:"700",color:"#c0caf5",marginBottom:"12px"}}>✅ Komenda poprawna!</div>
+              <button className="next-btn" onClick={proceedToNext} style={{background:"linear-gradient(135deg,#7aa2f7,#73daca)",color:"#0a0b10",border:"none",borderRadius:"12px",padding:"12px 24px",fontWeight:"800",fontSize:"16px",cursor:"pointer",fontFamily:"inherit"}}>Następny krok →</button>
+            </div>
+          )}
           {step&&done.has(`${li}-${lai}-${si}`)&&(
             <div className="tip-box" style={{background:"#73daca08",border:"2px solid #73daca22"}}>
               <div className="title" style={{color:"#73daca"}}>✅ Co to znaczy:</div>
@@ -578,6 +613,12 @@ function App(){
             <div className="aliases-box" style={{background:"#f59e0b0a",border:"2px solid #f59e0b22"}}>
               <div className="title" style={{color:"#f59e0b"}}>🏷️ Twoje naklejki</div>
               {aliases.map((a,i)=>(<div key={i} className="item"><span style={{color:"#73daca"}}>{a.name}</span> <span style={{color:"#5a6082"}}>→</span> {a.exp}</div>))}
+            </div>
+          )}
+          {(celebrate||layerDone)&&(
+            <div className="confirm-dialog" style={{background:"#73daca08",border:"2px solid #73daca22",borderRadius:"14px",padding:"16px",marginBottom:"16px",textAlign:"center"}}>
+              <div className="text" style={{fontSize:"16px",fontWeight:"700",color:"#c0caf5",marginBottom:"12px"}}>🎉 Ukończono etap!</div>
+              <button className="next-btn" onClick={nextLayer} data-testid="next-layer" style={{background:"linear-gradient(135deg,#73daca,#7aa2f7)",color:"#0a0b10",border:"none",borderRadius:"12px",padding:"12px 24px",fontWeight:"800",fontSize:"16px",cursor:"pointer",fontFamily:"inherit"}}>Następny etap →</button>
             </div>
           )}
         </div>

@@ -1,3 +1,15 @@
+## [1.0.2] - 2026-02-17
+
+### Summary
+
+feat(None): configuration management system
+
+### Other
+
+- update .gitignore
+- update index.jsx
+
+
 ## [1.0.1] - 2026-02-17
 
 ### Summary

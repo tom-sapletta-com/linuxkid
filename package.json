@@ -1,6 +1,6 @@
 {
   "name": "linuxkid",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Interactive terminal learning app for kids 10+ using car/city analogies",
   "main": "index.jsx",
   "scripts": {
