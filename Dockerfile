@@ -1,10 +1,5 @@
-FROM node:20-alpine AS builder
+FROM python:3-alpine
 WORKDIR /app
-COPY index.jsx ./
-RUN npm install -g serve
-
-FROM node:20-alpine
-WORKDIR /app
-COPY --from=builder /app /app
+COPY index.html index.jsx ./
 EXPOSE 3000
-CMD ["serve", "-s", "/app", "-p", "3000"]
+CMD ["python3", "-m", "http.server", "3000"]

@@ -1,3 +1,15 @@
+## [1.0.2] - 2026-02-17
+
+### Summary
+
+feat(build): new API capabilities
+
+### Other
+
+- build: update Makefile
+- update index.html
+
+
 ## [1.0.1] - 2026-02-17
 
 ### Summary

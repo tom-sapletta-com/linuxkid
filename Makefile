@@ -1,9 +1,9 @@
-.PHONY: build run stop clean
+.PHONY: build up stop clean
 
 build:
 	docker build -t linuxkid .
 
-run:
+up:
 	docker run -p 3000:3000 --rm -d linuxkid
 
 stop:
@@ -12,12 +12,12 @@ stop:
 clean:
 	docker rmi linuxkid 2>/dev/null || true
 
-restart: stop run
+restart: stop up
 
 help:
 	@echo "Available targets:"
 	@echo "  make build   - Build Docker image"
-	@echo "  make run     - Run container on port 3000"
+	@echo "  make up     - Run container on port 3000"
 	@echo "  make stop    - Stop running container"
 	@echo "  make clean   - Remove Docker image"
 	@echo "  make restart - Restart container"
