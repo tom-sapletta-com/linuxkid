@@ -21,10 +21,10 @@ Na tej planecie wszystko działa jak w sieci drogowej:
 
 Wybierz swój samochód (komputer), którym będziesz podróżować po Planecie X i naucz się języka terminala!`,
   tips: [
-    "🎯 Każde zadanie ma cel - dowiedz się, co musisz zrobić",
-    "📚 Najpierw teoria, potem praktyka",
-    "💡 Podpowiedzi są dostępne, gdy utkniesz",
-    "🏆 Ukończ wszystkie etapy, by stać się mistrzem terminala"
+    "🎯 Cel misji: poznać podstawowe komendy",
+    "🧩 Najpierw teoria, potem zabawa w terminalu",
+    "💡 Skorzystaj z podpowiedzi, gdy utkniesz",
+    "🏆 Zdobądź wszystkie odznaki i zostań mistrzem!"
   ]
 };
 
@@ -471,7 +471,7 @@ const LESSONS = [
 const ALL_LAYERS = LESSONS.flatMap(l => l.layers);
 const TOTAL_STEPS = ALL_LAYERS.reduce((s, l) => s + l.steps.length, 0);
 
-function Terminal({ pc, step, onSuccess, aliases }) {
+function Terminal({ pc, step, onSuccess, aliases, celebration, incomingMessage }) {
   const [history, setHistory] = useState([]);
   const [input, setInput] = useState("");
   const [hint, setHint] = useState(false);
@@ -479,15 +479,28 @@ function Terminal({ pc, step, onSuccess, aliases }) {
   const bodyRef = useRef(null);
   useEffect(() => { setHistory([]); setInput(""); setHint(false); }, [step?.command]);
   useEffect(() => { bodyRef.current && (bodyRef.current.scrollTop = bodyRef.current.scrollHeight); }, [history]);
+  useEffect(() => {
+    if (celebration) {
+      const cmd = `echo "${celebration}"`;
+      setHistory(h => [...h, { t: "in", v: cmd }, { t: "out", v: celebration, ok: true }]);
+      setTimeout(() => bodyRef.current.scrollTop = bodyRef.current.scrollHeight, 50);
+    }
+  }, [celebration]);
+  useEffect(() => {
+    if (incomingMessage) {
+      setHistory(h => [...h, { t: "in", v: incomingMessage.from, isRemote: true }, { t: "out", v: incomingMessage.msg, ok: true }]);
+      setTimeout(() => bodyRef.current.scrollTop = bodyRef.current.scrollHeight, 50);
+    }
+  }, [incomingMessage]);
   const run = useCallback(() => {
     const cmd = input.trim(); if (!cmd) return;
     let out = "", ok = false;
     if (step) {
       const norm = s => s.replace(/\s+/g, " ").trim();
       if (norm(cmd) === norm(step.command) || cmd.startsWith(step.command.split(" ")[0])) { out = step.expectedOutput(pc); ok = true; }
-      else { const a = aliases.find(x => x.name === cmd.split(" ")[0]); if (a) { out = `→ ${a.exp} ${cmd.split(" ").slice(1).join(" ")}\n${step.expectedOutput(pc)||"✅"}`; ok = true; } else out = `❓ Wpisz: ${step.command}`; }
+      else { const a = aliases.find(x => x.name === cmd.split(" ")[0]); if (a) { out = `→ ${a.exp} ${cmd.split(" ").slice(1).join(" ")}\n${step.expectedOutput(pc) || "✅"}`; ok = true; } else out = `❓ Wpisz: ${step.command}`; }
     }
-    setHistory(h => [...h, { t:"in", v:cmd }, ...(out?[{t:"out",v:out,ok}]:[])]);
+    setHistory(h => [...h, { t: "in", v: cmd }, ...(out ? [{ t: "out", v: out, ok }] : [])]);
     if (ok && onSuccess) setTimeout(onSuccess, 500);
     setInput(""); setHint(false);
   }, [input, step, pc, aliases, onSuccess]);
@@ -610,18 +623,20 @@ function App(){
   const[aliases,setAliases]=useState([]);
   const[picking,setPicking]=useState(true);
   const[showTheoryIntro,setShowTheoryIntro]=useState(false);
-  const[celebrate,setCelebrate]=useState(false);
+  const[celebrationMsg,setCelebrationMsg]=useState(null);
+  const[layerComplete,setLayerComplete]=useState(false);
+  const[receiverMessage,setReceiverMessage]=useState(null);
   const[showNextConfirm,setShowNextConfirm]=useState(false);
   const[menuOpen,setMenuOpen]=useState(false);
   
   // URL routing
   const updateURL = useCallback((lessonIdx, layerIdx, stepIdx, isIntro = false) => {
     if (isIntro) {
-      window.history.pushState(null, '', '/intro/theory/0');
+      window.history.pushState(null, '', '#/intro/theory/0');
     } else {
       const lesson = LESSONS[lessonIdx];
       const layer = lesson?.layers[layerIdx];
-      const hash = `/${lesson?.id || 'intro'}/${layer?.id || 'basics'}/${stepIdx}`;
+      const hash = `#/${lesson?.id || 'intro'}/${layer?.id || 'basics'}/${stepIdx}`;
       window.history.pushState(null, '', hash);
     }
   }, []);
@@ -648,6 +663,27 @@ function App(){
     return { isIntro: true, li: 0, lai: 0, si: 0 };
   }, []);
   
+  // Handle browser back/forward navigation
+  useEffect(() => {
+    const handlePopState = () => {
+      const { isIntro: isIntroPage, li: l, lai: la, si: s } = parseURL();
+      if (isIntroPage) {
+        setShowTheoryIntro(true);
+        setPicking(false);
+      } else {
+        setLI(l);
+        setLAI(la);
+        setSI(s);
+        setShowTheoryIntro(false);
+        setLayerComplete(false);
+        setShowNextConfirm(false);
+      }
+    };
+    
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [parseURL]);
+  
   useEffect(() => {
     const { isIntro: isIntroPage, li: l, lai: la, si: s } = parseURL();
     if (!isIntroPage) {
@@ -665,11 +701,33 @@ function App(){
     const key=`${li}-${lai}-${si}`;
     setDone(p=>new Set([...p,key]));
     if(step?.command?.startsWith("alias ")){const m=step.command.match(/alias\s+(\w+)='(.+)'/);if(m)setAliases(p=>[...p.filter(a=>a.name!==m[1]),{name:m[1],exp:m[2]}]);}
-    if(si<layer.steps.length-1)setShowNextConfirm(true);else{setCelebrate(true);setTimeout(()=>setCelebrate(false),3000);}
+    
+    // Handle nc commands - show message in receiver terminal
+    if(step?.command?.includes("| nc") && step.command.includes("auto-kuby")){
+      const msgMatch = step.command.match(/echo\s+"([^"]+)"/);
+      if(msgMatch){
+        setReceiverMessage({from: `📨 ${pc.name} wysyła:`, msg: msgMatch[1]});
+        setTimeout(()=>setReceiverMessage(null), 8000);
+      }
+    }
+    
+    if(si<layer.steps.length-1)setShowNextConfirm(true);else{
+      const celebrations = [
+        "🎉 Super! Teraz spróbuj: echo 'Jestem mistrzem terminala!'",
+        "🚀 Brawo! Wpisz: echo 'Umiem sterować komputerem!'",
+        "⭐ Świetnie! Spróbuj: echo 'Linux to prosta sprawa!'",
+        "🎯 Doskonale! Wpisz: echo 'Kolejny etap czeka!'",
+        "🏆 Tak trzymaj! Spróbuj: echo 'Jadę dalej!'"
+      ];
+      setCelebrationMsg(celebrations[Math.floor(Math.random()*celebrations.length)]);
+      setTimeout(()=>setCelebrationMsg(null),5000);
+      setLayerComplete(true);
+    }
   };
   
   const nextLayer=()=>{
-    setCelebrate(false);
+    setCelebrationMsg(null);
+    setLayerComplete(false);
     if(lai<lesson.layers.length-1){
       setLAI(lai+1);setSI(0);
       updateURL(li, lai+1, 0);
@@ -680,7 +738,7 @@ function App(){
   };
   
   const goTo=(l,la)=>{
-    setLI(l);setLAI(la);setSI(0);setCelebrate(false);setMenuOpen(false);
+    setLI(l);setLAI(la);setSI(0);setCelebrationMsg(null);setLayerComplete(false);setMenuOpen(false);
     updateURL(l, la, 0);
   };
   
@@ -696,9 +754,9 @@ function App(){
         <div className="inner" data-testid="pick-screen">
           <div className="big-icon">🚗</div>
           <h1>Planeta X</h1>
-          <p className="subtitle">Naucz się rozmawiać z komputerem!</p>
-          <p className="meta">Sieć = drogi 🛣️ • Komputery = samochody 🚗 • Ty = kierowca 🧑</p>
-          <p className="choose">Wybierz swój samochód:</p>
+          <p className="subtitle" style={{fontSize:"20px",fontWeight:700,color:"#a9b1d6"}}>Zostań komputerowym odkrywcą!</p>
+          <p className="meta">Drogi = sieć 🛣️ • Komputery = auta 🚗 • Ty = kierowca 🧑‍🚀</p>
+          <p className="choose">Wybierz swoje auto:</p>
           <div className="grid">
             {COMPUTERS.map(c=>(
               <button key={c.name} className="car-card" data-testid={`car-${c.user}`}
@@ -739,7 +797,7 @@ function App(){
           
           {/* Theory section */}
           <div style={{background:`${currentLesson.color}05`,border:`2px solid ${currentLesson.color}15`,borderRadius:"16px",padding:"24px",marginBottom:"20px"}}>
-            <div style={{fontSize:"22px",fontWeight:"800",color:currentLesson.color,marginBottom:"16px",textAlign:"center"}}>📚 Teoria - zrozumiej jak to działa</div>
+            <div style={{fontSize:"22px",fontWeight:"800",color:currentLesson.color,marginBottom:"16px",textAlign:"center"}}>📚 Jak to działa ?</div>
             
             {currentLayer?.theory?.map((item,i)=>(
               <div key={i} style={{marginBottom:"24px"}}>
@@ -755,7 +813,7 @@ function App(){
           </div>
 
           <button onClick={()=>{setShowTheoryIntro(false);updateURL(li,lai,si);}} style={{width:"100%",background:"linear-gradient(135deg,#7aa2f7,#73daca)",color:"#0a0b10",border:"none",borderRadius:"12px",padding:"16px",fontWeight:"800",fontSize:"18px",cursor:"pointer",fontFamily:"inherit"}}>
-            Rozpocznij praktykę! 🚀
+            Ruszamy na przygodę! 🚀
           </button>
         </div>
       </div>
@@ -811,14 +869,23 @@ function App(){
               <code>{step.command}</code>
             </div>
           )}
-          {(celebrate||layerDone)&&(
-            <div className="celebrate" style={{background:"#73daca10",border:"2px solid #73daca33"}} data-testid="celebrate">
-              <div className="icon">🎉</div>
-              <div className="title" style={{color:"#73daca"}}>Brawo!</div>
-              <div className="sub" style={{color:"#7982a9"}}>Ukończono: {layer.title}</div>
+          <Terminal pc={pc} step={layerDone?null:step} onSuccess={onSuccess} aliases={aliases} celebration={celebrationMsg}/>
+          
+          {/* Second terminal for receiver in talking layer */}
+          {layer.id === "talking" && (
+            <div style={{marginTop:"20px"}}>
+              <div style={{fontSize:"14px",fontWeight:"700",color:"#7982a9",marginBottom:"8px",textAlign:"center"}}>
+                📡 Terminal odbiorcy (auto-kuby):
+              </div>
+              <Terminal 
+                pc={COMPUTERS[1]} 
+                step={null} 
+                onSuccess={()=>{}} 
+                aliases={[]} 
+                incomingMessage={receiverMessage}
+              />
             </div>
           )}
-          <Terminal pc={pc} step={layerDone?null:step} onSuccess={onSuccess} aliases={aliases}/>
           {showNextConfirm&&(
             <div className="confirm-dialog" style={{background:"#7aa2f708",border:"2px solid #7aa2f722",borderRadius:"14px",padding:"16px",marginBottom:"16px",textAlign:"center"}}>
               <div className="text" style={{fontSize:"16px",fontWeight:"700",color:"#c0caf5",marginBottom:"12px"}}>✅ Komenda poprawna!</div>
@@ -831,7 +898,7 @@ function App(){
               {aliases.map((a,i)=>(<div key={i} className="item"><span style={{color:"#73daca"}}>{a.name}</span> <span style={{color:"#5a6082"}}>→</span> {a.exp}</div>))}
             </div>
           )}
-          {(celebrate||layerDone)&&(
+          {(layerComplete)&&(
             <div className="confirm-dialog" style={{background:"#73daca08",border:"2px solid #73daca22",borderRadius:"14px",padding:"16px",marginBottom:"16px",textAlign:"center"}}>
               <div className="text" style={{fontSize:"16px",fontWeight:"700",color:"#c0caf5",marginBottom:"12px"}}>🎉 Ukończono etap!</div>
               <button className="next-btn" onClick={nextLayer} data-testid="next-layer" style={{background:"linear-gradient(135deg,#73daca,#7aa2f7)",color:"#0a0b10",border:"none",borderRadius:"12px",padding:"12px 24px",fontWeight:"800",fontSize:"16px",cursor:"pointer",fontFamily:"inherit"}}>Następny etap →</button>
