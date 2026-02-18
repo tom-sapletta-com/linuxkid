@@ -216,47 +216,47 @@ const LESSONS = [
   },
   {
     id: "env",
-    title: "Schowek auta",
-    icon: "📋",
+    title: "Portfel kierowcy",
+    icon: "👛",
     color: "#A78BFA",
     layers: [
       {
         id: "env-basics",
-        title: "Dokumenty w schowku",
+        title: "Portfel kierowcy",
         category: "system",
-        categoryLabel: "📋 System",
-        description: "Każde auto ma schowek z dokumentami: dowód rejestracyjny, ubezpieczenie, mapa. Komputer też – to zmienne ENV.",
-        analogy: "📋 ENV = dokumenty w schowku auta.",
+        categoryLabel: "👛 System",
+        description: "Każdy kierowca ma portfel: dowód, karta bankowa, bilet miesięczny. Komputer też ma swój portfel – to zmienne środowiskowe ENV.",
+        analogy: "👛 ENV = portfel kierowcy.\nKażda zmienna to karta w portfelu – ma nazwę (np. USER) i wartość (np. ania).\nPortfel jest zawsze przy kierowcy, ale tymczasowe karty znikają po wyłączeniu silnika.",
         steps: [
           {
-            instruction: "Otwórz schowek – zobacz wszystkie dokumenty:",
+            instruction: "Otwórz portfel – sprawdź wszystkie karty:",
             command: "env",
             expectedOutput: (pc) => `USER=${pc.user}\nHOME=/home/${pc.user}\nHOSTNAME=${pc.name}\nPATH=/usr/local/bin:/usr/bin:/bin\nSHELL=/bin/bash\nLANG=pl_PL.UTF-8`,
-            tip: "📋 Każdy dokument ma nazwę (np. USER) i treść (np. ania). To pamięć Twojego auta.",
+            tip: "👛 Każda karta ma nazwę (np. USER) i wartość (np. ania). To portfel Twojego terminala.",
           },
           {
-            instruction: "Przeczytaj dowód – kto jest kierowcą:",
+            instruction: "Wyjmij dowód z portfela – kto jest kierowcą:",
             command: "echo $USER",
             expectedOutput: (pc) => pc.user,
-            tip: "🧑 $USER = dowód kierowcy. Znak $ mówi: 'pokaż ten dokument'.",
+            tip: "🪪 $USER = dowód kierowcy w portfelu. Znak $ mówi: 'wyjmij tę kartę i pokaż jej wartość'.",
           },
           {
-            instruction: "Gdzie jest Twój garaż (katalog domowy):",
+            instruction: "Sprawdź adres domowy na karcie:",
             command: "echo $HOME",
             expectedOutput: (pc) => `/home/${pc.user}`,
-            tip: "🏠 $HOME = adres Twojego garażu. Tu trzymasz swoje pliki.",
+            tip: "🏠 $HOME = karta z adresem domowym w portfelu. Tu trzymasz swoje pliki.",
           },
           {
-            instruction: "Wrzuć nowy dokument do schowka – ulubiony kolor auta:",
+            instruction: "Włóż nową kartę do portfela – ulubiony kolor auta:",
             command: 'export KOLOR="czerwony"',
             expectedOutput: () => "",
-            tip: "📝 export = wkładasz nową karteczkę do schowka.",
+            tip: "📝 export = wkładasz nową kartę do portfela. Inne programy też ją zobaczą.",
           },
           {
-            instruction: "Przeczytaj nowy dokument:",
+            instruction: "Wyjmij nową kartę z portfela:",
             command: "echo $KOLOR",
             expectedOutput: () => "czerwony",
-            tip: "✅ Zapamiętane! Ale uwaga – jak wyłączysz silnik (zamkniesz terminal), ta karteczka zniknie.",
+            tip: "✅ Zapamiętane! Ale uwaga – jak wyłączysz silnik (zamkniesz terminal), tymczasowe karty znikają z portfela.",
           },
         ],
       },
@@ -489,6 +489,13 @@ function Terminal({ pc, step, onSuccess, aliases, incomingMessage, showNextConfi
       setTimeout(() => bodyRef.current.scrollTop = bodyRef.current.scrollHeight, 50);
     }
   }, [incomingMessage]);
+  const successFiredRef = useRef(false);
+  useEffect(() => { successFiredRef.current = false; }, [step?.command]);
+  const fireSuccess = (onSuccessFn) => {
+    if (successFiredRef.current) return;
+    successFiredRef.current = true;
+    successTimerRef.current = setTimeout(onSuccessFn, 500);
+  };
   const run = useCallback(() => {
     const cmd = input.trim(); if (!cmd) return;
     let out = "", ok = false;
@@ -498,7 +505,7 @@ function Terminal({ pc, step, onSuccess, aliases, incomingMessage, showNextConfi
       else { const a = aliases.find(x => x.name === cmd.split(" ")[0]); if (a) { out = `→ ${a.exp} ${cmd.split(" ").slice(1).join(" ")}\n${step.expectedOutput(pc) || "✅"}`; ok = true; } else out = `❓ Wpisz: ${step.command}`; }
     }
     setHistory(h => [...h, { t: "in", v: cmd }, ...(out ? [{ t: "out", v: out, ok }] : [])]);
-    if (ok && onSuccess) { successTimerRef.current = setTimeout(onSuccess, 500); }
+    if (ok && onSuccess) fireSuccess(onSuccess);
     setInput(""); setHint(false);
   }, [input, step, pc, aliases, onSuccess]);
   const prompt = "~$";
@@ -511,7 +518,7 @@ function Terminal({ pc, step, onSuccess, aliases, incomingMessage, showNextConfi
       else { const a = aliases.find(x => x.name === cmd.split(" ")[0]); if (a) { out = `→ ${a.exp} ${cmd.split(" ").slice(1).join(" ")}\n${step.expectedOutput(pc)||"✅"}`; ok = true; } else out = `❓ Wpisz: ${step.command}`; }
     }
     setHistory(h => [...h, { t:"in", v:cmd }, ...(out?[{t:"out",v:out,ok}]:[])]);
-    if (ok && onSuccess) { successTimerRef.current = setTimeout(onSuccess, 500); }
+    if (ok && onSuccess) fireSuccess(onSuccess);
     setInput(""); setHint(false);
   };
   return (
@@ -575,7 +582,7 @@ function AnalogyCard(){
   const items=[
     ["🛣️","Sieć","Drogi w mieście"],["🔀","Router","Skrzyżowanie"],["🚗","Komputer","Samochód"],
     ["🏷️","Adres IP","Tablica rejestracyjna"],["🧑","Użytkownik","Kierowca"],["🔑","Hasło","Kluczyki do auta"],
-    ["📯","Ping","Trąbienie"],["📢","Echo","Megafon"],["📋","ENV","Schowek z dokumentami"],
+    ["📯","Ping","Trąbienie"],["📢","Echo","Megafon"],["👛","ENV","Portfel kierowcy"],
     ["📓",".bashrc","Instrukcja obsługi"],["🏷️","Alias","Naklejka na przycisku"],["🚪","Port","Okienko w budynku (jak na poczcie)"],
     ["👥","Grupa","Grupa społeczna (rodzina, klasa)"],["🚧","Brak uprawnień","Zamknięty szlaban"],["🔧","root","Główny mechanik"],
   ];
@@ -605,6 +612,7 @@ function App(){
   const[showTheoryIntro,setShowTheoryIntro]=useState(false);
   const[receiverMessage,setReceiverMessage]=useState(null);
   const[showNextConfirm,setShowNextConfirm]=useState(false);
+  const[confirmReady,setConfirmReady]=useState(false);
   const[menuOpen,setMenuOpen]=useState(false);
   
   // URL routing
@@ -698,7 +706,7 @@ function App(){
       }
     }
     
-    if(si<layer.steps.length-1)setShowNextConfirm(true);
+    if(si<layer.steps.length-1){setShowNextConfirm(true);setConfirmReady(false);setTimeout(()=>setConfirmReady(true),700);}
   };
   
   const goTo=(l,la)=>{
@@ -707,7 +715,8 @@ function App(){
   };
   
   const proceedToNext=()=>{
-    setShowNextConfirm(false);
+    if(!confirmReady)return;
+    setShowNextConfirm(false);setConfirmReady(false);
     setSI(si+1);
     updateURL(li, lai, si+1);
   };
@@ -834,7 +843,7 @@ function App(){
               <code>{step.command}</code>
             </div>
           )}
-          <Terminal pc={pc} step={layerDone?null:step} onSuccess={onSuccess} aliases={aliases} showNextConfirm={showNextConfirm} proceedToNext={proceedToNext} layerDone={layerDone} nextLayer={nextLayer}/>
+          <Terminal pc={pc} step={layerDone?null:step} onSuccess={onSuccess} aliases={aliases} showNextConfirm={showNextConfirm} confirmReady={confirmReady} proceedToNext={proceedToNext} layerDone={layerDone} nextLayer={nextLayer}/>
           
           {/* Second terminal for receiver in talking layer */}
           {layer.id === "talking" && (

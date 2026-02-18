@@ -517,11 +517,18 @@ function Terminal({ agent, step, onSuccess, showNextConfirm, proceedToNext, laye
   const inputRef = useRef(null);
   const bodyRef = useRef(null);
   const successTimerRef = useRef(null);
+  const successFiredRef = useRef(false);
   useEffect(() => {
     if (successTimerRef.current) { clearTimeout(successTimerRef.current); successTimerRef.current = null; }
+    successFiredRef.current = false;
     setHistory([]); setInput(""); setHint(false);
   }, [step?.command]);
   useEffect(() => { bodyRef.current && (bodyRef.current.scrollTop = bodyRef.current.scrollHeight); }, [history]);
+  const fireSuccess = (onSuccessFn) => {
+    if (successFiredRef.current) return;
+    successFiredRef.current = true;
+    successTimerRef.current = setTimeout(onSuccessFn, 500);
+  };
   const run = useCallback(() => {
     const cmd = input.trim(); if (!cmd) return;
     let out = "", ok = false;
@@ -532,7 +539,7 @@ function Terminal({ agent, step, onSuccess, showNextConfirm, proceedToNext, laye
       } else { out = `❓ Wpisz: ${step.command}`; }
     }
     setHistory(h => [...h, { t: "in", v: cmd }, ...(out ? [{ t: "out", v: out, ok }] : [])]);
-    if (ok && onSuccess) { successTimerRef.current = setTimeout(onSuccess, 500); }
+    if (ok && onSuccess) fireSuccess(onSuccess);
     setInput(""); setHint(false);
   }, [input, step, agent, onSuccess]);
   const prompt = "~$";
@@ -546,7 +553,7 @@ function Terminal({ agent, step, onSuccess, showNextConfirm, proceedToNext, laye
       } else { out = `❓ Wpisz: ${step.command}`; }
     }
     setHistory(h => [...h, { t: "in", v: cmd }, ...(out ? [{ t: "out", v: out, ok }] : [])]);
-    if (ok && onSuccess) { successTimerRef.current = setTimeout(onSuccess, 500); }
+    if (ok && onSuccess) fireSuccess(onSuccess);
     setInput(""); setHint(false);
   };
   return (
