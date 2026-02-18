@@ -1,3 +1,24 @@
+## [1.0.15] - 2026-02-18
+
+### Summary
+
+feat(automatyzacja): deep code analysis engine with 2 supporting modules
+
+### Other
+
+- update automatyzacja/index.html
+- update automatyzacja/index.jsx
+- update automatyzacja/style.css
+- update cyberquest/index.html
+- update cyberquest/index.jsx
+- update cyberquest/style.css
+- update explain-command.js
+- update kod/index.html
+- update kod/index.jsx
+- update kod/style.css
+- ... and 9 more
+
+
 ## [1.0.14] - 2026-02-18
 
 ### Summary

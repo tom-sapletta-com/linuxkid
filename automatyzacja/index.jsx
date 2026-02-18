@@ -25,18 +25,31 @@ echo "Dzisiaj jest $(date)"
 EOF`,
             expectedOutput: () => ``,
             tip: "📝 cat << 'EOF' > plik = 'zapisz wszystko aż do słowa EOF do pliku'. #!/bin/bash na początku to tytuł przepisu – mówi komputerowi, że to skrypt bash.",
+            explain: [
+              { code: "cat << 'EOF' > hello.sh", area: "shell", tokens: [{type:"command",text:"cat"},{text:" "},{type:"operator",text:"<< 'EOF'"},{text:" "},{type:"operator",text:">"},{text:" "},{type:"path",text:"hello.sh"}], explain: "Zapisz cały tekst (aż do słowa EOF) do pliku hello.sh", effect: "Tworzy nowy plik hello.sh w bieżącym folderze", link: {url:"https://pl.wikipedia.org/wiki/Here_document", label:"Heredoc – Wikipedia"} },
+              { code: "#!/bin/bash", area: "shell", tokens: [{type:"comment",text:"#!/bin/bash"}], explain: "Shebang – mówi systemowi: 'ten plik uruchamiaj w powłoce Bash'", effect: "Nagłówek pliku – nie zmienia nic w systemie", link: {url:"https://pl.wikipedia.org/wiki/Shebang", label:"Shebang – Wikipedia"} },
+              { code: 'echo "Cześć! Jestem skryptem!"', area: "shell", tokens: [{type:"command",text:"echo"},{text:" "},{type:"string",text:'"Cześć! Jestem skryptem!"'}], explain: "Wypisz tekst na ekranie – komputer mówi 'Cześć!'", effect: "Wyświetla tekst w terminalu (stdout)" },
+              { code: 'echo "Dzisiaj jest $(date)"', area: "shell", tokens: [{type:"command",text:"echo"},{text:" "},{type:"string",text:'"Dzisiaj jest '},{type:"variable",text:"$(date)"},{type:"string",text:'"'}], explain: "$(date) = uruchom komendę date i wstaw wynik. Komputer wpisze aktualną datę.", effect: "Wyświetla tekst z wstawioną datą systemową" },
+              { code: "EOF", area: "shell", tokens: [{type:"keyword",text:"EOF"}], explain: "Koniec tekstu do zapisania – plik jest gotowy", effect: "Zamyka heredoc i zapisuje plik na dysku" },
+            ],
           },
           {
             instruction: "Daj skryptowi pozwolenie na uruchomienie:",
             command: "chmod +x hello.sh",
             expectedOutput: () => ``,
             tip: "🔑 chmod +x = dajesz przepisowi pieczątkę 'można gotować'. Bez niej komputer nie będzie go wykonywać.",
+            explain: [
+              { code: "chmod +x hello.sh", area: "filesystem", tokens: [{type:"command",text:"chmod"},{text:" "},{type:"flag",text:"+x"},{text:" "},{type:"path",text:"hello.sh"}], explain: "chmod = zmień uprawnienia pliku. +x = dodaj prawo uruchamiania.", effect: "Plik hello.sh dostaje flagę 'wykonywalny' – teraz można go uruchomić jak program", link: {url:"https://pl.wikipedia.org/wiki/Chmod", label:"chmod – Wikipedia"} },
+            ],
           },
           {
             instruction: "Uruchom swój skrypt!",
             command: "./hello.sh",
             expectedOutput: () => `Cześć! Jestem skryptem!\nDzisiaj jest wto 18 lut 2025 12:00:00 CET`,
             tip: "🎉 ./ = 'uruchom z bieżącego folderu'. Skrypt wykonał obie komendy po kolei – jak kucharz czytający przepis!",
+            explain: [
+              { code: "./hello.sh", area: "shell", tokens: [{type:"path",text:"./"},{type:"path",text:"hello.sh"}], explain: "./ = 'szukaj w bieżącym folderze'. System uruchamia skrypt linia po linii.", effect: "Uruchamia plik hello.sh jako program – wykonuje komendy echo po kolei" },
+            ],
           },
         ],
       },
@@ -58,12 +71,25 @@ echo "Jestem $IMIE z Planety $PLANETA!"
 EOF`,
             expectedOutput: () => ``,
             tip: "📦 IMIE i PLANETA to nazwy pudełek. Cudzysłowy trzymają wartość w środku.",
+            explain: [
+              { code: "cat << 'EOF' > powitanie.sh", area: "shell", tokens: [{type:"command",text:"cat"},{text:" "},{type:"operator",text:"<< 'EOF'"},{text:" "},{type:"operator",text:">"},{text:" "},{type:"path",text:"powitanie.sh"}], explain: "Zapisz tekst do pliku powitanie.sh", effect: "Tworzy plik powitanie.sh" },
+              { code: "#!/bin/bash", area: "shell", tokens: [{type:"comment",text:"#!/bin/bash"}], explain: "Nagłówek – uruchamiaj w Bashu" },
+              { code: 'IMIE="Astronauta"', area: "shell", tokens: [{type:"variable",text:"IMIE"},{type:"operator",text:"="},{type:"string",text:'"Astronauta"'}], explain: "Tworzy pudełko IMIE i wkłada do niego tekst 'Astronauta'", effect: "Zmienna IMIE dostępna w skrypcie" },
+              { code: 'PLANETA="X"', area: "shell", tokens: [{type:"variable",text:"PLANETA"},{type:"operator",text:"="},{type:"string",text:'"X"'}], explain: "Tworzy pudełko PLANETA z wartością 'X'", effect: "Zmienna PLANETA dostępna w skrypcie" },
+              { code: 'echo "Jestem $IMIE z Planety $PLANETA!"', area: "shell", tokens: [{type:"command",text:"echo"},{text:" "},{type:"string",text:'"Jestem '},{type:"variable",text:"$IMIE"},{type:"string",text:" z Planety "},{type:"variable",text:"$PLANETA"},{type:"string",text:'!"'}], explain: "$IMIE i $PLANETA = zajrzyj do pudełek i wstaw ich zawartość", effect: "Wypisuje: Jestem Astronauta z Planety X!" },
+              { code: "EOF", area: "shell", tokens: [{type:"keyword",text:"EOF"}], explain: "Koniec pliku" },
+            ],
           },
           {
             instruction: "Uruchom skrypt z pudełkami:",
             command: "chmod +x powitanie.sh && ./powitanie.sh",
             expectedOutput: () => `Jestem Astronauta z Planety X!`,
             tip: "✅ && = 'zrób to, a potem tamto'. Komputer zajrzał do pudełek i wstawił ich zawartość w tekst.",
+            explain: [
+              { code: "chmod +x powitanie.sh", area: "filesystem", tokens: [{type:"command",text:"chmod"},{text:" "},{type:"flag",text:"+x"},{text:" "},{type:"path",text:"powitanie.sh"}], explain: "Dodaj prawo uruchamiania", effect: "Plik staje się wykonywalny" },
+              { code: "&&", area: "shell", tokens: [{type:"operator",text:"&&"}], explain: "Jeśli poprzednia komenda się udała, wykonaj następną" },
+              { code: "./powitanie.sh", area: "shell", tokens: [{type:"path",text:"./powitanie.sh"}], explain: "Uruchom skrypt z bieżącego folderu", effect: "Wykonuje komendy w pliku linia po linii" },
+            ],
           },
           {
             instruction: "Stwórz skrypt, który pyta o imię:",
@@ -75,6 +101,14 @@ echo "Witaj na Planecie X, $IMIE!"
 EOF`,
             expectedOutput: () => ``,
             tip: "🎤 read = mikrofon. Komputer czeka, aż coś powiesz, i wkłada to do pudełka IMIE.",
+            explain: [
+              { code: "cat << 'EOF' > pytanie.sh && chmod +x pytanie.sh", area: "shell", tokens: [{type:"command",text:"cat"},{text:" "},{type:"operator",text:"<< 'EOF'"},{text:" "},{type:"operator",text:">"},{text:" "},{type:"path",text:"pytanie.sh"},{text:" "},{type:"operator",text:"&&"},{text:" "},{type:"command",text:"chmod"},{text:" "},{type:"flag",text:"+x"},{text:" "},{type:"path",text:"pytanie.sh"}], explain: "Zapisz do pliku i od razu daj prawo uruchamiania", effect: "Tworzy plik pytanie.sh i ustawia go jako wykonywalny" },
+              { code: "#!/bin/bash", area: "shell", tokens: [{type:"comment",text:"#!/bin/bash"}], explain: "Nagłówek Bash" },
+              { code: 'echo "Jak masz na imię?"', area: "shell", tokens: [{type:"command",text:"echo"},{text:" "},{type:"string",text:'"Jak masz na imię?"'}], explain: "Wypisz pytanie na ekranie" },
+              { code: "read IMIE", area: "shell", tokens: [{type:"command",text:"read"},{text:" "},{type:"variable",text:"IMIE"}], explain: "Czekaj na odpowiedź i włóż ją do pudełka IMIE", effect: "Użytkownik wpisuje tekst, który trafia do zmiennej IMIE", link: {url:"https://www.gnu.org/software/bash/manual/html_node/Bash-Builtins.html", label:"Bash builtins – GNU"} },
+              { code: 'echo "Witaj na Planecie X, $IMIE!"', area: "shell", tokens: [{type:"command",text:"echo"},{text:" "},{type:"string",text:'"Witaj na Planecie X, '},{type:"variable",text:"$IMIE"},{type:"string",text:'!"'}], explain: "Wypisz powitanie z wstawionym imieniem" },
+              { code: "EOF", area: "shell", tokens: [{type:"keyword",text:"EOF"}], explain: "Koniec pliku" },
+            ],
           },
         ],
       },
@@ -438,7 +472,7 @@ function App() {
           {step && (!layerDone || showNextConfirm) && (
             <div className="instruction-box" style={{background:`${lesson.color}08`,border:`2px solid ${lesson.color}22`}} data-testid="instruction">
               <div className="text">🤖 {step.instruction}</div>
-              <div className="code-row"><code>{step.command}</code><CopyCode text={step.command}/></div>
+              <div className="code-row"><code>{step.command}</code><CopyCode text={step.command}/>{step.explain && <ExplainButton explain={step.explain} command={step.command}/>}</div>
             </div>
           )}
           <Terminal step={step} onSuccess={onSuccess} showNextConfirm={showNextConfirm} confirmReady={confirmReady} proceedToNext={proceedToNext} layerDone={layerDone}/>

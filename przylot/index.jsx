@@ -889,7 +889,7 @@ function App(){
           {step&&(!layerDone||showNextConfirm)&&(
             <div className="instruction-box" style={{background:"#7aa2f708",border:"2px solid #7aa2f722"}} data-testid="instruction">
               <div className="text">👉 {step.instruction}</div>
-              <div className="code-row"><code>{step.command}</code><CopyCode text={step.command}/></div>
+              <div className="code-row"><code>{step.command}</code><CopyCode text={step.command}/>{step.explain && <ExplainButton explain={step.explain} command={step.command}/>}</div>
             </div>
           )}
           <Terminal pc={pc} step={step} onSuccess={onSuccess} aliases={aliases} showNextConfirm={showNextConfirm} confirmReady={confirmReady} proceedToNext={proceedToNext} layerDone={layerDone} nextLayer={nextLayer}/>

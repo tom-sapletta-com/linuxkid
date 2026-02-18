@@ -37,6 +37,8 @@ button { -webkit-tap-highlight-color: transparent; }
 .copy-code-btn { background:#ffffff22; color:#c0caf5; border:1px solid #ffffff33; border-radius:8px; padding:6px 10px; cursor:pointer; font-size:16px; flex-shrink:0; transition:background 0.2s; }
 .copy-code-btn:hover { background:#ffffff33; }
 .copy-code-btn.copied { background:#73daca22; color:#73daca; border-color:#73daca44; }
+.explain-btn { background:#7aa2f722; color:#7aa2f7; border:1px solid #7aa2f744; border-radius:8px; padding:6px 10px; cursor:pointer; font-size:16px; flex-shrink:0; transition:background 0.2s; }
+.explain-btn:hover { background:#7aa2f744; }
 
 .terminal { background:#0c0e14; border-radius:16px; overflow:hidden; font-family:'JetBrains Mono','Fira Code',monospace; border:2px solid #1e2030; }
 .terminal .bar { background:#161822; padding:10px 16px; display:flex; align-items:center; gap:8px; border-bottom:2px solid #1e2030; }

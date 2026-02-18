@@ -40,6 +40,8 @@ button { -webkit-tap-highlight-color: transparent; }
 .copy-code-btn { background:#7aa2f722; color:#7aa2f7; border:1px solid #7aa2f744; border-radius:8px; padding:6px 10px; cursor:pointer; font-size:16px; flex-shrink:0; transition:background 0.2s; }
 .copy-code-btn:hover { background:#7aa2f744; }
 .copy-code-btn.copied { background:#73daca22; color:#73daca; border-color:#73daca44; }
+.explain-btn { background:#7aa2f722; color:#7aa2f7; border:1px solid #7aa2f744; border-radius:8px; padding:6px 10px; cursor:pointer; font-size:16px; flex-shrink:0; transition:background 0.2s; }
+.explain-btn:hover { background:#7aa2f744; }
 
 .celebrate { border-radius:16px; padding:24px; margin-bottom:16px; text-align:center; }
 .celebrate .icon { font-size:56px; }
