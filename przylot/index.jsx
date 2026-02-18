@@ -378,6 +378,9 @@ const LESSONS = [
             command: "droga",
             expectedOutput: () => COMPUTERS.map(c => `${c.emoji} ${c.name} (${c.ip})`).join("\n"),
             tip: "🛣️ Lista aut na drodze – jednym słowem!",
+            explain: [
+              { code: "droga", area: "shell", tokens: [{type:"command",text:"droga"}], explain: "Używasz naklejki 'droga' – to alias na 'arp -a'. Jedno słowo zamiast długiej komendy!", effect: "Wyświetla listę urządzeń w sieci (jak arp -a)" },
+            ],
           },
           {
             instruction: "Naklejka 'trabi' – trąbienie (ping):",
@@ -393,6 +396,9 @@ const LESSONS = [
             command: "trabi auto-oli",
             expectedOutput: () => `PING auto-oli (192.168.1.12): 56 bytes\n64 bytes from 192.168.1.12: time=0.9ms\n64 bytes from 192.168.1.12: time=1.1ms\n64 bytes from 192.168.1.12: time=0.7ms\n--- 3 wysłane, 3 odebrane, 0% strat`,
             tip: "📯 Zatrąbiłeś 3 razy, Ola odtrąbiła 3 razy!",
+            explain: [
+              { code: "trabi auto-oli", area: "network", tokens: [{type:"command",text:"trabi"},{text:" "},{type:"argument",text:"auto-oli"}], explain: "Naklejka 'trabi' = ping -c 3. Dodajesz cel po spacji – tu: auto-oli.", effect: "Wysyła 3 pingi do auto-oli (192.168.1.12)" },
+            ],
           },
         ],
       },
@@ -409,12 +415,19 @@ const LESSONS = [
             command: `echo 'alias czesc=\\'echo "Cześć, jestem $HOSTNAME"\\'' >> ~/.bashrc`,
             expectedOutput: () => "",
             tip: ">> = dopisz na koniec pliku (nie kasuj tego, co było!).",
+            explain: [
+              { code: "echo 'alias czesc=...' >> ~/.bashrc", area: "filesystem", tokens: [{type:"command",text:"echo"},{text:" "},{type:"string",text:"'alias czesc=\\'echo \"Cześć, jestem $HOSTNAME\"\\''"},{text:" "},{type:"operator",text:">>"},{text:" "},{type:"path",text:"~/.bashrc"}], explain: "Dopisuje definicję naklejki 'czesc' na koniec pliku .bashrc", effect: "Po restarcie terminala alias 'czesc' będzie dostępny automatycznie" },
+            ],
           },
           {
             instruction: "Dopisz resztę naklejek:",
             command: `echo 'alias droga=\\'arp -a\\'' >> ~/.bashrc && echo 'alias trabi=\\'ping -c 3\\'' >> ~/.bashrc`,
             expectedOutput: () => "",
             tip: "&& = zrób jedno, potem drugie. Dwie naklejki jednym ruchem!",
+            explain: [
+              { code: "echo 'alias droga=...' >> ~/.bashrc", area: "filesystem", tokens: [{type:"command",text:"echo"},{text:" "},{type:"string",text:"'alias droga=\\'arp -a\\''"},{text:" "},{type:"operator",text:">>"},{text:" "},{type:"path",text:"~/.bashrc"}], explain: "Dopisuje naklejkę 'droga' (arp -a) do .bashrc" },
+              { code: "echo 'alias trabi=...' >> ~/.bashrc", area: "filesystem", tokens: [{type:"operator",text:"&&"},{text:" "},{type:"command",text:"echo"},{text:" "},{type:"string",text:"'alias trabi=\\'ping -c 3\\''"},{text:" "},{type:"operator",text:">>"},{text:" "},{type:"path",text:"~/.bashrc"}], explain: "&& = jeśli pierwsze się udało, zrób drugie. Dopisuje naklejkę 'trabi' (ping -c 3)" },
+            ],
           },
           {
             instruction: "Przekręć kluczyk – wczytaj nowe ustawienia:",
@@ -549,6 +562,9 @@ const LESSONS = [
             command: "echo 'Linux: ls | Windows: dir | macOS: ls'",
             expectedOutput: () => "🐧 Linux:   ls -la     | terminal: bash\n🪟 Windows: dir /a     | terminal: PowerShell\n🍎 macOS:   ls -la     | terminal: zsh\n\n→ Linux i macOS to kuzyni – komendy prawie takie same!",
             tip: "🚗 Różne marki aut mają pedały w tym samym miejscu. Różne systemy – inne komendy, ten sam cel!",
+            explain: [
+              { code: "echo 'Linux: ls | Windows: dir | macOS: ls'", area: "shell", tokens: [{type:"command",text:"echo"},{text:" "},{type:"string",text:"'Linux: ls | Windows: dir | macOS: ls'"}], explain: "Wyświetla tekst porównujący komendy w różnych systemach operacyjnych", effect: "Pokazuje że Linux i macOS używają podobnych komend, Windows ma swoje" },
+            ],
           },
         ],
       },
@@ -686,14 +702,6 @@ function AnalogyCard(){
       ))}
     </div>
   );
-}
-
-function CopyCode({ text }) {
-  const [copied, setCopied] = React.useState(false);
-  const copy = () => {
-    navigator.clipboard?.writeText(text).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500); });
-  };
-  return <button className={`copy-code-btn${copied?' copied':''}`} onClick={copy} title="Kopiuj do schowka">{copied ? '✅' : '📋'}</button>;
 }
 
 const pm = typeof ProgressManager !== 'undefined' ? new ProgressManager() : null;
@@ -974,7 +982,7 @@ function App(){
             <p className="desc">{layer.description}</p>
             {layer.analogy&&(<div className="analogy" style={{borderLeft:`4px solid ${lesson.color}`}}>{layer.analogy}</div>)}
           </div>
-          {step&&(!layerDone||showNextConfirm)&&(
+          {step&&(
             <div className="instruction-box" style={{background:"#7aa2f708",border:"2px solid #7aa2f722"}} data-testid="instruction">
               <div className="text">👉 {step.instruction}</div>
               <div className="code-row"><ColorizedCode text={step.command}/><CopyCode text={step.command}/>{step.explain && <ExplainButton explain={step.explain} command={step.command}/>}</div>

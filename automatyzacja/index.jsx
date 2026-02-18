@@ -384,12 +384,6 @@ function GlossaryCard() {
   );
 }
 
-function CopyCode({ text }) {
-  const [copied, setCopied] = React.useState(false);
-  const copy = () => { navigator.clipboard?.writeText(text).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500); }); };
-  return <button className={`copy-code-btn${copied?' copied':''}`} onClick={copy} title="Kopiuj do schowka">{copied ? '✅' : '📋'}</button>;
-}
-
 /* ───── Main App ───── */
 const pm = typeof ProgressManager !== 'undefined' ? new ProgressManager() : null;
 
@@ -512,7 +506,7 @@ function App() {
             <p className="desc">{layer.description}</p>
             {layer.analogy && (<div className="analogy" style={{borderLeft:`4px solid ${lesson.color}`}}>{layer.analogy}</div>)}
           </div>
-          {step && (!layerDone || showNextConfirm) && (
+          {step && (
             <div className="instruction-box" style={{background:`${lesson.color}08`,border:`2px solid ${lesson.color}22`}} data-testid="instruction">
               <div className="text">🤖 {step.instruction}</div>
               <div className="code-row"><ColorizedCode text={step.command}/><CopyCode text={step.command}/>{step.explain && <ExplainButton explain={step.explain} command={step.command}/>}</div>

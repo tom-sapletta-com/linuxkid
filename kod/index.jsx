@@ -174,24 +174,38 @@ EOF`,
             command: "git init planeta-x-projekt",
             expectedOutput: () => `Initialized empty Git repository in /home/user/planeta-x-projekt/.git/`,
             tip: "📸 git init = kupujesz pusty album. .git/ to ukryty folder, w którym Git przechowuje wszystkie zdjęcia.",
+            explain: [
+              { code: "git init planeta-x-projekt", area: "git", tokens: [{type:"command",text:"git"},{text:" "},{type:"argument",text:"init"},{text:" "},{type:"path",text:"planeta-x-projekt"}], explain: "git init = stwórz nowe repozytorium (pusty album). Tworzy ukryty folder .git/ do przechowywania historii.", effect: "Pojawia się folder planeta-x-projekt/.git/" },
+            ],
           },
           {
             instruction: "Wejdź do folderu i stwórz plik:",
             command: 'cd planeta-x-projekt && echo "# Planeta X" > README.md',
             expectedOutput: () => ``,
             tip: "📝 README.md = okładka projektu. Każdy dobry projekt zaczyna się od opisu.",
+            explain: [
+              { code: "cd planeta-x-projekt", area: "filesystem", tokens: [{type:"command",text:"cd"},{text:" "},{type:"path",text:"planeta-x-projekt"}], explain: "Wejdź do folderu projektu" },
+              { code: "echo \"# Planeta X\" > README.md", area: "filesystem", tokens: [{type:"command",text:"echo"},{text:" "},{type:"string",text:"\"# Planeta X\""},{text:" "},{type:"operator",text:">"},{text:" "},{type:"path",text:"README.md"}], explain: "> = zapisz tekst do pliku (nadpisz). README.md = okładka projektu w formacie Markdown.", effect: "Tworzy plik README.md z nagłówkiem projektu" },
+            ],
           },
           {
             instruction: "Wybierz plik do zdjęcia i zrób zdjęcie:",
             command: 'git add README.md && git commit -m "Pierwszy commit – okładka projektu"',
             expectedOutput: () => `[main (root-commit) a1b2c3d] Pierwszy commit – okładka projektu\n 1 file changed, 1 insertion(+)\n create mode 100644 README.md`,
             tip: "📸 add = wybieram to zdjęcie. commit -m = wklejam i podpisuję. Twoje pierwsze zdjęcie kodu jest w albumie!",
+            explain: [
+              { code: "git add README.md", area: "git", tokens: [{type:"command",text:"git"},{text:" "},{type:"argument",text:"add"},{text:" "},{type:"path",text:"README.md"}], explain: "git add = wybierz plik do następnego zdjęcia (staging area)" },
+              { code: "git commit -m \"Pierwszy commit\"", area: "git", tokens: [{type:"operator",text:"&&"},{text:" "},{type:"command",text:"git"},{text:" "},{type:"argument",text:"commit"},{text:" "},{type:"flag",text:"-m"},{text:" "},{type:"string",text:"\"Pierwszy commit – okładka projektu\""}], explain: "git commit = zrób zdjęcie. -m = podpis (wiadomość). Twoje pierwsze zdjęcie kodu!", effect: "Zapisuje stan plików w historii Git" },
+            ],
           },
           {
             instruction: "Przejrzyj album – historia zmian:",
             command: "git log --oneline",
             expectedOutput: () => `a1b2c3d Pierwszy commit – okładka projektu`,
             tip: "📖 git log = przeglądasz album od najnowszego zdjęcia. --oneline = pokaż skrót (jedno zdjęcie = jedna linia).",
+            explain: [
+              { code: "git log --oneline", area: "git", tokens: [{type:"command",text:"git"},{text:" "},{type:"argument",text:"log"},{text:" "},{type:"flag",text:"--oneline"}], explain: "git log = przejrzyj album od końca. --oneline = pokaż skrót (hash + podpis).", effect: "Wyświetla listę commitów, każdy w jednej linii" },
+            ],
           },
         ],
       },
@@ -245,12 +259,6 @@ function GlossaryCard() {
   return (<div className="glossary" data-testid="glossary"><div className="title">🗺️ Słowniczek</div>{items.map(([icon,term,meaning],i)=>(<div key={i} className="row"><span className="icon">{icon}</span><span className="term">{term}</span><span>= {meaning}</span></div>))}</div>);
 }
 
-function CopyCode({ text }) {
-  const [copied, setCopied] = React.useState(false);
-  const copy = () => { navigator.clipboard?.writeText(text).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500); }); };
-  return <button className={`copy-code-btn${copied?' copied':''}`} onClick={copy} title="Kopiuj do schowka">{copied ? '✅' : '📋'}</button>;
-}
-
 /* ───── App ───── */
 const pm = typeof ProgressManager !== 'undefined' ? new ProgressManager() : null;
 
@@ -286,7 +294,7 @@ function App() {
         <div className={`sidebar${menuOpen?" open":""}`}>{LESSONS.map((les,l)=>(<div key={les.id} style={{marginBottom:16}}><div className="lesson-title" style={{color:les.color}}>{les.icon} {les.title}</div>{les.layers.map((lay,la)=>{const active=l===li&&la===lai,allDone=lay.steps.every((_,s)=>done.has(`${l}-${la}-${s}`));return(<button key={lay.id} className="layer-btn" onClick={()=>goTo(l,la)} style={{background:active?`${les.color}18`:"transparent",border:active?`2px solid ${les.color}44`:"2px solid transparent",color:"#c0caf5"}}><div className="name">{allDone?"✅":active?"▶":"○"} {lay.title}</div><div className="count">{lay.steps.filter((_,s)=>done.has(`${l}-${la}-${s}`)).length}/{lay.steps.length}</div></button>);})}</div>))}</div>
         <div className="content">
           <div className="lesson-header" style={{background:`${lesson.color}08`,border:`2px solid ${lesson.color}22`}}><div className="cat" style={{color:lesson.color}}>{layer.categoryLabel}</div><h2>{layer.title}</h2><p className="desc">{layer.description}</p>{layer.analogy&&(<div className="analogy" style={{borderLeft:`4px solid ${lesson.color}`}}>{layer.analogy}</div>)}</div>
-          {step&&(!layerDone||showNextConfirm)&&(<div className="instruction-box" style={{background:`${lesson.color}08`,border:`2px solid ${lesson.color}22`}} data-testid="instruction"><div className="text">🧬 {step.instruction}</div><div className="code-row"><ColorizedCode text={step.command}/><CopyCode text={step.command}/>{step.explain && <ExplainButton explain={step.explain} command={step.command}/>}</div></div>)}
+          {step&&(<div className="instruction-box" style={{background:`${lesson.color}08`,border:`2px solid ${lesson.color}22`}} data-testid="instruction"><div className="text">🧬 {step.instruction}</div><div className="code-row"><ColorizedCode text={step.command}/><CopyCode text={step.command}/>{step.explain && <ExplainButton explain={step.explain} command={step.command}/>}</div></div>)}
           <Terminal step={step} onSuccess={onSuccess} showNextConfirm={showNextConfirm} confirmReady={confirmReady} proceedToNext={proceedToNext} layerDone={layerDone}/>
           {step?.tip&&(<div style={{background:`${lesson.color}08`,border:`2px solid ${lesson.color}22`,borderRadius:"14px",padding:"14px",marginTop:"16px"}}><div style={{fontSize:"14px",color:"#a9b1d6",lineHeight:"1.7"}}>{step.tip}</div></div>)}
         </div>
