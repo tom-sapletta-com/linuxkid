@@ -80,14 +80,125 @@ Każda grupa daje inne prawa – dokładnie jak w Linuxie, gdzie przynależnoś�
 ### ✅ Jest: `port` = okienko w budynku (jak na poczcie)
 **Dlaczego lepiej:** Każdy budynek (komputer) ma wiele okienek, a każde obsługuje inną sprawę – okienko 80 dla stron WWW, okienko 25 dla poczty, okienko 1234 dla rozmowy. To naturalna i jednoznaczna analogia.
 
+## 🚀 Jak uruchomić
+
+### 🌐 Tryb Web (przeglądarka)
+
+Najprostszy sposób – bez instalacji:
+
+```bash
+# Opcja A: wbudowany serwer Python
+python3 -m http.server 8080
+# Otwórz: http://localhost:8080
+
+# Opcja B: npm start (port 3001)
+npm start
+# Otwórz: http://localhost:3001
+```
+
+### 🐳 Tryb Docker (kontener nginx)
+
+```bash
+# Zbuduj obraz i uruchom
+make build
+make up
+# Otwórz: http://localhost:8080
+
+# Lub ręcznie:
+docker build -t planetax .
+docker run -p 8080:80 --rm -d planetax
+
+# Zatrzymaj
+make stop
+```
+
+### 🖥️ Tryb Desktop (Electron)
+
+Wymaga Node.js 18+:
+
+```bash
+cd electron
+npm install
+npm start
+```
+
+Aby zbudować instalator (AppImage / deb / exe / dmg):
+
+```bash
+cd electron
+npm run build:linux   # Linux: AppImage + deb
+npm run build:win     # Windows: NSIS installer
+npm run build:mac     # macOS: dmg
+# Wynik: ../dist-electron/
+```
+
+### 🧪 Sandbox – prawdziwy terminal (Docker Compose)
+
+Sandbox uruchamia sieć kontenerów odwzorowującą środowisko misji:
+
+```bash
+docker compose -f sandbox/docker-compose.yml up -d
+
+# Wejdź do terminala jako użytkownik ania:
+docker exec -it planetax-sandbox bash -c "su - ania"
+
+# Zatrzymaj sandbox:
+docker compose -f sandbox/docker-compose.yml down
+```
+
+Usługi sandbox:
+
+| Kontener | IP | Rola |
+|---|---|---|
+| `planetax-sandbox` | 192.168.1.10 | Główny terminal (Misja 1) |
+| `planetax-kuby` | 192.168.1.11 | Peer do ćwiczeń sieciowych |
+| `planetax-nginx` | 192.168.1.100 | Serwer WWW (Misja 3), port 8090 |
+| `planetax-redis` | 192.168.1.101 | Redis (Misja 5) |
+| `planetax-python` | 192.168.1.102 | Środowisko Python (Misja 6) |
+
+### 📊 Opcjonalne: SQLite REST API
+
+```bash
+# Skopiuj konfigurację i uzupełnij klucz OpenRouter
+cp .env.example .env
+
+# Uruchom backend API (port 3001)
+npm run api
+# lub: node progress-api.js
+```
+
+Zmienne środowiskowe (`.env.example`):
+
+| Zmienna | Opis |
+|---|---|
+| `OPENROUTER_API_KEY` | Klucz API z [openrouter.ai](https://openrouter.ai/keys) |
+| `OPENROUTER_MODEL` | Model LLM (domyślnie: `google/gemma-3-27b-it:free`) |
+| `LLM_MAX_TOKENS` | Limit tokenów odpowiedzi (domyślnie: 800) |
+| `LLM_TEMPERATURE` | Kreatywność modelu 0.0–1.0 (domyślnie: 0.7) |
+
+### 🧪 Testy E2E (Playwright)
+
+```bash
+npm install
+npx playwright install
+npm test                    # wszystkie testy
+npm run test:desktop        # tylko desktop
+npm run test:mobile         # tylko mobile
+```
+
+---
+
 ## 🏗️ Architektura projektu
 
 ```
 linuxkid/
 ├── index.html            # 🪐 Centrum Misji – dynamiczna strona z postępem i odblokowywaniem
 ├── style.css             # Style dla strony głównej
+├── config.html           # Konfiguracja aplikacji (język, API, motyw)
 ├── progress.js           # 📊 Progress Manager (localStorage + SQLite API facade)
 ├── progress-api.js       # 🗄️ SQLite REST API backend (opcjonalny)
+├── i18n.js               # Internacjonalizacja (i18n)
+├── .env.example          # Przykładowa konfiguracja (LLM, CORS)
 │
 ├── przylot/              # ✅ Misja 01: Przylot na Planetę X
 │   ├── index.html        # HTML (ładuje progress.js + React + index.jsx)
@@ -97,33 +208,44 @@ linuxkid/
 │   └── tests/
 │       └── app.spec.js
 │
-├── cyberquest/           # ✅ Misja 02: CyberQuest
+├── cyberquest/           # ✅ Misja 02: CyberQuest → README
 │   ├── index.html
 │   ├── style.css
 │   ├── index.jsx
 │   ├── playwright.config.js
+│   ├── README.md
 │   └── tests/
 │       └── app.spec.js
 │
-├── serwer/               # ✅ Misja 03: Serwer Planety X
+├── serwer/               # ✅ Misja 03: Serwer Planety X → README
 │   ├── index.html
 │   ├── style.css
 │   ├── index.jsx
 │   ├── README.md
 │   └── TODO.md
 │
-├── automatyzacja/        # 📋 Misja 04: Automatyzacja (planowana)
+├── automatyzacja/        # 📋 Misja 04: Automatyzacja (planowana) → README
 │   ├── README.md
 │   └── TODO.md
 │
-├── konteneryzacja/       # 📋 Misja 05: Konteneryzacja (planowana)
+├── konteneryzacja/       # 📋 Misja 05: Konteneryzacja (planowana) → README
 │   ├── README.md
 │   └── TODO.md
 │
-├── kod/                  # 📋 Misja 06: Kod Planety X (planowana)
+├── kod/                  # 📋 Misja 06: Kod Planety X (planowana) → README
 │   ├── README.md
 │   └── TODO.md
 │
+├── electron/             # 🖥️ Aplikacja desktop (Electron)
+│   ├── main.js           # Główny proces: static server + API + okno
+│   ├── preload.js        # Bezpieczny most IPC
+│   └── package.json      # Zależności Electron + electron-builder
+│
+├── sandbox/              # 🧪 Środowisko testowe (Docker Compose)
+│   └── docker-compose.yml
+│
+├── Dockerfile            # Obraz nginx do wdrożenia webowego
+├── Makefile              # Skróty: make build / up / stop / clean
 ├── package.json          # Zależności (Playwright + opcjonalne: Express, SQLite)
 ├── README.md
 └── LICENSE
@@ -155,12 +277,12 @@ Hub (`index.html`) dynamicznie sprawdza postęp i blokuje misje, które wymagaj�
 
 | # | Folder | Tytuł | Status | Temat |
 |---|---|---|---|---|
-| 01 | `przylot/` | Przylot na Planetę X | ✅ Dostępna | Terminal, sieć, pliki, uprawnienia |
-| 02 | `cyberquest/` | CyberQuest | ✅ Dostępna | Firewall, SSH, szyfrowanie, logi |
-| 03 | `serwer/` | Serwer Planety X | ✅ Dostępna | Nginx, DNS, SSL |
-| 04 | `automatyzacja/` | Automatyzacja | 📋 Planowana | Bash, Cron, Ansible, CI/CD |
-| 05 | `konteneryzacja/` | Konteneryzacja | 📋 Planowana | Docker, Kubernetes, Helm |
-| 06 | `kod/` | Kod Planety X | 📋 Planowana | Python, API, SQLite, Git |
+| 01 | [`przylot/`](przylot/) | Przylot na Planetę X | ✅ Dostępna | Terminal, sieć, pliki, uprawnienia |
+| 02 | [`cyberquest/`](cyberquest/README.md) | CyberQuest | ✅ Dostępna | Firewall, SSH, szyfrowanie, logi |
+| 03 | [`serwer/`](serwer/README.md) | Serwer Planety X | ✅ Dostępna | Nginx, DNS, SSL |
+| 04 | [`automatyzacja/`](automatyzacja/README.md) | Automatyzacja | 📋 Planowana | Bash, Cron, Ansible, CI/CD |
+| 05 | [`konteneryzacja/`](konteneryzacja/README.md) | Konteneryzacja | 📋 Planowana | Docker, Kubernetes, Helm |
+| 06 | [`kod/`](kod/README.md) | Kod Planety X | 📋 Planowana | Python, API, SQLite, Git |
 
 ## License
 

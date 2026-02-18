@@ -754,6 +754,22 @@ function App(){
     }
   };
 
+  useEffect(()=>{
+    if(typeof window.__pxSetChatCtx==='function'){
+      window.__pxSetChatCtx({
+        missionId:'przylot',
+        missionTitle:'Przylot na Planetę X',
+        layerTitle:layer?.title||'',
+        layerDescription:layer?.description||'',
+        layerAnalogy:layer?.analogy||'',
+        categoryLabel:layer?.categoryLabel||'',
+        stepInstruction:step?.instruction||'',
+        stepCommand:step?.command||'',
+        stepTip:step?.tip||'',
+      });
+    }
+  },[li,lai,si,layer,step]);
+
   if(picking){
     return(
       <div className="pick-screen" style={{fontFamily:"'Nunito',system-ui,sans-serif"}}>
@@ -920,4 +936,15 @@ function App(){
   );
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+function AppWithChat() {
+  const [chatCtx, setChatCtx] = React.useState({});
+  return <App onContextChange={setChatCtx} chatCtx={chatCtx}/>;
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<AppWithChat/>);
+
+if (typeof PlanetaChat !== 'undefined') {
+  let _ctx = {};
+  window.__pxSetChatCtx = (ctx) => { _ctx = ctx; };
+  PlanetaChat.init(() => _ctx);
+}

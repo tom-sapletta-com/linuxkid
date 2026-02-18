@@ -323,6 +323,22 @@ function App() {
   const goTo = (l, la) => { setLI(l); setLAI(la); setSI(0); setMenuOpen(false); updateURL(l, la, 0); };
   const proceedToNext = () => { if (!confirmReady) return; setShowNextConfirm(false); setConfirmReady(false); if (si < layer.steps.length - 1) { setSI(si + 1); updateURL(li, lai, si + 1); } else { nextLayer(); } };
 
+  useEffect(() => {
+    if (typeof window.__pxSetChatCtx === 'function') {
+      window.__pxSetChatCtx({
+        missionId: 'automatyzacja',
+        missionTitle: 'Automatyzacja',
+        layerTitle: layer?.title || '',
+        layerDescription: layer?.description || '',
+        layerAnalogy: layer?.analogy || '',
+        categoryLabel: layer?.categoryLabel || '',
+        stepInstruction: step?.instruction || '',
+        stepCommand: step?.command || '',
+        stepTip: step?.tip || '',
+      });
+    }
+  }, [li, lai, si, layer, step]);
+
   const completedSteps = [...done].length;
   const pct = Math.round((completedSteps / TOTAL_STEPS) * 100);
 
@@ -398,3 +414,9 @@ function App() {
 }
 
 ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+
+if (typeof PlanetaChat !== 'undefined') {
+  let _ctx = {};
+  window.__pxSetChatCtx = (ctx) => { _ctx = ctx; };
+  PlanetaChat.init(() => _ctx);
+}

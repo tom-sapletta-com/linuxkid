@@ -743,6 +743,22 @@ function App() {
     else { nextLayer(); }
   };
 
+  useEffect(() => {
+    if (typeof window.__pxSetChatCtx === 'function') {
+      window.__pxSetChatCtx({
+        missionId: 'cyberquest',
+        missionTitle: 'CyberQuest',
+        layerTitle: layer?.title || '',
+        layerDescription: layer?.description || '',
+        layerAnalogy: layer?.analogy || '',
+        categoryLabel: layer?.categoryLabel || '',
+        stepInstruction: step?.instruction || '',
+        stepCommand: step?.command || '',
+        stepTip: step?.tip || '',
+      });
+    }
+  }, [li, lai, si, layer, step]);
+
   /* ── Pick Screen ── */
   if (picking) {
     return (
@@ -886,3 +902,9 @@ function App() {
 }
 
 ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+
+if (typeof PlanetaChat !== 'undefined') {
+  let _ctx = {};
+  window.__pxSetChatCtx = (ctx) => { _ctx = ctx; };
+  PlanetaChat.init(() => _ctx);
+}

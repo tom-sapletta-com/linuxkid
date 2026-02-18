@@ -203,6 +203,11 @@ function App() {
   const onSuccess = () => { const key = `${li}-${lai}-${si}`; setDone(p => { const n = new Set([...p, key]); if (pm) { pm.backend.saveStepDone('kod', key); if (n.size >= TOTAL_STEPS) pm.backend.completeMission('kod'); } return n; }); setConfirmReady(false); setTimeout(() => setConfirmReady(true), 700); setShowNextConfirm(true); };
   const goTo = (l, la) => { setLI(l); setLAI(la); setSI(0); setMenuOpen(false); updateURL(l, la, 0); };
   const proceedToNext = () => { if (!confirmReady) return; setShowNextConfirm(false); setConfirmReady(false); if (si < layer.steps.length - 1) { setSI(si + 1); updateURL(li, lai, si + 1); } else { nextLayer(); } };
+  useEffect(() => {
+    if (typeof window.__pxSetChatCtx === 'function') {
+      window.__pxSetChatCtx({ missionId:'kod', missionTitle:'Kod Planety X', layerTitle:layer?.title||'', layerDescription:layer?.description||'', layerAnalogy:layer?.analogy||'', categoryLabel:layer?.categoryLabel||'', stepInstruction:step?.instruction||'', stepCommand:step?.command||'', stepTip:step?.tip||'' });
+    }
+  }, [li, lai, si, layer, step]);
   const pct = Math.round(([...done].length / TOTAL_STEPS) * 100);
   return (
     <div style={{minHeight:"100vh",background:"#0a0b10",fontFamily:"'Nunito',system-ui,sans-serif",color:"#c0caf5"}} data-testid="app-main">
@@ -226,3 +231,9 @@ function App() {
 }
 
 ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+
+if (typeof PlanetaChat !== 'undefined') {
+  let _ctx = {};
+  window.__pxSetChatCtx = (ctx) => { _ctx = ctx; };
+  PlanetaChat.init(() => _ctx);
+}
