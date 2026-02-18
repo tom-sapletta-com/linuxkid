@@ -18,9 +18,13 @@ const LESSONS = [
         steps: [
           {
             instruction: "Stwórz swój pierwszy skrypt – plik z listą poleceń:",
-            command: 'echo \'#!/bin/bash\necho "Cześć! Jestem skryptem!"\necho "Dzisiaj jest $(date)"\' > hello.sh',
+            command: `cat << 'EOF' > hello.sh
+#!/bin/bash
+echo "Cześć! Jestem skryptem!"
+echo "Dzisiaj jest $(date)"
+EOF`,
             expectedOutput: () => ``,
-            tip: "📝 #!/bin/bash na początku to jakby tytuł przepisu – mówi komputerowi, że to skrypt bash.",
+            tip: "📝 cat << 'EOF' > plik = 'zapisz wszystko aż do słowa EOF do pliku'. #!/bin/bash na początku to tytuł przepisu – mówi komputerowi, że to skrypt bash.",
           },
           {
             instruction: "Daj skryptowi pozwolenie na uruchomienie:",
@@ -46,7 +50,12 @@ const LESSONS = [
         steps: [
           {
             instruction: "Stwórz skrypt z pudełkami (zmiennymi):",
-            command: `echo '#!/bin/bash\nIMIE="Astronauta"\nPLANETA="X"\necho "Jestem $IMIE z Planety $PLANETA!"' > powitanie.sh`,
+            command: `cat << 'EOF' > powitanie.sh
+#!/bin/bash
+IMIE="Astronauta"
+PLANETA="X"
+echo "Jestem $IMIE z Planety $PLANETA!"
+EOF`,
             expectedOutput: () => ``,
             tip: "📦 IMIE i PLANETA to nazwy pudełek. Cudzysłowy trzymają wartość w środku.",
           },
@@ -58,7 +67,12 @@ const LESSONS = [
           },
           {
             instruction: "Stwórz skrypt, który pyta o imię:",
-            command: `echo '#!/bin/bash\necho "Jak masz na imię?"\nread IMIE\necho "Witaj na Planecie X, $IMIE!"' > pytanie.sh && chmod +x pytanie.sh`,
+            command: `cat << 'EOF' > pytanie.sh && chmod +x pytanie.sh
+#!/bin/bash
+echo "Jak masz na imię?"
+read IMIE
+echo "Witaj na Planecie X, $IMIE!"
+EOF`,
             expectedOutput: () => ``,
             tip: "🎤 read = mikrofon. Komputer czeka, aż coś powiesz, i wkłada to do pudełka IMIE.",
           },
@@ -82,7 +96,15 @@ const LESSONS = [
         steps: [
           {
             instruction: "Stwórz skrypt ze światłami (warunkiem):",
-            command: `echo '#!/bin/bash\nGODZINA=$(date +%H)\nif [ $GODZINA -lt 12 ]; then\n  echo "☀️ Dzień dobry! Rano na Planecie X."\nelse\n  echo "🌙 Dobry wieczór! Wieczór na Planecie X."\nfi' > poranek.sh && chmod +x poranek.sh`,
+            command: `cat << 'EOF' > poranek.sh && chmod +x poranek.sh
+#!/bin/bash
+GODZINA=$(date +%H)
+if [ $GODZINA -lt 12 ]; then
+  echo "☀️ Dzień dobry! Rano na Planecie X."
+else
+  echo "🌙 Dobry wieczór! Wieczór na Planecie X."
+fi
+EOF`,
             expectedOutput: () => ``,
             tip: "🚦 if [ warunek ]; then → 'jeśli tak, to...'. -lt = less than (mniej niż). fi = koniec warunku.",
           },
@@ -94,7 +116,14 @@ const LESSONS = [
           },
           {
             instruction: "Sprawdź, czy plik istnieje:",
-            command: `echo '#!/bin/bash\nif [ -f hello.sh ]; then\n  echo "✅ Plik hello.sh istnieje!"\nelse\n  echo "❌ Nie znaleziono hello.sh"\nfi' > sprawdz.sh && chmod +x sprawdz.sh && ./sprawdz.sh`,
+            command: `cat << 'EOF' > sprawdz.sh && chmod +x sprawdz.sh && ./sprawdz.sh
+#!/bin/bash
+if [ -f hello.sh ]; then
+  echo "✅ Plik hello.sh istnieje!"
+else
+  echo "❌ Nie znaleziono hello.sh"
+fi
+EOF`,
             expectedOutput: () => `✅ Plik hello.sh istnieje!`,
             tip: "📁 -f = 'czy ten plik istnieje?'. Komputer zajrzał i odpowiedział.",
           },
@@ -110,13 +139,26 @@ const LESSONS = [
         steps: [
           {
             instruction: "Powitaj wszystkie planety z listy:",
-            command: `echo '#!/bin/bash\nfor PLANETA in Merkury Wenus Ziemia Mars; do\n  echo "🪐 Cześć, $PLANETA!"\ndone' > planety.sh && chmod +x planety.sh && ./planety.sh`,
+            command: `cat << 'EOF' > planety.sh && chmod +x planety.sh && ./planety.sh
+#!/bin/bash
+for PLANETA in Merkury Wenus Ziemia Mars; do
+  echo "🪐 Cześć, $PLANETA!"
+done
+EOF`,
             expectedOutput: () => `🪐 Cześć, Merkury!\n🪐 Cześć, Wenus!\n🪐 Cześć, Ziemia!\n🪐 Cześć, Mars!`,
             tip: "🎠 Karuzela zatrzymała się 4 razy – raz przy każdej planecie. done = karuzela się skończyła.",
           },
           {
             instruction: "Policz od 1 do 5 z pętlą while:",
-            command: `echo '#!/bin/bash\nLICZNIK=1\nwhile [ $LICZNIK -le 5 ]; do\n  echo "Odliczanie: $LICZNIK"\n  LICZNIK=$((LICZNIK + 1))\ndone\necho "🚀 Start!"' > odliczanie.sh && chmod +x odliczanie.sh && ./odliczanie.sh`,
+            command: `cat << 'EOF' > odliczanie.sh && chmod +x odliczanie.sh && ./odliczanie.sh
+#!/bin/bash
+LICZNIK=1
+while [ $LICZNIK -le 5 ]; do
+  echo "Odliczanie: $LICZNIK"
+  LICZNIK=$((LICZNIK + 1))
+done
+echo "🚀 Start!"
+EOF`,
             expectedOutput: () => `Odliczanie: 1\nOdliczanie: 2\nOdliczanie: 3\nOdliczanie: 4\nOdliczanie: 5\n🚀 Start!`,
             tip: "🔁 while = 'kręć się, dopóki warunek jest prawdziwy'. -le = less or equal (mniejsze lub równe 5).",
           },
@@ -248,6 +290,7 @@ function GlossaryCard() {
     ["🔑","chmod +x","Pieczątka 'można uruchomić'"],
     ["🎤","read","Mikrofon – czekaj na odpowiedź"],
     ["📝","#!/bin/bash","Tytuł przepisu (shebang)"],
+    ["📄","cat << 'EOF'","Zapisz tekst do pliku (aż do EOF)"],
     ["➕","&&","Zrób to, potem tamto"],
   ];
   return (

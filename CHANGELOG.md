@@ -1,3 +1,16 @@
+## [1.0.14] - 2026-02-18
+
+### Summary
+
+feat(automatyzacja): deep code analysis engine
+
+### Other
+
+- update automatyzacja/index.jsx
+- update kod/index.jsx
+- update konteneryzacja/index.jsx
+
+
 ## [1.0.13] - 2026-02-18
 
 ### Summary

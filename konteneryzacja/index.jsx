@@ -87,7 +87,11 @@ const LESSONS = [
           },
           {
             instruction: "Napisz przepis na plecak (Dockerfile):",
-            command: `echo 'FROM nginx:alpine\nCOPY index.html /usr/share/nginx/html/\nEXPOSE 80' > Dockerfile`,
+            command: `cat << 'EOF' > Dockerfile
+FROM nginx:alpine
+COPY index.html /usr/share/nginx/html/
+EXPOSE 80
+EOF`,
             expectedOutput: () => ``,
             tip: "📝 FROM = bazowy plecak (nginx). COPY = włóż stronę do środka. EXPOSE = otwórz okienko 80.",
           },
@@ -123,7 +127,15 @@ const LESSONS = [
         steps: [
           {
             instruction: "Stwórz partyturę (docker-compose.yml) z dwoma muzykami:",
-            command: `echo 'services:\n  web:\n    image: nginx:alpine\n    ports:\n      - "8080:80"\n  redis:\n    image: redis:alpine' > docker-compose.yml`,
+            command: `cat << 'EOF' > docker-compose.yml
+services:
+  web:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+  redis:
+    image: redis:alpine
+EOF`,
             expectedOutput: () => ``,
             tip: "🎼 web = pierwszy muzyk (serwer Nginx). redis = drugi muzyk (baza danych). Razem tworzą orkiestrę!",
           },

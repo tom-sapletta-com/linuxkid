@@ -23,9 +23,14 @@ const LESSONS = [
           },
           {
             instruction: "Stwórz plik z programem Python:",
-            command: `echo 'imie = "Odkrywca"\nplaneta = "X"\nprint(f"Jestem {imie} z Planety {planeta}!")\nprint(f"2 + 2 = {2 + 2}")' > hello.py`,
+            command: `cat << 'EOF' > hello.py
+imie = "Odkrywca"
+planeta = "X"
+print(f"Jestem {imie} z Planety {planeta}!")
+print(f"2 + 2 = {2 + 2}")
+EOF`,
             expectedOutput: () => ``,
-            tip: "📝 Plik .py = notatnik z programem. f\"...\" = tekst z wstawkami (jak szablony z dziurkami na dane).",
+            tip: "📝 cat << 'EOF' > plik = 'zapisz wszystko aż do słowa EOF do pliku'. Plik .py = notatnik z programem. f\"...\" = tekst z wstawkami.",
           },
           {
             instruction: "Uruchom swój program:",
@@ -45,13 +50,22 @@ const LESSONS = [
         steps: [
           {
             instruction: "Stwórz listę planet i wypisz je:",
-            command: `echo 'planety = ["Merkury", "Wenus", "Ziemia", "Mars"]\nfor p in planety:\n    print(f"🪐 {p}")\nprint(f"Razem: {len(planety)} planet")' > listy.py && python3 listy.py`,
+            command: `cat << 'EOF' > listy.py && python3 listy.py
+planety = ["Merkury", "Wenus", "Ziemia", "Mars"]
+for p in planety:
+    print(f"🪐 {p}")
+print(f"Razem: {len(planety)} planet")
+EOF`,
             expectedOutput: () => `🪐 Merkury\n🪐 Wenus\n🪐 Ziemia\n🪐 Mars\nRazem: 4 planet`,
             tip: "📚 for p in planety = 'dla każdej książki na półce'. len() = 'ile jest na półce?'.",
           },
           {
             instruction: "Stwórz słownik załogi Planety X:",
-            command: `echo 'zaloga = {"Ania": "pilot", "Kuba": "inżynier", "Ola": "naukowiec"}\nfor imie, rola in zaloga.items():\n    print(f"👤 {imie} → {rola}")' > slownik.py && python3 slownik.py`,
+            command: `cat << 'EOF' > slownik.py && python3 slownik.py
+zaloga = {"Ania": "pilot", "Kuba": "inżynier", "Ola": "naukowiec"}
+for imie, rola in zaloga.items():
+    print(f"👤 {imie} → {rola}")
+EOF`,
             expectedOutput: () => `👤 Ania → pilot\n👤 Kuba → inżynier\n👤 Ola → naukowiec`,
             tip: "📖 Słownik = pary klucz:wartość. .items() = 'pokaż wszystkie wpisy z książki telefonicznej'.",
           },
@@ -75,13 +89,29 @@ const LESSONS = [
         steps: [
           {
             instruction: "Zbuduj narzędzie do powitań:",
-            command: `echo 'def powitaj(imie):\n    return f"🚀 Witaj na Planecie X, {imie}!"\n\nprint(powitaj("Ania"))\nprint(powitaj("Kuba"))\nprint(powitaj("Ola"))' > funkcje.py && python3 funkcje.py`,
+            command: `cat << 'EOF' > funkcje.py && python3 funkcje.py
+def powitaj(imie):
+    return f"🚀 Witaj na Planecie X, {imie}!"
+
+print(powitaj("Ania"))
+print(powitaj("Kuba"))
+print(powitaj("Ola"))
+EOF`,
             expectedOutput: () => `🚀 Witaj na Planecie X, Ania!\n🚀 Witaj na Planecie X, Kuba!\n🚀 Witaj na Planecie X, Ola!`,
             tip: "🔧 def = 'zbuduj narzędzie'. return = 'oddaj wynik'. Użyłeś go 3 razy – nie musiałeś pisać tego samego!",
           },
           {
             instruction: "Zbuduj kalkulator paliwa kosmicznego:",
-            command: `echo 'def paliwo(dystans_km):\n    litry = dystans_km * 0.5\n    return litry\n\nplanety = {"Mars": 225, "Jowisz": 628, "Saturn": 1275}\nfor nazwa, km in planety.items():\n    p = paliwo(km)\n    print(f"🪐 {nazwa}: {km} mln km → {p} mln litrów paliwa")' > paliwo.py && python3 paliwo.py`,
+            command: `cat << 'EOF' > paliwo.py && python3 paliwo.py
+def paliwo(dystans_km):
+    litry = dystans_km * 0.5
+    return litry
+
+planety = {"Mars": 225, "Jowisz": 628, "Saturn": 1275}
+for nazwa, km in planety.items():
+    p = paliwo(km)
+    print(f"🪐 {nazwa}: {km} mln km → {p} mln litrów paliwa")
+EOF`,
             expectedOutput: () => `🪐 Mars: 225 mln km → 112.5 mln litrów paliwa\n🪐 Jowisz: 628 mln km → 314.0 mln litrów paliwa\n🪐 Saturn: 1275 mln km → 637.5 mln litrów paliwa`,
             tip: "🧮 Funkcja paliwo() to kalkulator – podajesz dystans, dostajesz litry. Użyłeś go dla każdej planety ze słownika.",
           },
@@ -175,7 +205,7 @@ function Terminal({ step, onSuccess, showNextConfirm, confirmReady, proceedToNex
 }
 
 function GlossaryCard() {
-  const items = [["🗣️","print()","Powiedz głośno (wypisz na ekran)"],["📝","zmienna","Karteczka samoprzylepna z danymi"],["📚","lista","Półka z książkami (ponumerowane)"],["📖","słownik","Książka telefoniczna (klucz→wartość)"],["🔧","def","Zbuduj narzędzie (funkcję)"],["🔄","for","Karuzela – powtarzaj dla każdego"],["📸","git init","Kup nowy album na zdjęcia kodu"],["📎","git add","Wybierz zdjęcia do wklejenia"],["💾","git commit","Wklej zdjęcia i podpisz datę"],["📖","git log","Przejrzyj album"]];
+  const items = [["🗣️","print()","Powiedz głośno (wypisz na ekran)"],["📝","zmienna","Karteczka samoprzylepna z danymi"],["📚","lista","Półka z książkami (ponumerowane)"],["📖","słownik","Książka telefoniczna (klucz→wartość)"],["🔧","def","Zbuduj narzędzie (funkcję)"],["🔄","for","Karuzela – powtarzaj dla każdego"],["📄","cat << 'EOF'","Zapisz tekst do pliku (aż do EOF)"],["📸","git init","Kup nowy album na zdjęcia kodu"],["📎","git add","Wybierz zdjęcia do wklejenia"],["💾","git commit","Wklej zdjęcia i podpisz datę"],["📖","git log","Przejrzyj album"]];
   return (<div className="glossary" data-testid="glossary"><div className="title">🗺️ Słowniczek</div>{items.map(([icon,term,meaning],i)=>(<div key={i} className="row"><span className="icon">{icon}</span><span className="term">{term}</span><span>= {meaning}</span></div>))}</div>);
 }
 
