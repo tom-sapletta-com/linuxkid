@@ -84,18 +84,20 @@ Każda grupa daje inne prawa – dokładnie jak w Linuxie, gdzie przynależnoś�
 
 ```
 linuxkid/
-├── index.html            # 🪐 Centrum Misji – strona startowa z listą wszystkich misji
+├── index.html            # 🪐 Centrum Misji – dynamiczna strona z postępem i odblokowywaniem
 ├── style.css             # Style dla strony głównej
+├── progress.js           # 📊 Progress Manager (localStorage + SQLite API facade)
+├── progress-api.js       # 🗄️ SQLite REST API backend (opcjonalny)
 │
-├── przylot/              # ✅ Misja 01: Przylot na Planetę X (podstawy terminala)
-│   ├── index.html        # HTML (ładuje style.css + index.jsx)
-│   ├── style.css         # Style CSS
-│   ├── index.jsx         # Aplikacja React
+├── przylot/              # ✅ Misja 01: Przylot na Planetę X
+│   ├── index.html        # HTML (ładuje progress.js + React + index.jsx)
+│   ├── style.css
+│   ├── index.jsx         # Aplikacja React z persystencją postępu
 │   ├── playwright.config.js
 │   └── tests/
-│       └── app.spec.js   # Testy E2E
+│       └── app.spec.js
 │
-├── cyberquest/           # ✅ Misja 02: CyberQuest (cyberbezpieczeństwo)
+├── cyberquest/           # ✅ Misja 02: CyberQuest
 │   ├── index.html
 │   ├── style.css
 │   ├── index.jsx
@@ -103,12 +105,27 @@ linuxkid/
 │   └── tests/
 │       └── app.spec.js
 │
-├── serwer/               # 🔧 Misja 03: Serwer Planety X (w przygotowaniu)
-│   ├── README.md         # Opis misji i analogii
-│   └── TODO.md           # Plan implementacji dla deweloperów
+├── serwer/               # ✅ Misja 03: Serwer Planety X
+│   ├── index.html
+│   ├── style.css
+│   ├── index.jsx
+│   ├── README.md
+│   └── TODO.md
 │
-├── package.json          # Zależności (Playwright)
-├── README.md             # Dokumentacja główna
+├── automatyzacja/        # 📋 Misja 04: Automatyzacja (planowana)
+│   ├── README.md
+│   └── TODO.md
+│
+├── konteneryzacja/       # 📋 Misja 05: Konteneryzacja (planowana)
+│   ├── README.md
+│   └── TODO.md
+│
+├── kod/                  # 📋 Misja 06: Kod Planety X (planowana)
+│   ├── README.md
+│   └── TODO.md
+│
+├── package.json          # Zależności (Playwright + opcjonalne: Express, SQLite)
+├── README.md
 └── LICENSE
 ```
 
@@ -116,16 +133,34 @@ linuxkid/
 
 **Standaryzacja:** Każdy projekt ma identyczną strukturę: `index.html` + `style.css` + `index.jsx`
 
+## 📊 System postępu
+
+Dwie implementacje persystencji danych:
+
+1. **localStorage** (domyślna) – działa offline, bez serwera, dane w przeglądarce
+2. **SQLite REST API** (opcjonalna) – `node progress-api.js` uruchamia serwer na porcie 3001
+
+Hub (`index.html`) dynamicznie sprawdza postęp i blokuje misje, które wymagają ukończenia wcześniejszych:
+
+| Misja | Wymaga ukończenia |
+|---|---|
+| Przylot | *(brak – zawsze dostępna)* |
+| CyberQuest | Przylot |
+| Serwer | Przylot |
+| Automatyzacja | Serwer |
+| Konteneryzacja | Automatyzacja |
+| Kod Planety X | Przylot |
+
 ## 🗺️ Mapa misji
 
 | # | Folder | Tytuł | Status | Temat |
 |---|---|---|---|---|
 | 01 | `przylot/` | Przylot na Planetę X | ✅ Dostępna | Terminal, sieć, pliki, uprawnienia |
 | 02 | `cyberquest/` | CyberQuest | ✅ Dostępna | Firewall, SSH, szyfrowanie, logi |
-| 03 | `serwer/` | Serwer Planety X | 🔧 W przygotowaniu | Nginx, DNS, SSL, Docker |
-| 04 | *(planowane)* | Automatyzacja | 📋 Planowana | Bash, Cron, Ansible, CI/CD |
-| 05 | *(planowane)* | Konteneryzacja | 📋 Planowana | Docker, Kubernetes, Helm |
-| 06 | *(planowane)* | Kod Planety X | 📋 Planowana | Python, API, SQLite, Git |
+| 03 | `serwer/` | Serwer Planety X | ✅ Dostępna | Nginx, DNS, SSL |
+| 04 | `automatyzacja/` | Automatyzacja | 📋 Planowana | Bash, Cron, Ansible, CI/CD |
+| 05 | `konteneryzacja/` | Konteneryzacja | 📋 Planowana | Docker, Kubernetes, Helm |
+| 06 | `kod/` | Kod Planety X | 📋 Planowana | Python, API, SQLite, Git |
 
 ## License
 

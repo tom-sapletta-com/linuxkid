@@ -600,13 +600,24 @@ function AnalogyCard(){
   );
 }
 
+const pm = typeof ProgressManager !== 'undefined' ? new ProgressManager() : null;
+
 function App(){
   const[pc,setPC]=useState(COMPUTERS[0]);
   const[li,setLI]=useState(0);
   const[lai,setLAI]=useState(0);
   const[si,setSI]=useState(0);
-  const[done,setDone]=useState(new Set());
+  const[done,setDone]=useState(()=>{
+    if(!pm) return new Set();
+    const saved = pm.backend.getSteps('przylot');
+    return new Set(saved);
+  });
   const[aliases,setAliases]=useState([]);
+
+  useEffect(()=>{
+    if(!pm) return;
+    pm.backend.setTotal('przylot', TOTAL_STEPS);
+  },[]);
   const[picking,setPicking]=useState(true);
   const[showTheoryIntro,setShowTheoryIntro]=useState(false);
   const[receiverMessage,setReceiverMessage]=useState(null);
@@ -693,7 +704,14 @@ function App(){
 
   const onSuccess=()=>{
     const key=`${li}-${lai}-${si}`;
-    setDone(p=>new Set([...p,key]));
+    setDone(p=>{
+      const next=new Set([...p,key]);
+      if(pm){
+        pm.backend.saveStepDone('przylot',key);
+        if(next.size>=TOTAL_STEPS) pm.backend.completeMission('przylot');
+      }
+      return next;
+    });
     if(step?.command?.startsWith("alias ")){const m=step.command.match(/alias\s+(\w+)='(.+)'/);if(m)setAliases(p=>[...p.filter(a=>a.name!==m[1]),{name:m[1],exp:m[2]}]);}
     
     // Handle nc commands - show message in receiver terminal

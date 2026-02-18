@@ -642,13 +642,22 @@ function GlossaryCard() {
 }
 
 /* ───── Main App ───── */
+const pm = typeof ProgressManager !== 'undefined' ? new ProgressManager() : null;
+
 function App() {
   const [agent, setAgent] = useState(AGENTS[0]);
   const [li, setLI] = useState(0);
   const [lai, setLAI] = useState(0);
   const [si, setSI] = useState(0);
-  const [done, setDone] = useState(new Set());
+  const [done, setDone] = useState(() => {
+    if (!pm) return new Set();
+    return new Set(pm.backend.getSteps('cyberquest'));
+  });
   const [picking, setPicking] = useState(true);
+
+  useEffect(() => {
+    if (pm) pm.backend.setTotal('cyberquest', TOTAL_STEPS);
+  }, []);
   const [showTheoryIntro, setShowTheoryIntro] = useState(false);
   const [showNextConfirm, setShowNextConfirm] = useState(false);
   const [confirmReady, setConfirmReady] = useState(false);
@@ -702,7 +711,14 @@ function App() {
 
   const onSuccess = () => {
     const key = `${li}-${lai}-${si}`;
-    setDone(p => new Set([...p, key]));
+    setDone(p => {
+      const next = new Set([...p, key]);
+      if (pm) {
+        pm.backend.saveStepDone('cyberquest', key);
+        if (next.size >= TOTAL_STEPS) pm.backend.completeMission('cyberquest');
+      }
+      return next;
+    });
     setConfirmReady(false);
     setTimeout(() => setConfirmReady(true), 700);
     setShowNextConfirm(true);
