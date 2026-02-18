@@ -1,0 +1,55 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0a0b10; font-family: 'Nunito', system-ui, sans-serif; color: #c0caf5; min-height: 100vh; overflow-x: hidden; }
+
+.hub { max-width: 900px; margin: 0 auto; padding: 48px 24px 80px; }
+
+.hub-hero { text-align: center; margin-bottom: 56px; }
+.hub-hero .planet { font-size: 80px; margin-bottom: 16px; animation: float 4s ease-in-out infinite; }
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+.hub-hero h1 { font-size: 42px; font-weight: 900; color: #c0caf5; margin-bottom: 8px; }
+.hub-hero h1 span { background: linear-gradient(90deg, #7aa2f7, #73daca); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.hub-hero .tagline { font-size: 18px; color: #7982a9; font-weight: 600; margin-bottom: 4px; }
+.hub-hero .sub { font-size: 15px; color: #5a6082; }
+
+.missions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 48px; }
+
+.mission-card { border-radius: 20px; padding: 28px 24px; text-decoration: none; color: inherit; display: block; transition: transform 0.2s, box-shadow 0.2s; position: relative; overflow: hidden; }
+.mission-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px #0006; }
+.mission-card.available { cursor: pointer; }
+.mission-card.coming-soon { opacity: 0.6; cursor: default; }
+.mission-card.coming-soon:hover { transform: none; box-shadow: none; }
+
+.mission-card .badge { position: absolute; top: 16px; right: 16px; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
+.badge-available { background: #73daca22; color: #73daca; border: 1px solid #73daca44; }
+.badge-soon { background: #f59e0b22; color: #f59e0b; border: 1px solid #f59e0b44; }
+.badge-planned { background: #7982a922; color: #7982a9; border: 1px solid #7982a944; }
+
+.mission-card .num { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+.mission-card .icon { font-size: 52px; margin-bottom: 12px; display: block; }
+.mission-card h2 { font-size: 22px; font-weight: 900; margin-bottom: 6px; color: #c0caf5; }
+.mission-card .desc { font-size: 14px; color: #7982a9; line-height: 1.7; margin-bottom: 16px; }
+.mission-card .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.mission-card .tag { font-size: 12px; padding: 3px 10px; border-radius: 20px; font-weight: 700; }
+.mission-card .story { font-size: 13px; color: #a9b1d6; font-style: italic; margin-bottom: 14px; line-height: 1.6; border-left: 3px solid; padding-left: 10px; }
+
+.mission-card .cta { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 800; padding: 10px 20px; border-radius: 12px; margin-top: 4px; }
+
+.section-title { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: #5a6082; margin-bottom: 16px; }
+
+.skills-bar { background: #12141e; border-radius: 16px; padding: 24px; border: 2px solid #1e2030; margin-bottom: 48px; }
+.skills-bar h3 { font-size: 16px; font-weight: 800; color: #c0caf5; margin-bottom: 16px; }
+.skills-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+.skill { background: #0f1019; border-radius: 10px; padding: 10px 14px; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; }
+.skill.unlocked { color: #73daca; border: 1px solid #73daca33; }
+.skill.locked { color: #5a6082; border: 1px solid #1e2030; }
+
+.footer-hub { text-align: center; color: #5a6082; font-size: 13px; padding-top: 32px; border-top: 1px solid #1e2030; }
+.footer-hub a { color: #7aa2f7; text-decoration: none; }
+
+@media (max-width: 640px) {
+  .missions-grid { grid-template-columns: 1fr; }
+  .hub-hero h1 { font-size: 30px; }
+  .hub-hero .planet { font-size: 60px; }
+  .mission-card .icon { font-size: 40px; }
+  .hub { padding: 32px 16px 60px; }
+}
