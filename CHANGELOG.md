@@ -1,3 +1,18 @@
+## [1.0.5] - 2026-02-18
+
+### Summary
+
+feat(docs): deep code analysis engine
+
+### Docs
+
+- docs: update README
+
+### Other
+
+- update index.jsx
+
+
 ## [1.0.4] - 2026-02-17
 
 ### Summary

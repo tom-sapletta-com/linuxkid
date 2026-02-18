@@ -160,15 +160,15 @@ const LESSONS = [
         title: "Samochody rozmawiają",
         category: "network",
         categoryLabel: "🛣️ Sieć",
-        description: "Samochody mogą się porozumiewać – wysyłać paczki (dane) pod konkretny adres i numer bramy (port).",
-        analogy: "🚪 Port = numer bramy w garażu.",
+        description: "Samochody mogą się porozumiewać – wysyłać paczki (dane) pod konkretny adres i numer okienka (port).",
+        analogy: "🚪 Port = numer okienka w budynku. Każde okienko obsługuje inną sprawę.",
         theory: [
           {
-            title: "🚪 Porty - bramy w garażach",
-            content: "Każdy samochód ma wiele garaży (portów). Garaż 22 dla WWW, garaż 25 dla poczty, garaż 1234 dla naszej rozmowy. Musisz wiedzieć zarówno adres auta, jak i numer garażu.",
+            title: "🚪 Porty - okienka w budynku",
+            content: "Każdy komputer (budynek) ma wiele okienek (portów). Okienko 80 dla stron WWW, okienko 25 dla poczty, okienko 1234 dla naszej rozmowy. Musisz wiedzieć zarówno adres budynku, jak i numer okienka.",
             examples: [
               "🏠 adres: auto-kuby (192.168.1.11)",
-              "🚪 port: 1234 (nasza rozmowa)",
+              "🚪 okienko: 1234 (nasza rozmowa)",
               "📦 pełny adres: auto-kuby:1234"
             ]
           },
@@ -387,10 +387,10 @@ const LESSONS = [
             tip: "🧑 Twoje imię kierowcy. Masz kluczyki do swojego auta, ale nie do cudzego.",
           },
           {
-            instruction: "Do jakich parkingów (grup) masz kartę?",
+            instruction: "Do jakich grup należysz?",
             command: "groups",
             expectedOutput: (pc) => `${pc.user} uczniowie siec`,
-            tip: "🅿️ Grupy = parkingi. Masz kartę do kilku parkingów, każdy daje inne uprawnienia.",
+            tip: "👥 Grupy = grupy społeczne, do których należysz. Jak w życiu: rodzina, klasa szkolna, drużyna sportowa – każda daje Ci inne prawa i dostęp.",
           },
           {
             instruction: "Sprawdź zamki na pliku:",
@@ -596,8 +596,8 @@ function AnalogyCard(){
     ["🛣️","Sieć","Drogi w mieście"],["🔀","Router","Skrzyżowanie"],["🚗","Komputer","Samochód"],
     ["🏷️","Adres IP","Tablica rejestracyjna"],["🧑","Użytkownik","Kierowca"],["🔑","Hasło","Kluczyki do auta"],
     ["📯","Ping","Trąbienie"],["📢","Echo","Megafon"],["📋","ENV","Schowek z dokumentami"],
-    ["📓",".bashrc","Instrukcja obsługi"],["🏷️","Alias","Naklejka na przycisku"],["🚪","Port","Numer bramy w garażu"],
-    ["🅿️","Grupa","Parking z kartą"],["🚧","Brak uprawnień","Zamknięty szlaban"],["🔧","root","Główny mechanik"],
+    ["📓",".bashrc","Instrukcja obsługi"],["🏷️","Alias","Naklejka na przycisku"],["🚪","Port","Okienko w budynku (jak na poczcie)"],
+    ["👥","Grupa","Grupa społeczna (rodzina, klasa)"],["🚧","Brak uprawnień","Zamknięty szlaban"],["🔧","root","Główny mechanik"],
   ];
   return(
     <div className="glossary" data-testid="glossary">
