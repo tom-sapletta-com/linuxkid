@@ -1,0 +1,103 @@
+version: '3.8'
+
+# Planeta X – Sandbox for real terminal testing
+# Each service matches a mission scenario
+# Usage: docker compose up -d
+#        docker exec -it planetax-sandbox bash
+
+services:
+
+  # ─── Main sandbox (Mission 1: Przylot) ───
+  sandbox:
+    image: ubuntu:22.04
+    container_name: planetax-sandbox
+    hostname: auto-ani
+    environment:
+      - USER=ania
+      - HOME=/home/ania
+      - HOSTNAME=auto-ani
+    volumes:
+      - sandbox-home:/home/ania
+      - ./scripts:/opt/planetax:ro
+    networks:
+      planetax-net:
+        ipv4_address: 192.168.1.10
+    command: >
+      bash -c "
+        apt-get update -q && apt-get install -y -q iputils-ping net-tools netcat-openbsd iproute2 curl wget git python3 python3-pip bash-completion &&
+        useradd -m -s /bin/bash ania 2>/dev/null || true &&
+        echo 'ania:planetax' | chpasswd &&
+        mkdir -p /home/ania &&
+        chown ania:ania /home/ania &&
+        tail -f /dev/null
+      "
+    stdin_open: true
+    tty: true
+
+  # ─── Peer computer (Mission 1: network) ───
+  kuby:
+    image: ubuntu:22.04
+    container_name: planetax-kuby
+    hostname: auto-kuby
+    environment:
+      - USER=kuby
+      - HOSTNAME=auto-kuby
+    networks:
+      planetax-net:
+        ipv4_address: 192.168.1.11
+    command: >
+      bash -c "
+        apt-get update -q && apt-get install -y -q netcat-openbsd iputils-ping net-tools &&
+        useradd -m -s /bin/bash kuby 2>/dev/null || true &&
+        nc -lk -p 1234 &
+        tail -f /dev/null
+      "
+    stdin_open: true
+    tty: true
+
+  # ─── Web server (Mission 3: Serwer) ───
+  webserver:
+    image: nginx:alpine
+    container_name: planetax-nginx
+    hostname: serwer-planetax
+    volumes:
+      - ./nginx-html:/usr/share/nginx/html:ro
+    networks:
+      planetax-net:
+        ipv4_address: 192.168.1.100
+    ports:
+      - "8090:80"
+
+  # ─── Redis (Mission 5: Konteneryzacja) ───
+  redis:
+    image: redis:alpine
+    container_name: planetax-redis
+    networks:
+      planetax-net:
+        ipv4_address: 192.168.1.101
+
+  # ─── Python environment (Mission 6: Kod) ───
+  python-env:
+    image: python:3.11-slim
+    container_name: planetax-python
+    hostname: python-planetax
+    volumes:
+      - python-work:/workspace
+    networks:
+      planetax-net:
+        ipv4_address: 192.168.1.102
+    working_dir: /workspace
+    command: tail -f /dev/null
+    stdin_open: true
+    tty: true
+
+networks:
+  planetax-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.1.0/24
+
+volumes:
+  sandbox-home:
+  python-work:

@@ -641,6 +641,12 @@ function GlossaryCard() {
   );
 }
 
+function CopyCode({ text }) {
+  const [copied, setCopied] = React.useState(false);
+  const copy = () => { navigator.clipboard?.writeText(text).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500); }); };
+  return <button className={`copy-code-btn${copied?' copied':''}`} onClick={copy} title="Kopiuj do schowka">{copied ? '✅' : '📋'}</button>;
+}
+
 /* ───── Main App ───── */
 const pm = typeof ProgressManager !== 'undefined' ? new ProgressManager() : null;
 
@@ -865,7 +871,7 @@ function App() {
           {step && (!layerDone || showNextConfirm) && (
             <div className="instruction-box" style={{background:"#f7768e08",border:"2px solid #f7768e22"}} data-testid="instruction">
               <div className="text">🎯 {step.instruction}</div>
-              <code>{step.command}</code>
+              <div className="code-row"><code>{step.command}</code><CopyCode text={step.command}/></div>
             </div>
           )}
           <Terminal agent={agent} step={(layerDone && !showNextConfirm) ? null : step} onSuccess={onSuccess} showNextConfirm={showNextConfirm} confirmReady={confirmReady} proceedToNext={proceedToNext} layerDone={layerDone} nextLayer={nextLayer}/>

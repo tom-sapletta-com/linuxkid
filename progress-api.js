@@ -55,7 +55,24 @@ db.exec(`
     UNIQUE(mission_id, step_key)
   );
 
+  CREATE TABLE IF NOT EXISTS logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ts TEXT DEFAULT (datetime('now')),
+    level TEXT NOT NULL CHECK(level IN ('info','warn','error','debug')),
+    mission_id TEXT,
+    event TEXT NOT NULL,
+    data TEXT
+  );
+
+  CREATE TABLE IF NOT EXISTS config (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL,
+    updated_at TEXT DEFAULT (datetime('now'))
+  );
+
   CREATE INDEX IF NOT EXISTS idx_steps_mission ON steps(mission_id);
+  CREATE INDEX IF NOT EXISTS idx_logs_ts ON logs(ts);
+  CREATE INDEX IF NOT EXISTS idx_logs_mission ON logs(mission_id);
 `);
 
 // Ensure all missions exist
@@ -74,7 +91,21 @@ const stmts = {
   countSteps: db.prepare('SELECT COUNT(*) as cnt FROM steps WHERE mission_id = ?'),
   deleteSteps: db.prepare('DELETE FROM steps'),
   resetMissions: db.prepare('UPDATE missions SET complete = 0, total_steps = 0, completed_at = NULL'),
+  insertLog: db.prepare('INSERT INTO logs (level, mission_id, event, data) VALUES (?, ?, ?, ?)'),
+  getLogs: db.prepare('SELECT * FROM logs ORDER BY ts DESC LIMIT ?'),
+  getLogsByMission: db.prepare('SELECT * FROM logs WHERE mission_id = ? ORDER BY ts DESC LIMIT ?'),
+  getLogsByLevel: db.prepare("SELECT * FROM logs WHERE level = ? ORDER BY ts DESC LIMIT ?"),
+  deleteLogs: db.prepare('DELETE FROM logs'),
+  getConfig: db.prepare('SELECT * FROM config WHERE key = ?'),
+  getAllConfig: db.prepare('SELECT * FROM config ORDER BY key'),
+  setConfig: db.prepare("INSERT INTO config (key, value, updated_at) VALUES (?, ?, datetime('now')) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = datetime('now')"),
+  deleteConfig: db.prepare('DELETE FROM config WHERE key = ?'),
 };
+
+// Internal log helper
+function log(level, event, missionId = null, data = null) {
+  stmts.insertLog.run(level, missionId, event, data ? JSON.stringify(data) : null);
+}
 
 // ─── Routes ───
 
@@ -147,6 +178,85 @@ app.get('/api/progress/export', (req, res) => {
       completedSteps: cnt,
       steps,
     };
+  });
+  res.json(data);
+});
+
+// ─── Logging Routes ───
+
+// Write a log entry
+app.post('/api/logs', (req, res) => {
+  const { level = 'info', event, missionId = null, data = null } = req.body;
+  if (!event) return res.status(400).json({ error: 'event required' });
+  stmts.insertLog.run(level, missionId, event, data ? JSON.stringify(data) : null);
+  res.json({ ok: true });
+});
+
+// Get logs (optionally filtered)
+app.get('/api/logs', (req, res) => {
+  const limit = parseInt(req.query.limit) || 200;
+  const { mission, level } = req.query;
+  let rows;
+  if (mission) rows = stmts.getLogsByMission.all(mission, limit);
+  else if (level) rows = stmts.getLogsByLevel.all(level, limit);
+  else rows = stmts.getLogs.all(limit);
+  res.json({ logs: rows });
+});
+
+// Clear logs
+app.delete('/api/logs', (req, res) => {
+  stmts.deleteLogs.run();
+  res.json({ ok: true });
+});
+
+// ─── Config Routes ───
+
+// Get all config
+app.get('/api/config', (req, res) => {
+  const rows = stmts.getAllConfig.all();
+  const config = {};
+  rows.forEach(r => { try { config[r.key] = JSON.parse(r.value); } catch { config[r.key] = r.value; } });
+  res.json({ config, rows });
+});
+
+// Get single config key
+app.get('/api/config/:key', (req, res) => {
+  const row = stmts.getConfig.get(req.params.key);
+  if (!row) return res.status(404).json({ error: 'Key not found' });
+  res.json({ key: row.key, value: row.value, updatedAt: row.updated_at });
+});
+
+// Set config key
+app.post('/api/config/:key', (req, res) => {
+  const { value } = req.body;
+  if (value === undefined) return res.status(400).json({ error: 'value required' });
+  stmts.setConfig.run(req.params.key, typeof value === 'string' ? value : JSON.stringify(value));
+  log('info', 'config.set', null, { key: req.params.key });
+  res.json({ ok: true });
+});
+
+// Delete config key
+app.delete('/api/config/:key', (req, res) => {
+  stmts.deleteConfig.run(req.params.key);
+  res.json({ ok: true });
+});
+
+// ─── Diagnostics / Export ───
+
+// Full diagnostic export (JSON)
+app.get('/api/diagnostics', (req, res) => {
+  const data = {
+    generatedAt: new Date().toISOString(),
+    dbPath: DB_PATH,
+    missions: {},
+    logs: stmts.getLogs.all(500),
+    config: stmts.getAllConfig.all(),
+  };
+  MISSION_IDS.forEach(id => {
+    const mission = stmts.getMission.get(id);
+    const steps = stmts.getSteps.all(id).map(r => r.step_key);
+    const { cnt } = stmts.countSteps.get(id);
+    data.missions[id] = { complete: !!mission?.complete, totalSteps: mission?.total_steps || 0, completedSteps: cnt, steps };
   });
   res.json(data);
 });

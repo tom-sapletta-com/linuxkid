@@ -1,7 +1,7 @@
 FROM nginx:alpine
 
 # Copy static site to nginx default root
-COPY index.html style.css progress.js /usr/share/nginx/html/
+COPY index.html style.css progress.js i18n.js config.html /usr/share/nginx/html/
 COPY przylot/ /usr/share/nginx/html/przylot/
 COPY cyberquest/ /usr/share/nginx/html/cyberquest/
 COPY serwer/ /usr/share/nginx/html/serwer/

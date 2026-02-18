@@ -7,6 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="style.css"/>
   <script src="progress.js"></script>
+  <script src="i18n.js"></script>
 </head>
 <body>
   <div class="hub">
@@ -27,7 +28,8 @@
     </div>
 
     <div class="footer-hub">
-      <p>Planeta X – Akademia Młodego Odkrywcy &nbsp;·&nbsp; <a href="https://github.com/tom-sapletta-com/linuxkid">GitHub</a> &nbsp;·&nbsp; Autor: <a href="mailto:tom@sapletta.com">Tom Sapletta</a></p>
+      <p>Planeta X – Akademia Młodego Odkrywcy &nbsp;·&nbsp; <a href="https://github.com/tom-sapletta-com/linuxkid">GitHub</a> &nbsp;·&nbsp; Autor: <a href="mailto:tom@sapletta.com">Tom Sapletta</a> &nbsp;·&nbsp; <a href="config.html">🔧 Diagnostyka</a></p>
+      <div id="lang-bar" style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;"></div>
     </div>
 
   </div>
@@ -159,8 +161,24 @@
       });
     }
 
+    function renderLangBar() {
+      const bar = document.getElementById('lang-bar');
+      if (!bar || typeof PlanetaI18n === 'undefined') return;
+      const langs = PlanetaI18n.getLanguages();
+      const current = PlanetaI18n.getLang();
+      bar.innerHTML = Object.entries(langs).map(([code, info]) =>
+        `<button onclick="setLang('${code}')" style="background:${code===current?'#7aa2f722':'transparent'};border:1px solid ${code===current?'#7aa2f744':'#1e2030'};border-radius:8px;padding:4px 10px;cursor:pointer;font-size:13px;color:${code===current?'#7aa2f7':'#7982a9'};font-family:inherit;">${info.flag} ${info.name}</button>`
+      ).join('');
+    }
+
+    function setLang(code) {
+      if (typeof PlanetaI18n !== 'undefined') { PlanetaI18n.setLang(code); }
+      renderLangBar();
+    }
+
     renderMissions();
     renderSkills();
+    renderLangBar();
   </script>
 </body>
 </html>
