@@ -36,7 +36,11 @@ button { -webkit-tap-highlight-color: transparent; }
 
 .instruction-box { border-radius:14px; padding:16px; margin-bottom:16px; }
 .instruction-box .text { font-size:17px; font-weight:700; color:#c0caf5; margin-bottom:8px; line-height:1.5; }
-.instruction-box code { display:inline-block; background:#0c0e14; color:#f7768e; padding:8px 16px; border-radius:10px; font-family:'JetBrains Mono',monospace; font-size:16px; border:2px solid #1a1c2e; word-break:break-all; }
+.instruction-box .code-row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.instruction-box code { display:inline-block; background:#0c0e14; color:#f7768e; padding:8px 16px; border-radius:10px; font-family:'JetBrains Mono',monospace; font-size:16px; border:2px solid #1a1c2e; word-break:break-all; flex:1; min-width:0; }
+.copy-code-btn { background:#ffffff22; color:#c0caf5; border:1px solid #ffffff33; border-radius:8px; padding:6px 10px; cursor:pointer; font-size:16px; flex-shrink:0; transition:background 0.2s; }
+.copy-code-btn:hover { background:#ffffff33; }
+.copy-code-btn.copied { background:#73daca22; color:#73daca; border-color:#73daca44; }
 
 .celebrate { border-radius:16px; padding:24px; margin-bottom:16px; text-align:center; }
 .celebrate .icon { font-size:56px; }

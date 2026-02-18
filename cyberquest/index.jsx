@@ -707,6 +707,7 @@ function App() {
   const nextLayer = () => {
     if (lai < lesson.layers.length - 1) { setLAI(lai + 1); setSI(0); updateURL(li, lai + 1, 0); }
     else if (li < LESSONS.length - 1) { setLI(li + 1); setLAI(0); setSI(0); updateURL(li + 1, 0, 0); }
+    else { window.location.href = '../index.html'; }
   };
 
   const onSuccess = () => {

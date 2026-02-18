@@ -13,8 +13,8 @@ const LESSONS = [
         title: "Instalacja Nginx",
         category: "server",
         categoryLabel: "🏛️ Serwer WWW",
-        description: "Każde miasto potrzebuje budynku użyteczności publicznej – miejsca, gdzie goście mogą przyjść i coś załatwić. Serwer WWW to taki budynek w internecie.",
-        analogy: "🏛️ Serwer WWW = budynek użyteczności publicznej.\nNginx = recepcjonista, który wita gości i kieruje ich do właściwych pokoi.\nKażdy budynek ma adres (IP) i okienka (porty).",
+        description: "Każde miasto potrzebuje sklepu – miejsca, gdzie ludzie mogą przyjść i coś zobaczyć. Serwer WWW to taki sklep w internecie.",
+        analogy: "🏪 Serwer WWW = sklep w internecie.\nNginx = sprzedawca za ladą, który obsługuje klientów.\nKażdy sklep ma adres (IP) i okienka kas (porty).",
         steps: [
           {
             instruction: "Zaktualizuj listę dostępnych paczek:",
@@ -77,8 +77,8 @@ const LESSONS = [
         title: "Jak działa DNS",
         category: "network",
         categoryLabel: "🌐 Sieć",
-        description: "Ludzie nie pamiętają numerów IP – tak jak nie pamiętają numerów telefonów. DNS to książka adresowa internetu.",
-        analogy: "📚 DNS = książka adresowa wszechświata.\nZamiast pamiętać 192.168.1.100, mówisz 'planetax.galaktyka' – DNS tłumaczy nazwę na numer.",
+        description: "Ludzie nie pamiętają numerów IP – tak jak nie pamiętają numerów telefonów. DNS to lista kontaktów w telefonie.",
+        analogy: "📱 DNS = lista kontaktów w telefonie.\nZamiast wpisywać numer 192.168.1.100, szukasz 'Planeta X' w kontaktach – telefon sam wybiera numer.",
         steps: [
           {
             instruction: "Sprawdź jaki adres IP ma domena google.com:",
@@ -252,17 +252,17 @@ function ServerMap() {
 /* ───── Glossary ───── */
 function GlossaryCard() {
   const items = [
-    ["🏛️","Serwer WWW","Budynek użyteczności publicznej"],
-    ["🚪","Nginx","Recepcjonista w budynku"],
-    ["🔓","Port 80","Wejście główne (HTTP)"],
-    ["🔒","Port 443","Wejście z bramką (HTTPS)"],
-    ["🪪","Certyfikat SSL","Dowód tożsamości budynku"],
-    ["📚","DNS","Książka adresowa internetu"],
-    ["📄","HTML","Plakat w witrynie"],
-    ["📁","/var/www/html","Witryna budynku"],
+    ["🏪","Serwer WWW","Sklep w internecie"],
+    ["🧑‍💼","Nginx","Sprzedawca za ladą"],
+    ["🔓","Port 80","Kasa główna (HTTP)"],
+    ["🔒","Port 443","Kasa z sejfem (HTTPS)"],
+    ["🪪","Certyfikat SSL","Dowód tożsamości sklepu"],
+    ["📱","DNS","Lista kontaktów w telefonie"],
+    ["📄","HTML","Plakat w witrynie sklepu"],
+    ["📁","/var/www/html","Witryna sklepu"],
     ["🔧","systemctl","Włącznik usług"],
     ["📦","apt","Sklep z narzędziami"],
-    ["🌐","curl","Wysyłasz gościa do budynku"],
+    ["🌐","curl","Wysyłasz klienta do sklepu"],
     ["🛠️","Certbot","Urzędnik od certyfikatów"],
   ];
   return (
@@ -337,6 +337,7 @@ function App() {
   const nextLayer = () => {
     if (lai < lesson.layers.length - 1) { setLAI(lai + 1); setSI(0); updateURL(li, lai + 1, 0); }
     else if (li < LESSONS.length - 1) { setLI(li + 1); setLAI(0); setSI(0); updateURL(li + 1, 0, 0); }
+    else { window.location.href = '../index.html'; }
   };
 
   const onSuccess = () => {

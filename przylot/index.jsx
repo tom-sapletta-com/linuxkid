@@ -402,11 +402,11 @@ const LESSONS = [
       },
       {
         id: "auth",
-        title: "Prawo jazdy i szlaban",
+        title: "Legitymacja i karta wstępu",
         category: "security",
         categoryLabel: "🔑 Bezpieczeństwo",
-        description: "Autentykacja = pokazujesz prawo jazdy (kim jesteś). Autoryzacja = czy szlaban Cię wpuści (co możesz robić).",
-        analogy: "🪪 Autentykacja = pokazanie prawa jazdy.\n✅ Autoryzacja = sprawdzenie, czy masz pozwolenie na wjazd.",
+        description: "Autentykacja = pokazujesz legitymację (kim jesteś). Autoryzacja = czy karta wstępu Cię wpuści (co możesz robić).",
+        analogy: "🪪 Autentykacja = pokazanie legitymacji szkolnej (kim jesteś).\n✅ Autoryzacja = karta do biblioteki (co możesz wypożyczyć).",
         steps: [
           {
             instruction: "Spróbuj wjechać do strefy zamkniętej:",
@@ -600,6 +600,14 @@ function AnalogyCard(){
   );
 }
 
+function CopyCode({ text }) {
+  const [copied, setCopied] = React.useState(false);
+  const copy = () => {
+    navigator.clipboard?.writeText(text).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500); });
+  };
+  return <button className={`copy-code-btn${copied?' copied':''}`} onClick={copy} title="Kopiuj do schowka">{copied ? '✅' : '📋'}</button>;
+}
+
 const pm = typeof ProgressManager !== 'undefined' ? new ProgressManager() : null;
 
 function App(){
@@ -699,6 +707,8 @@ function App(){
     }else if(li<LESSONS.length-1){
       setLI(li+1);setLAI(0);setSI(0);
       updateURL(li+1, 0, 0);
+    }else{
+      window.location.href='../index.html';
     }
   };
 
@@ -863,7 +873,7 @@ function App(){
           {step&&(!layerDone||showNextConfirm)&&(
             <div className="instruction-box" style={{background:"#7aa2f708",border:"2px solid #7aa2f722"}} data-testid="instruction">
               <div className="text">👉 {step.instruction}</div>
-              <code>{step.command}</code>
+              <div className="code-row"><code>{step.command}</code><CopyCode text={step.command}/></div>
             </div>
           )}
           <Terminal pc={pc} step={(layerDone&&!showNextConfirm)?null:step} onSuccess={onSuccess} aliases={aliases} showNextConfirm={showNextConfirm} confirmReady={confirmReady} proceedToNext={proceedToNext} layerDone={layerDone} nextLayer={nextLayer}/>

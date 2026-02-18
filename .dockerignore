@@ -1,0 +1,6 @@
+node_modules/
+test-results/
+.git/
+.idea/
+*.db
+progress.db
