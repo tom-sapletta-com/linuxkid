@@ -1,3 +1,14 @@
+## [1.0.13] - 2026-02-18
+
+### Summary
+
+feat(tests): improved test coverage
+
+### Other
+
+- update electron/test/planetax-desktop.test.js
+
+
 ## [1.0.12] - 2026-02-18
 
 ### Summary
