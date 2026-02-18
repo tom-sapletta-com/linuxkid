@@ -202,6 +202,178 @@
     }
   };
 
+  /* ── Bash syntax colorizer ── */
+  var BASH_KEYWORDS = /^(if|then|else|elif|fi|for|do|done|while|until|case|esac|in|function|select|return|exit)$/;
+  var BASH_BUILTINS = /^(echo|cd|pwd|export|source|alias|unalias|set|unset|read|printf|test|eval|exec|trap|shift|wait|kill|true|false|type|hash|help|let|local|declare|readonly|getopts|umask|ulimit|enable|shopt|bind|builtin|caller|complete|compgen|compopt|dirs|disown|fc|history|jobs|logout|mapfile|popd|pushd|readarray|suspend|times|typeset)$/;
+
+  function colorizeBash(cmd) {
+    if (!cmd) return '';
+    var lines = cmd.split('\n');
+    return lines.map(function(line) {
+      /* Comment lines */
+      if (/^\s*#/.test(line)) {
+        return '<span class="sh-comment">' + escHtml(line) + '</span>';
+      }
+      var result = '';
+      var i = 0;
+      var isFirstWord = true;
+      var afterPipe = false;
+
+      while (i < line.length) {
+        /* Whitespace */
+        if (line[i] === ' ' || line[i] === '\t') {
+          result += line[i];
+          i++;
+          continue;
+        }
+        /* Inline comment */
+        if (line[i] === '#' && (i === 0 || line[i-1] === ' ')) {
+          result += '<span class="sh-comment">' + escHtml(line.slice(i)) + '</span>';
+          break;
+        }
+        /* Single-quoted string */
+        if (line[i] === "'") {
+          var end = line.indexOf("'", i + 1);
+          if (end === -1) end = line.length - 1;
+          var s = line.slice(i, end + 1);
+          result += '<span class="sh-string">' + escHtml(s) + '</span>';
+          i = end + 1;
+          isFirstWord = false;
+          continue;
+        }
+        /* Double-quoted string */
+        if (line[i] === '"') {
+          var j = i + 1;
+          while (j < line.length && line[j] !== '"') {
+            if (line[j] === '\\') j++;
+            j++;
+          }
+          var s2 = line.slice(i, j + 1);
+          /* Colorize variables inside double-quoted strings */
+          var inner = escHtml(s2);
+          inner = inner.replace(/(\$\{[^}]+\}|\$\([^)]+\)|\$[A-Za-z_][A-Za-z0-9_]*)/g,
+            '<span class="sh-variable">$1</span>');
+          result += '<span class="sh-string">' + inner + '</span>';
+          i = j + 1;
+          isFirstWord = false;
+          continue;
+        }
+        /* Variable */
+        if (line[i] === '$') {
+          var vMatch = line.slice(i).match(/^(\$\{[^}]+\}|\$\([^)]+\)|\$[A-Za-z_][A-Za-z0-9_]*|\$[0-9]|\$[?!#@*-])/);
+          if (vMatch) {
+            result += '<span class="sh-variable">' + escHtml(vMatch[1]) + '</span>';
+            i += vMatch[1].length;
+            isFirstWord = false;
+            continue;
+          }
+        }
+        /* Operators: |, ||, &&, >, >>, <, <<, ;, =, 2>, 2>> */
+        var opMatch = line.slice(i).match(/^(2>>|2>|>>|<<|&&|\|\||[|><;=])/);
+        if (opMatch) {
+          result += '<span class="sh-operator">' + escHtml(opMatch[1]) + '</span>';
+          i += opMatch[1].length;
+          /* After = don't reset first word (it's assignment value, not a command) */
+          if (opMatch[1] !== '=') {
+            isFirstWord = true;
+            afterPipe = true;
+          }
+          continue;
+        }
+        /* Word token */
+        var wMatch = line.slice(i).match(/^[^\s'"$|><;=&]+/);
+        if (wMatch) {
+          var word = wMatch[0];
+          var cls = '';
+          if (isFirstWord || afterPipe) {
+            if (BASH_KEYWORDS.test(word)) {
+              cls = 'sh-keyword';
+            } else {
+              cls = 'sh-command';
+            }
+            isFirstWord = false;
+            afterPipe = false;
+          } else if (BASH_KEYWORDS.test(word)) {
+            cls = 'sh-keyword';
+          } else if (/^-/.test(word)) {
+            cls = 'sh-flag';
+          } else if ((/[\/~]/.test(word) && word.length > 1) || /\.(sh|txt|py|html|css|js|json|yml|yaml|conf|log|pem|pub|gpg|cfg|md|xml|env|bashrc|profile|dockerfile|gitignore)$/i.test(word) || /^(\/|~\/|\.\/)/.test(word)) {
+            cls = 'sh-path';
+          } else if (BASH_BUILTINS.test(word)) {
+            cls = 'sh-command';
+          } else {
+            cls = 'sh-argument';
+          }
+          result += '<span class="' + cls + '">' + escHtml(word) + '</span>';
+          i += word.length;
+          continue;
+        }
+        /* Fallback: single char */
+        result += escHtml(line[i]);
+        i++;
+      }
+      return result;
+    }).join('\n');
+  }
+
+  /* ── Inject colorizer CSS ── */
+  var colorizerStyleInjected = false;
+  function injectColorizerStyles() {
+    if (colorizerStyleInjected) return;
+    colorizerStyleInjected = true;
+    var css = `
+.sh-command  { color: #bb9af7; font-weight: 600; }
+.sh-path     { color: #9ece6a; }
+.sh-flag     { color: #ff9e64; }
+.sh-argument { color: #7aa2f7; }
+.sh-operator { color: #f7768e; font-weight: 600; }
+.sh-string   { color: #e0af68; }
+.sh-variable { color: #73daca; font-weight: 600; }
+.sh-keyword  { color: #f7768e; font-weight: 600; }
+.sh-comment  { color: #5a6082; font-style: italic; }
+.code-legend { display:flex; flex-wrap:wrap; gap:6px 10px; margin-top:10px; padding:8px 12px; background:#0a0b1099; border:1px solid #1e2030; border-radius:10px; }
+.code-legend-item { display:flex; align-items:center; gap:4px; font-size:11px; color:#7982a9; }
+.code-legend-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+`;
+    var el = document.createElement("style");
+    el.textContent = css;
+    document.head.appendChild(el);
+  }
+
+  /* ── Public: colorize a bash command string → HTML ── */
+  window.colorizeBash = function(cmd) {
+    injectColorizerStyles();
+    return colorizeBash(cmd);
+  };
+
+  /* ── React component: <ColorizedCode text="..." /> ── */
+  window.ColorizedCode = function ColorizedCode(props) {
+    injectColorizerStyles();
+    var html = colorizeBash(props.text || '');
+    return React.createElement("code", {
+      dangerouslySetInnerHTML: { __html: html },
+      onCopy: function(e) {
+        /* Ensure plain text on manual copy */
+        e.preventDefault();
+        var sel = window.getSelection();
+        var plain = sel ? sel.toString() : props.text || '';
+        (e.clipboardData || e.originalEvent.clipboardData).setData('text/plain', plain);
+      }
+    });
+  };
+
+  /* ── React component: <CodeLegend /> ── */
+  window.CodeLegend = function CodeLegend() {
+    injectColorizerStyles();
+    var items = Object.keys(TOKEN_COLORS).map(function(type) {
+      return React.createElement("span", { className: "code-legend-item", key: type },
+        React.createElement("span", { className: "code-legend-dot", style: { background: TOKEN_COLORS[type] } }),
+        React.createElement("span", null, TOKEN_LABELS[type] || type)
+      );
+    });
+    return React.createElement("div", { className: "code-legend" }, items);
+  };
+
   /* ── React component factory ── */
   window.ExplainButton = function ExplainButton(props) {
     if (!props.explain || !props.explain.length) return null;

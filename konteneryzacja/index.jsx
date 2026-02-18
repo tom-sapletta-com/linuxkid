@@ -20,18 +20,27 @@ const LESSONS = [
             command: "docker --version",
             expectedOutput: () => `Docker version 24.0.7, build afdd53b`,
             tip: "🐳 Docker to narzędzie do tworzenia i zarządzania plecakami (kontenerami). Wersja potwierdza, że jest gotowy!",
+            explain: [
+              { code: "docker --version", area: "docker", tokens: [{type:"command",text:"docker"},{text:" "},{type:"flag",text:"--version"}], explain: "Sprawdź wersję Dockera – czy jest zainstalowany i gotowy", effect: "Wyświetla numer wersji Dockera", link: {url:"https://docs.docker.com/get-started/", label:"Docker – dokumentacja"} },
+            ],
           },
           {
             instruction: "Pobierz gotowy plecak (obraz) z Dockera:",
             command: "docker pull hello-world",
             expectedOutput: () => `Using default tag: latest\nlatest: Pulling from library/hello-world\n2db29710123e: Pull complete\nDigest: sha256:2498fce14358aa50ead0cc6c19990fc6ff866ce72aeb5546e1d59caac3d0d60f\nStatus: Downloaded newer image for hello-world:latest`,
             tip: "📦 docker pull = pobierasz gotowy plecak z internetu (Docker Hub). Ktoś go już spakował za Ciebie!",
+            explain: [
+              { code: "docker pull hello-world", area: "docker", tokens: [{type:"command",text:"docker"},{text:" "},{type:"command",text:"pull"},{text:" "},{type:"argument",text:"hello-world"}], explain: "Pobierz obraz (gotowy plecak) o nazwie hello-world z Docker Hub", effect: "Pobiera obraz na dysk lokalny", link: {url:"https://hub.docker.com/_/hello-world", label:"hello-world – Docker Hub"} },
+            ],
           },
           {
             instruction: "Uruchom kontener z pobranego obrazu:",
             command: "docker run hello-world",
             expectedOutput: () => `Hello from Docker!\nThis message shows that your installation appears to be working correctly.\n\nTo generate this message, Docker took the following steps:\n 1. The Docker client contacted the Docker daemon.\n 2. The Docker daemon pulled the "hello-world" image.\n 3. The Docker daemon created a new container.\n 4. The Docker daemon streamed that output to the Docker client.`,
             tip: "🚀 docker run = otwierasz plecak i uruchamiasz to, co jest w środku. Kontener żyje tylko tak długo, jak potrzeba!",
+            explain: [
+              { code: "docker run hello-world", area: "docker", tokens: [{type:"command",text:"docker"},{text:" "},{type:"command",text:"run"},{text:" "},{type:"argument",text:"hello-world"}], explain: "Stwórz kontener z obrazu hello-world i uruchom go", effect: "Tworzy nowy kontener, uruchamia program w środku, wyświetla wynik" },
+            ],
           },
         ],
       },
@@ -48,18 +57,29 @@ const LESSONS = [
             command: "docker run -d --name moj-serwer -p 8080:80 nginx",
             expectedOutput: () => `a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef12345678`,
             tip: "📱 -d = uruchom w tle. --name = nadaj nazwę. -p 8080:80 = przekieruj okienko 8080 na 80 wewnątrz kontenera.",
+            explain: [
+              { code: "docker run -d --name moj-serwer -p 8080:80 nginx", area: "docker", tokens: [{type:"command",text:"docker"},{text:" "},{type:"command",text:"run"},{text:" "},{type:"flag",text:"-d"},{text:" "},{type:"flag",text:"--name"},{text:" "},{type:"argument",text:"moj-serwer"},{text:" "},{type:"flag",text:"-p"},{text:" "},{type:"argument",text:"8080:80"},{text:" "},{type:"argument",text:"nginx"}], explain: "-d = w tle. --name = nazwa kontenera. -p 8080:80 = port zewnętrzny:wewnętrzny. nginx = obraz.", effect: "Uruchamia serwer Nginx dostępny na http://localhost:8080" },
+            ],
           },
           {
             instruction: "Zobacz, jakie kontenery działają (otwarte aplikacje):",
             command: "docker ps",
             expectedOutput: () => `CONTAINER ID   IMAGE   COMMAND                  STATUS          PORTS                  NAMES\na1b2c3d4e5f6   nginx   "/docker-entrypoint.…"   Up 2 minutes    0.0.0.0:8080->80/tcp   moj-serwer`,
             tip: "📋 docker ps = 'pokaż otwarte aplikacje'. Twój serwer Nginx działa i jest dostępny na porcie 8080!",
+            explain: [
+              { code: "docker ps", area: "docker", tokens: [{type:"command",text:"docker"},{text:" "},{type:"command",text:"ps"}], explain: "Pokaż listę działających kontenerów (jak lista otwartych aplikacji)", effect: "Wyświetla ID, obraz, status, porty i nazwę każdego kontenera" },
+            ],
           },
           {
             instruction: "Zatrzymaj i usuń kontener:",
             command: "docker stop moj-serwer && docker rm moj-serwer",
             expectedOutput: () => `moj-serwer\nmoj-serwer`,
             tip: "🛑 stop = zamknij. rm = odinstaluj. Kontener zniknął, ale obraz (plecak) nadal jest na dysku – możesz go uruchomić ponownie.",
+            explain: [
+              { code: "docker stop moj-serwer", area: "docker", tokens: [{type:"command",text:"docker"},{text:" "},{type:"command",text:"stop"},{text:" "},{type:"argument",text:"moj-serwer"}], explain: "Zatrzymaj kontener o nazwie moj-serwer", effect: "Kontener przestaje działać" },
+              { code: "&&", area: "shell", tokens: [{type:"operator",text:"&&"}], explain: "Jeśli się udało, wykonaj następną komendę" },
+              { code: "docker rm moj-serwer", area: "docker", tokens: [{type:"command",text:"docker"},{text:" "},{type:"command",text:"rm"},{text:" "},{type:"argument",text:"moj-serwer"}], explain: "Usuń kontener (obraz zostaje na dysku)", effect: "Kontener usunięty z listy" },
+            ],
           },
         ],
       },
@@ -84,6 +104,9 @@ const LESSONS = [
             command: 'echo "<h1>🪐 Planeta X w kontenerze!</h1>" > index.html',
             expectedOutput: () => ``,
             tip: "📄 To będzie treść naszej strony – plakat, który umieścimy w plecaku.",
+            explain: [
+              { code: 'echo "<h1>...</h1>" > index.html', area: "filesystem", tokens: [{type:"command",text:"echo"},{text:" "},{type:"string",text:'"<h1>🪐 Planeta X w kontenerze!</h1>"'},{text:" "},{type:"operator",text:">"},{text:" "},{type:"path",text:"index.html"}], explain: "Stwórz plik index.html z treścią strony WWW", effect: "Tworzy plik HTML w bieżącym folderze" },
+            ],
           },
           {
             instruction: "Napisz przepis na plecak (Dockerfile):",
@@ -94,18 +117,30 @@ EXPOSE 80
 EOF`,
             expectedOutput: () => ``,
             tip: "📝 FROM = bazowy plecak (nginx). COPY = włóż stronę do środka. EXPOSE = otwórz okienko 80.",
+            explain: [
+              { code: "cat << 'EOF' > Dockerfile", area: "shell", tokens: [{type:"command",text:"cat"},{text:" "},{type:"operator",text:"<< 'EOF'"},{text:" "},{type:"operator",text:">"},{text:" "},{type:"path",text:"Dockerfile"}], explain: "Zapisz przepis na obraz do pliku Dockerfile" },
+              { code: "FROM nginx:alpine", area: "docker", tokens: [{type:"keyword",text:"FROM"},{text:" "},{type:"argument",text:"nginx:alpine"}], explain: "Weź bazowy obraz nginx (lekka wersja alpine)", effect: "Bazowy plecak z serwerem Nginx", link: {url:"https://docs.docker.com/reference/dockerfile/#from", label:"FROM – Dockerfile"} },
+              { code: "COPY index.html /usr/share/nginx/html/", area: "docker", tokens: [{type:"keyword",text:"COPY"},{text:" "},{type:"path",text:"index.html"},{text:" "},{type:"path",text:"/usr/share/nginx/html/"}], explain: "Skopiuj naszą stronę do folderu, z którego Nginx ją serwuje", effect: "Plik index.html trafia do obrazu" },
+              { code: "EXPOSE 80", area: "docker", tokens: [{type:"keyword",text:"EXPOSE"},{text:" "},{type:"argument",text:"80"}], explain: "Informacja: kontener używa portu 80", effect: "Dokumentuje port – nie otwiera go automatycznie" },
+            ],
           },
           {
             instruction: "Zbuduj obraz z przepisu:",
             command: "docker build -t planeta-x-web .",
             expectedOutput: () => `[+] Building 2.1s (7/7) FINISHED\n => [1/2] FROM nginx:alpine\n => [2/2] COPY index.html /usr/share/nginx/html/\n => exporting to image\n => => naming to docker.io/library/planeta-x-web`,
             tip: "🏗️ docker build = pakujesz plecak według przepisu. -t = nadajesz mu nazwę. Kropka = 'szukaj Dockerfile tutaj'.",
+            explain: [
+              { code: "docker build -t planeta-x-web .", area: "docker", tokens: [{type:"command",text:"docker"},{text:" "},{type:"command",text:"build"},{text:" "},{type:"flag",text:"-t"},{text:" "},{type:"argument",text:"planeta-x-web"},{text:" "},{type:"path",text:"."}], explain: "build = zbuduj obraz. -t = nadaj nazwę. . = szukaj Dockerfile w bieżącym folderze.", effect: "Tworzy obraz Docker z Dockerfile" },
+            ],
           },
           {
             instruction: "Uruchom swój obraz!",
             command: "docker run -d --name planetax -p 3000:80 planeta-x-web",
             expectedOutput: () => `b2c3d4e5f6a789012345678901234567890abcdef`,
             tip: "🚀 Twoja strona Planety X działa w kontenerze na porcie 3000! Otwórz http://localhost:3000 w przeglądarce.",
+            explain: [
+              { code: "docker run -d --name planetax -p 3000:80 planeta-x-web", area: "docker", tokens: [{type:"command",text:"docker"},{text:" "},{type:"command",text:"run"},{text:" "},{type:"flag",text:"-d"},{text:" "},{type:"flag",text:"--name"},{text:" "},{type:"argument",text:"planetax"},{text:" "},{type:"flag",text:"-p"},{text:" "},{type:"argument",text:"3000:80"},{text:" "},{type:"argument",text:"planeta-x-web"}], explain: "Uruchom nasz obraz w tle. Port 3000 na komputerze → port 80 w kontenerze.", effect: "Strona dostępna na http://localhost:3000" },
+            ],
           },
         ],
       },
@@ -138,24 +173,39 @@ services:
 EOF`,
             expectedOutput: () => ``,
             tip: "🎼 web = pierwszy muzyk (serwer Nginx). redis = drugi muzyk (baza danych). Razem tworzą orkiestrę!",
+            explain: [
+              { code: "cat << 'EOF' > docker-compose.yml", area: "shell", tokens: [{type:"command",text:"cat"},{text:" "},{type:"operator",text:"<< 'EOF'"},{text:" "},{type:"operator",text:">"},{text:" "},{type:"path",text:"docker-compose.yml"}], explain: "Zapisz partyturę orkiestry do pliku YAML" },
+              { code: "services:", area: "docker", tokens: [{type:"keyword",text:"services:"}], explain: "Lista muzyków (kontenerów) w orkiestrze" },
+              { code: "  web: / image: nginx:alpine / ports: 8080:80", area: "docker", tokens: [{type:"variable",text:"web"},{text:": "},{type:"argument",text:"nginx:alpine"},{text:", port "},{type:"argument",text:"8080:80"}], explain: "Pierwszy muzyk: serwer Nginx na porcie 8080" },
+              { code: "  redis: / image: redis:alpine", area: "docker", tokens: [{type:"variable",text:"redis"},{text:": "},{type:"argument",text:"redis:alpine"}], explain: "Drugi muzyk: baza danych Redis" },
+            ],
           },
           {
             instruction: "Uruchom całą orkiestrę jednym poleceniem:",
             command: "docker compose up -d",
             expectedOutput: () => `[+] Running 2/2\n ✔ Container web-1    Started\n ✔ Container redis-1  Started`,
             tip: "🎵 up -d = 'dyrygent macha batutą, orkiestra zaczyna grać w tle'. Oba kontenery działają!",
+            explain: [
+              { code: "docker compose up -d", area: "docker", tokens: [{type:"command",text:"docker"},{text:" "},{type:"command",text:"compose"},{text:" "},{type:"command",text:"up"},{text:" "},{type:"flag",text:"-d"}], explain: "compose up = uruchom całą orkiestrę. -d = w tle (detached).", effect: "Uruchamia wszystkie kontenery z docker-compose.yml" },
+            ],
           },
           {
             instruction: "Sprawdź status orkiestry:",
             command: "docker compose ps",
             expectedOutput: () => `NAME        IMAGE          STATUS          PORTS\nweb-1       nginx:alpine   Up 30 seconds   0.0.0.0:8080->80/tcp\nredis-1     redis:alpine   Up 30 seconds   6379/tcp`,
             tip: "📋 Obaj muzycy grają! web na porcie 8080, redis na 6379. Orkiestra działa.",
+            explain: [
+              { code: "docker compose ps", area: "docker", tokens: [{type:"command",text:"docker"},{text:" "},{type:"command",text:"compose"},{text:" "},{type:"command",text:"ps"}], explain: "Pokaż status wszystkich kontenerów z orkiestry", effect: "Lista kontenerów z ich statusem i portami" },
+            ],
           },
           {
             instruction: "Zakończ koncert – zatrzymaj wszystko:",
             command: "docker compose down",
             expectedOutput: () => `[+] Running 2/2\n ✔ Container redis-1  Removed\n ✔ Container web-1    Removed`,
             tip: "🛑 down = 'koniec koncertu'. Wszystkie kontenery zatrzymane i usunięte. Partytura zostaje – możesz zagrać jeszcze raz!",
+            explain: [
+              { code: "docker compose down", area: "docker", tokens: [{type:"command",text:"docker"},{text:" "},{type:"command",text:"compose"},{text:" "},{type:"command",text:"down"}], explain: "Zatrzymaj i usuń wszystkie kontenery z orkiestry", effect: "Kontenery usunięte, plik docker-compose.yml zostaje" },
+            ],
           },
         ],
       },
@@ -250,11 +300,11 @@ function App() {
         <div className={`sidebar${menuOpen?" open":""}`}>{LESSONS.map((les,l)=>(<div key={les.id} style={{marginBottom:16}}><div className="lesson-title" style={{color:les.color}}>{les.icon} {les.title}</div>{les.layers.map((lay,la)=>{const active=l===li&&la===lai,allDone=lay.steps.every((_,s)=>done.has(`${l}-${la}-${s}`));return(<button key={lay.id} className="layer-btn" onClick={()=>goTo(l,la)} style={{background:active?`${les.color}18`:"transparent",border:active?`2px solid ${les.color}44`:"2px solid transparent",color:"#c0caf5"}}><div className="name">{allDone?"✅":active?"▶":"○"} {lay.title}</div><div className="count">{lay.steps.filter((_,s)=>done.has(`${l}-${la}-${s}`)).length}/{lay.steps.length}</div></button>);})}</div>))}</div>
         <div className="content">
           <div className="lesson-header" style={{background:`${lesson.color}08`,border:`2px solid ${lesson.color}22`}}><div className="cat" style={{color:lesson.color}}>{layer.categoryLabel}</div><h2>{layer.title}</h2><p className="desc">{layer.description}</p>{layer.analogy&&(<div className="analogy" style={{borderLeft:`4px solid ${lesson.color}`}}>{layer.analogy}</div>)}</div>
-          {step&&(!layerDone||showNextConfirm)&&(<div className="instruction-box" style={{background:`${lesson.color}08`,border:`2px solid ${lesson.color}22`}} data-testid="instruction"><div className="text">🐳 {step.instruction}</div><div className="code-row"><code>{step.command}</code><CopyCode text={step.command}/>{step.explain && <ExplainButton explain={step.explain} command={step.command}/>}</div></div>)}
+          {step&&(!layerDone||showNextConfirm)&&(<div className="instruction-box" style={{background:`${lesson.color}08`,border:`2px solid ${lesson.color}22`}} data-testid="instruction"><div className="text">🐳 {step.instruction}</div><div className="code-row"><ColorizedCode text={step.command}/><CopyCode text={step.command}/>{step.explain && <ExplainButton explain={step.explain} command={step.command}/>}</div></div>)}
           <Terminal step={step} onSuccess={onSuccess} showNextConfirm={showNextConfirm} confirmReady={confirmReady} proceedToNext={proceedToNext} layerDone={layerDone}/>
           {step?.tip&&(<div style={{background:`${lesson.color}08`,border:`2px solid ${lesson.color}22`,borderRadius:"14px",padding:"14px",marginTop:"16px"}}><div style={{fontSize:"14px",color:"#a9b1d6",lineHeight:"1.7"}}>{step.tip}</div></div>)}
         </div>
-        <div className="right-panel"><GlossaryCard/></div>
+        <div className="right-panel"><CodeLegend/><GlossaryCard/></div>
       </div>
     </div>
   );

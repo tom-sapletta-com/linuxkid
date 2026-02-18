@@ -60,24 +60,36 @@ const LESSONS = [
             command: "whoami",
             expectedOutput: (a) => a.user,
             tip: "🕵️ Twój pseudonim agenta. W cyberbezpieczeństwie zawsze musisz wiedzieć, na jakim koncie działasz!",
+            explain: [
+              { code: "whoami", area: "security", tokens: [{type:"command",text:"whoami"}], explain: "Pokaż nazwę zalogowanego użytkownika – Twoją tożsamość w systemie", effect: "Wyświetla nazwę użytkownika" },
+            ],
           },
           {
             instruction: "Pokaż pełną legitymację (UID, GID, oddziały):",
             command: "id",
             expectedOutput: (a) => `uid=1000(${a.user}) gid=1000(${a.user}) groups=1000(${a.user}),27(sudo),100(agenci)`,
             tip: "🆔 UID=Twój numer, GID=Twój oddział, groups=wszystkie oddziały. sudo = oddział specjalny!",
+            explain: [
+              { code: "id", area: "security", tokens: [{type:"command",text:"id"}], explain: "Pokaż pełną legitymację: UID (numer), GID (oddział), grupy", effect: "Wyświetla uprawnienia i przynależność do grup" },
+            ],
           },
           {
             instruction: "Kto jeszcze jest na służbie w systemie?",
             command: "who",
             expectedOutput: (a) => `${a.user}    pts/0    2026-02-18 10:30 (terminal)\nroot       pts/1    2026-02-18 09:00 (konsola)`,
             tip: "👀 Widzisz kto jest zalogowany. Jeśli widzisz kogoś podejrzanego – to może być intruz!",
+            explain: [
+              { code: "who", area: "security", tokens: [{type:"command",text:"who"}], explain: "Pokaż kto jest aktualnie zalogowany w systemie", effect: "Lista zalogowanych użytkowników z terminalami i czasem logowania" },
+            ],
           },
           {
             instruction: "Sprawdź ostatnie logowania – kto tu był?",
             command: "last -5",
             expectedOutput: (a) => `${a.user}  pts/0  terminal  Tue Feb 18 10:30   still logged in\nroot     pts/1  konsola   Tue Feb 18 09:00   still logged in\n${a.user}  pts/0  terminal  Mon Feb 17 18:20 - 22:15 (03:55)\nreboot   system boot     Tue Feb 18 08:55`,
             tip: "📋 Historia logowań = dziennik wartownika. Szukaj podejrzanych wpisów!",
+            explain: [
+              { code: "last -5", area: "security", tokens: [{type:"command",text:"last"},{text:" "},{type:"flag",text:"-5"}], explain: "Pokaż 5 ostatnich logowań. Szukaj podejrzanych godzin i IP.", effect: "Historia logowań z pliku /var/log/wtmp" },
+            ],
           },
         ],
       },
@@ -105,18 +117,29 @@ const LESSONS = [
             command: "ps aux",
             expectedOutput: (a) => `USER       PID  %CPU %MEM COMMAND\nroot         1   0.0  0.1 /sbin/init\nroot        42   0.0  0.0 /usr/sbin/sshd\n${a.user}     1337   0.2  0.5 bash\nwww-data   800   0.1  0.3 nginx\n⚠️ nobody    666   5.2  2.1 ???suspicious???`,
             tip: "👀 PID 666 – podejrzany proces uruchomiony przez 'nobody' z dużym zużyciem CPU!",
+            explain: [
+              { code: "ps aux", area: "process", tokens: [{type:"command",text:"ps"},{text:" "},{type:"flag",text:"aux"}], explain: "ps = lista procesów. a = wszystkich użytkowników. u = szczegóły. x = też bez terminala.", effect: "Wyświetla wszystkie działające procesy z zużyciem CPU/RAM", link: {url:"https://pl.wikipedia.org/wiki/Ps_(Unix)", label:"ps – Wikipedia"} },
+            ],
           },
           {
             instruction: "Sprawdź otwarte okienka (porty) w budynku:",
             command: "ss -tlnp",
             expectedOutput: () => `State   Local Address:Port\nLISTEN  0.0.0.0:22     → sshd\nLISTEN  0.0.0.0:80     → nginx\nLISTEN  0.0.0.0:443    → nginx\n⚠️ LISTEN  0.0.0.0:4444 → ???unknown??? (PODEJRZANE!)`,
             tip: "🚪 Port 4444 jest otwarty! Klasyczny port złośliwego oprogramowania. Trzeba zbadać!",
+            explain: [
+              { code: "ss -tlnp", area: "network", tokens: [{type:"command",text:"ss"},{text:" "},{type:"flag",text:"-tlnp"}], explain: "ss = socket statistics. -t = TCP. -l = nasłuchujące. -n = numery portów. -p = procesy.", effect: "Pokazuje otwarte porty i które programy ich używają" },
+            ],
           },
           {
             instruction: "Zbadaj podejrzany proces – kto go uruchomił?",
             command: "ps aux | grep suspicious",
             expectedOutput: () => `nobody     666   5.2  2.1  ???suspicious???\n→ ⚠️ ALERT: Proces nasłuchuje na porcie 4444!\n→ 🔍 To może być backdoor – tylne drzwi dla intruza!`,
             tip: "🐴 Znalazłeś trojana! Otwiera tylne drzwi (port 4444) dla atakującego.",
+            explain: [
+              { code: "ps aux", area: "process", tokens: [{type:"command",text:"ps"},{text:" "},{type:"flag",text:"aux"}], explain: "Lista wszystkich procesów" },
+              { code: "|", area: "shell", tokens: [{type:"operator",text:"|"}], explain: "Taśma – przekazuje wynik do następnej komendy" },
+              { code: "grep suspicious", area: "shell", tokens: [{type:"command",text:"grep"},{text:" "},{type:"argument",text:"suspicious"}], explain: "Filtruj – pokaż tylko linie zawierające 'suspicious'", effect: "Znajduje podejrzany proces wśród setek działających" },
+            ],
           },
         ],
       },
@@ -152,30 +175,45 @@ const LESSONS = [
             command: "sudo iptables -L",
             expectedOutput: () => `Chain INPUT (policy ACCEPT)  ⚠️ Wszystko wpuszczone!\ntarget  prot  source    destination\n\nChain FORWARD (policy ACCEPT)\nChain OUTPUT (policy ACCEPT)\n\n⚠️ ALARM: Brak reguł! Zamek jest otwarty na oścież!`,
             tip: "🚨 Policy ACCEPT bez reguł = zamek bez murów! Każdy może wejść.",
+            explain: [
+              { code: "sudo iptables -L", area: "security", tokens: [{type:"command",text:"sudo"},{text:" "},{type:"command",text:"iptables"},{text:" "},{type:"flag",text:"-L"}], explain: "iptables = firewall Linuxa. -L = pokaż reguły (List).", effect: "Wyświetla reguły firewalla dla INPUT, FORWARD, OUTPUT", link: {url:"https://pl.wikipedia.org/wiki/Iptables", label:"iptables – Wikipedia"} },
+            ],
           },
           {
             instruction: "Zamknij domyślną bramę – blokuj nieznajomych:",
             command: "sudo iptables -P INPUT DROP",
             expectedOutput: () => `✅ Domyślna polityka INPUT: DROP\n🧱 Mur obronny postawiony! Nikt nieznany nie wejdzie.`,
             tip: "🧱 DROP = mur. Teraz domyślnie NIKT nie wejdzie, chyba że dodasz regułę wpuszczającą.",
+            explain: [
+              { code: "sudo iptables -P INPUT DROP", area: "security", tokens: [{type:"command",text:"sudo"},{text:" "},{type:"command",text:"iptables"},{text:" "},{type:"flag",text:"-P"},{text:" "},{type:"argument",text:"INPUT"},{text:" "},{type:"argument",text:"DROP"}], explain: "-P = ustaw politykę domyślną. INPUT = ruch przychodzący. DROP = odrzucaj.", effect: "Domyślnie blokuje cały ruch przychodzący" },
+            ],
           },
           {
             instruction: "Wpuść ruch na okienko WWW (port 80):",
             command: "sudo iptables -A INPUT -p tcp --dport 80 -j ACCEPT",
             expectedOutput: () => `✅ Reguła dodana: wpuść TCP na port 80\n🌐 Okienko WWW otwarte dla odwiedzających.`,
             tip: "👮 Strażnik wpuszcza gości do okienka WWW (port 80). Reszta murów nadal blokuje!",
+            explain: [
+              { code: "sudo iptables -A INPUT -p tcp --dport 80 -j ACCEPT", area: "security", tokens: [{type:"command",text:"sudo"},{text:" "},{type:"command",text:"iptables"},{text:" "},{type:"flag",text:"-A"},{text:" "},{type:"argument",text:"INPUT"},{text:" "},{type:"flag",text:"-p"},{text:" "},{type:"argument",text:"tcp"},{text:" "},{type:"flag",text:"--dport"},{text:" "},{type:"argument",text:"80"},{text:" "},{type:"flag",text:"-j"},{text:" "},{type:"argument",text:"ACCEPT"}], explain: "-A = dodaj regułę. -p tcp = protokół TCP. --dport 80 = port docelowy. -j ACCEPT = wpuść.", effect: "Otwiera port 80 (WWW) dla wszystkich" },
+            ],
           },
           {
             instruction: "Wpuść SSH (port 22) tylko z naszej bazy:",
             command: "sudo iptables -A INPUT -p tcp --dport 22 -s 192.168.1.0/24 -j ACCEPT",
             expectedOutput: () => `✅ Reguła: SSH tylko z sieci 192.168.1.0/24\n🔐 Zdalny dostęp tylko dla naszych agentów!`,
             tip: "🏰 Brama SSH otwarta TYLKO dla agentów z naszej bazy. Obcy nie wejdą!",
+            explain: [
+              { code: "sudo iptables -A INPUT -p tcp --dport 22 -s 192.168.1.0/24 -j ACCEPT", area: "security", tokens: [{type:"command",text:"sudo"},{text:" "},{type:"command",text:"iptables"},{text:" "},{type:"flag",text:"-A"},{text:" "},{type:"argument",text:"INPUT"},{text:" "},{type:"flag",text:"-p"},{text:" "},{type:"argument",text:"tcp"},{text:" "},{type:"flag",text:"--dport"},{text:" "},{type:"argument",text:"22"},{text:" "},{type:"flag",text:"-s"},{text:" "},{type:"argument",text:"192.168.1.0/24"},{text:" "},{type:"flag",text:"-j"},{text:" "},{type:"argument",text:"ACCEPT"}], explain: "-s = źródło. 192.168.1.0/24 = cała sieć lokalna. Tylko oni mogą używać SSH.", effect: "SSH dostępne tylko z sieci 192.168.1.x" },
+            ],
           },
           {
             instruction: "Sprawdź nowe mury obronne:",
             command: "sudo iptables -L --line-numbers",
             expectedOutput: () => `Chain INPUT (policy DROP) ✅ Domyślnie: blokuj\nnum  target  prot  source           destination\n1    ACCEPT  tcp   anywhere         anywhere    dport 80\n2    ACCEPT  tcp   192.168.1.0/24   anywhere    dport 22\n\n🏰 Zamek zabezpieczony! 2 kontrolowane bramy.`,
             tip: "✅ 2 kontrolowane bramy (port 80 i 22) i mur blokujący resztę!",
+            explain: [
+              { code: "sudo iptables -L --line-numbers", area: "security", tokens: [{type:"command",text:"sudo"},{text:" "},{type:"command",text:"iptables"},{text:" "},{type:"flag",text:"-L"},{text:" "},{type:"flag",text:"--line-numbers"}], explain: "-L = pokaż reguły. --line-numbers = z numerami (do usuwania).", effect: "Wyświetla ponumerowaną listę reguł firewalla" },
+            ],
           },
         ],
       },
@@ -192,24 +230,36 @@ const LESSONS = [
             command: "sudo ufw enable",
             expectedOutput: () => `🛡️ Firewall aktywowany!\nDomyślna polityka: blokuj przychodzące, pozwól wychodzące.\nStatus: active`,
             tip: "📱 UFW włączony! Domyślnie blokuje wszystko przychodzące.",
+            explain: [
+              { code: "sudo ufw enable", area: "security", tokens: [{type:"command",text:"sudo"},{text:" "},{type:"command",text:"ufw"},{text:" "},{type:"command",text:"enable"}], explain: "ufw = Uncomplicated Firewall. enable = włącz.", effect: "Aktywuje firewall z domyślną polityką: blokuj przychodzące", link: {url:"https://help.ubuntu.com/community/UFW", label:"UFW – Ubuntu"} },
+            ],
           },
           {
             instruction: "Otwórz bramę dla stron WWW:",
             command: "sudo ufw allow 80/tcp",
             expectedOutput: () => `Rule added: allow 80/tcp\n✅ Brama WWW otwarta!`,
             tip: "🌐 Proste! 'allow 80/tcp' zamiast długiej komendy iptables.",
+            explain: [
+              { code: "sudo ufw allow 80/tcp", area: "security", tokens: [{type:"command",text:"sudo"},{text:" "},{type:"command",text:"ufw"},{text:" "},{type:"command",text:"allow"},{text:" "},{type:"argument",text:"80/tcp"}], explain: "allow = wpuść. 80/tcp = port 80 protokołem TCP.", effect: "Otwiera port 80 dla ruchu WWW" },
+            ],
           },
           {
             instruction: "Otwórz bramę SSH tylko dla naszej bazy:",
             command: "sudo ufw allow from 192.168.1.0/24 to any port 22",
             expectedOutput: () => `Rule added: allow from 192.168.1.0/24 to any port 22\n🔐 SSH dostępne tylko z naszej bazy!`,
             tip: "🏰 SSH tylko z naszej sieci. Proste i czytelne!",
+            explain: [
+              { code: "sudo ufw allow from 192.168.1.0/24 to any port 22", area: "security", tokens: [{type:"command",text:"sudo"},{text:" "},{type:"command",text:"ufw"},{text:" "},{type:"command",text:"allow"},{text:" "},{type:"keyword",text:"from"},{text:" "},{type:"argument",text:"192.168.1.0/24"},{text:" "},{type:"keyword",text:"to any port"},{text:" "},{type:"argument",text:"22"}], explain: "Wpuść na port 22 tylko z sieci 192.168.1.x", effect: "SSH dostępne wyłącznie z sieci lokalnej" },
+            ],
           },
           {
             instruction: "Sprawdź status murów:",
             command: "sudo ufw status verbose",
             expectedOutput: () => `Status: active\nDefault: deny (incoming), allow (outgoing)\n\nTo             Action   From\n80/tcp         ALLOW    Anywhere\n22             ALLOW    192.168.1.0/24\n\n🛡️ Mury sprawne! 2 kontrolowane bramy.`,
             tip: "📋 Czytelny raport! Widzisz dokładnie, co jest otwarte i dla kogo.",
+            explain: [
+              { code: "sudo ufw status verbose", area: "security", tokens: [{type:"command",text:"sudo"},{text:" "},{type:"command",text:"ufw"},{text:" "},{type:"command",text:"status"},{text:" "},{type:"flag",text:"verbose"}], explain: "Pokaż szczegółowy status firewalla z regułami", effect: "Wyświetla aktywne reguły i domyślną politykę" },
+            ],
           },
         ],
       },
@@ -245,18 +295,29 @@ const LESSONS = [
             command: "sudo cat /etc/shadow | head -3",
             expectedOutput: (a) => `root:$6$xyz...hash...:19000:0:99999:7:::\ndaemon:*:19000:0:99999:7:::\n${a.user}:$6$aB3$kL9mN2pQ...hash...:19040:0:99999:7:::\n\n🔐 Hasła są zaszyfrowane! Nawet admin nie widzi prawdziwych haseł.`,
             tip: "🔐 /etc/shadow = sejf z zaszyfrowanymi hasłami. Nikt nie widzi haseł – tylko ich 'odciski' (hashe).",
+            explain: [
+              { code: "sudo cat /etc/shadow", area: "security", tokens: [{type:"command",text:"sudo"},{text:" "},{type:"command",text:"cat"},{text:" "},{type:"path",text:"/etc/shadow"}], explain: "/etc/shadow = plik z zaszyfrowanymi hasłami. Tylko root może go czytać." },
+              { code: "| head -3", area: "shell", tokens: [{type:"operator",text:"|"},{text:" "},{type:"command",text:"head"},{text:" "},{type:"flag",text:"-3"}], explain: "Pokaż tylko 3 pierwsze linie", effect: "Wyświetla zaszyfrowane hashe haseł" },
+            ],
           },
           {
             instruction: "Zmień hasło na silniejsze:",
             command: "passwd",
             expectedOutput: (a) => `Changing password for ${a.user}.\nCurrent password: ********\nNew password: ********\nRetype new password: ********\n✅ Hasło zmienione! Nowy zamek zainstalowany.`,
             tip: "🔑 Regularnie zmieniaj hasła! Jak wymiana zamków w sejfie.",
+            explain: [
+              { code: "passwd", area: "security", tokens: [{type:"command",text:"passwd"}], explain: "Zmień hasło aktualnego użytkownika. Pyta o stare i nowe hasło.", effect: "Aktualizuje hash hasła w /etc/shadow" },
+            ],
           },
           {
             instruction: "Sprawdź politykę haseł:",
             command: "cat /etc/login.defs | grep PASS",
             expectedOutput: () => `PASS_MAX_DAYS   90    → hasło ważne max 90 dni\nPASS_MIN_DAYS   1     → min 1 dzień między zmianami\nPASS_MIN_LEN    12    → minimum 12 znaków\nPASS_WARN_AGE   14    → ostrzeżenie 14 dni przed wygaśnięciem\n\n🛡️ Polityka: silne hasła, regularna wymiana!`,
             tip: "📋 Polityka haseł = regulamin sejfów. Wymusza silne hasła i regularną wymianę.",
+            explain: [
+              { code: "cat /etc/login.defs", area: "security", tokens: [{type:"command",text:"cat"},{text:" "},{type:"path",text:"/etc/login.defs"}], explain: "Plik z ustawieniami polityki logowania" },
+              { code: "| grep PASS", area: "shell", tokens: [{type:"operator",text:"|"},{text:" "},{type:"command",text:"grep"},{text:" "},{type:"argument",text:"PASS"}], explain: "Filtruj – pokaż tylko linie dotyczące haseł", effect: "Wyświetla reguły: długość, ważność, ostrzeżenia" },
+            ],
           },
         ],
       },
@@ -284,18 +345,27 @@ const LESSONS = [
             command: "ssh-keygen -t ed25519",
             expectedOutput: (a) => `Generating public/private ed25519 key pair.\nYour identification: /home/${a.user}/.ssh/id_ed25519\nYour public key: /home/${a.user}/.ssh/id_ed25519.pub\nFingerprint: SHA256:xK9mN2pQ7vL3bR8... ${a.user}@${a.name}\n\n🖐️ Odcisk palca wygenerowany!`,
             tip: "🖐️ ed25519 = najnowszy i najbezpieczniejszy typ odcisku.",
+            explain: [
+              { code: "ssh-keygen -t ed25519", area: "security", tokens: [{type:"command",text:"ssh-keygen"},{text:" "},{type:"flag",text:"-t"},{text:" "},{type:"argument",text:"ed25519"}], explain: "Wygeneruj parę kluczy SSH. -t ed25519 = typ algorytmu (najnowszy).", effect: "Tworzy klucz prywatny i publiczny w ~/.ssh/", link: {url:"https://pl.wikipedia.org/wiki/Secure_Shell", label:"SSH – Wikipedia"} },
+            ],
           },
           {
             instruction: "Pokaż swój publiczny odcisk:",
             command: "cat ~/.ssh/id_ed25519.pub",
             expectedOutput: (a) => `ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI... ${a.user}@${a.name}\n\n🔓 Publiczny klucz – możesz go bezpiecznie dać strażnikowi (serwerowi).`,
             tip: "🔓 Klucz publiczny to skan odcisku – możesz go rozdawać. Prywatny NIGDY nie opuszcza komputera!",
+            explain: [
+              { code: "cat ~/.ssh/id_ed25519.pub", area: "security", tokens: [{type:"command",text:"cat"},{text:" "},{type:"path",text:"~/.ssh/id_ed25519.pub"}], explain: "Pokaż klucz publiczny. .pub = publiczny (bezpieczny do udostępnienia).", effect: "Wyświetla klucz, który można dać serwerowi" },
+            ],
           },
           {
             instruction: "Wyślij odcisk do bazy agentów:",
             command: "ssh-copy-id agent-baza",
             expectedOutput: (a) => `Number of key(s) added: 1\n✅ Odcisk dodany do bazy!\nTeraz logujesz się bez hasła: ssh ${a.user}@agent-baza\n\n🖐️ Strażnik rozpozna Cię po odcisku palca.`,
             tip: "📋 Twój publiczny klucz dodany do authorized_keys na serwerze. Logujesz się odciskiem!",
+            explain: [
+              { code: "ssh-copy-id agent-baza", area: "security", tokens: [{type:"command",text:"ssh-copy-id"},{text:" "},{type:"argument",text:"agent-baza"}], explain: "Skopiuj klucz publiczny na serwer agent-baza", effect: "Dodaje klucz do ~/.ssh/authorized_keys na serwerze – logowanie bez hasła" },
+            ],
           },
         ],
       },
@@ -331,24 +401,37 @@ const LESSONS = [
             command: "sudo tail -20 /var/log/auth.log",
             expectedOutput: (a) => `Feb 18 10:30:01 ${a.name} sshd: Accepted key for ${a.user} from 192.168.1.10\n⚠️ Feb 18 03:15:42 ${a.name} sshd: Failed password for root from 45.33.32.156\n⚠️ Feb 18 03:15:43 ${a.name} sshd: Failed password for root from 45.33.32.156\n⚠️ Feb 18 03:15:44 ${a.name} sshd: Failed password for admin from 45.33.32.156\n🚨 ALERT: Nieudane próby logowania z IP 45.33.32.156 o 3:15 w nocy!`,
             tip: "🚨 Ktoś z IP 45.33.32.156 próbował się włamać o 3:15 w nocy! To atak brute force!",
+            explain: [
+              { code: "sudo tail -20 /var/log/auth.log", area: "security", tokens: [{type:"command",text:"sudo"},{text:" "},{type:"command",text:"tail"},{text:" "},{type:"flag",text:"-20"},{text:" "},{type:"path",text:"/var/log/auth.log"}], explain: "tail -20 = pokaż 20 ostatnich linii. auth.log = dziennik logowań.", effect: "Wyświetla ostatnie wpisy o logowaniach i próbach dostępu" },
+            ],
           },
           {
             instruction: "Policz ile razy próbowano się włamać:",
             command: "grep 'Failed password' /var/log/auth.log | wc -l",
             expectedOutput: () => `847\n\n🚨 847 nieudanych prób logowania! To atak brute force.`,
             tip: "📊 grep szuka wzorca, wc -l liczy linie. 847 prób = masowy atak!",
+            explain: [
+              { code: "grep 'Failed password' /var/log/auth.log", area: "security", tokens: [{type:"command",text:"grep"},{text:" "},{type:"string",text:"'Failed password'"},{text:" "},{type:"path",text:"/var/log/auth.log"}], explain: "Znajdź linie z 'Failed password' w dzienniku" },
+              { code: "| wc -l", area: "shell", tokens: [{type:"operator",text:"|"},{text:" "},{type:"command",text:"wc"},{text:" "},{type:"flag",text:"-l"}], explain: "wc -l = policz linie. Ile razy ktoś się nie zalogował?", effect: "Zlicza nieudane próby logowania" },
+            ],
           },
           {
             instruction: "Znajdź IP atakującego:",
             command: "grep 'Failed password' /var/log/auth.log | awk '{print $(NF-3)}' | sort | uniq -c | sort -rn | head -5",
             expectedOutput: () => `    523 45.33.32.156\n    201 103.45.67.89\n     78 185.220.101.42\n     31 23.129.64.100\n     14 192.168.1.99\n\n🎯 Główny atakujący: 45.33.32.156 (523 próby!)`,
             tip: "🕵️ Analiza logów jak praca detektywa! sort + uniq -c = policz unikalne IP.",
+            explain: [
+              { code: "grep 'Failed password' ... | awk | sort | uniq -c | sort -rn | head -5", area: "security", tokens: [{type:"command",text:"grep"},{text:" "},{type:"operator",text:"|"},{text:" "},{type:"command",text:"awk"},{text:" "},{type:"operator",text:"|"},{text:" "},{type:"command",text:"sort"},{text:" "},{type:"operator",text:"|"},{text:" "},{type:"command",text:"uniq -c"},{text:" "},{type:"operator",text:"|"},{text:" "},{type:"command",text:"sort -rn"},{text:" "},{type:"operator",text:"|"},{text:" "},{type:"command",text:"head -5"}], explain: "Łańcuch poleceń: znajdź → wyciągnij IP → posortuj → policz → top 5", effect: "Ranking IP z największą liczbą ataków" },
+            ],
           },
           {
             instruction: "Zablokuj atakującego na murze obronnym!",
             command: "sudo iptables -A INPUT -s 45.33.32.156 -j DROP",
             expectedOutput: () => `✅ IP 45.33.32.156 zablokowane!\n🧱 Atakujący nie może już się połączyć.\n\n🛡️ Planeta X jest bezpieczniejsza!`,
             tip: "🧱 Zablokowany! Reguła DROP = mur nie do przejścia.",
+            explain: [
+              { code: "sudo iptables -A INPUT -s 45.33.32.156 -j DROP", area: "security", tokens: [{type:"command",text:"sudo"},{text:" "},{type:"command",text:"iptables"},{text:" "},{type:"flag",text:"-A"},{text:" "},{type:"argument",text:"INPUT"},{text:" "},{type:"flag",text:"-s"},{text:" "},{type:"argument",text:"45.33.32.156"},{text:" "},{type:"flag",text:"-j"},{text:" "},{type:"argument",text:"DROP"}], explain: "-s = źródło (atakujący IP). -j DROP = odrzucaj wszystko od niego.", effect: "Blokuje cały ruch z IP atakującego" },
+            ],
           },
         ],
       },
@@ -365,18 +448,27 @@ const LESSONS = [
             command: "sudo fail2ban-client status sshd",
             expectedOutput: () => `Status for the jail: sshd\n|- Currently failed: 3\n|- Total failed: 847\n└- Actions\n   |- Currently banned: 4\n   |- Total banned: 12\n   └- Banned IP list: 45.33.32.156 103.45.67.89 185.220.101.42 23.129.64.100\n\n🤖 Robot aktywny! 4 intruzów zablokowanych automatycznie.`,
             tip: "🤖 Fail2ban sam wykrył i zablokował 4 atakujących! Działa 24/7.",
+            explain: [
+              { code: "sudo fail2ban-client status sshd", area: "security", tokens: [{type:"command",text:"sudo"},{text:" "},{type:"command",text:"fail2ban-client"},{text:" "},{type:"command",text:"status"},{text:" "},{type:"argument",text:"sshd"}], explain: "Sprawdź status robota-strażnika dla usługi SSH", effect: "Pokazuje ile ataków wykryto i ile IP zablokowano", link: {url:"https://www.fail2ban.org/", label:"Fail2ban – oficjalna strona"} },
+            ],
           },
           {
             instruction: "Sprawdź po ilu próbach blokuje:",
             command: "sudo fail2ban-client get sshd maxretry",
             expectedOutput: () => `5\n\n🤖 Blokuje po 5 nieudanych próbach.`,
             tip: "⚙️ maxretry=5: po 5 złych próbach IP jest blokowane. Możesz zmienić na 3!",
+            explain: [
+              { code: "sudo fail2ban-client get sshd maxretry", area: "security", tokens: [{type:"command",text:"sudo"},{text:" "},{type:"command",text:"fail2ban-client"},{text:" "},{type:"command",text:"get"},{text:" "},{type:"argument",text:"sshd"},{text:" "},{type:"argument",text:"maxretry"}], explain: "Sprawdź po ilu nieudanych próbach robot blokuje IP", effect: "Wyświetla próg blokowania (domyślnie 5)" },
+            ],
           },
           {
             instruction: "Odblokuj IP naszego agenta (zapomniał hasła):",
             command: "sudo fail2ban-client set sshd unbanip 192.168.1.99",
             expectedOutput: () => `✅ IP 192.168.1.99 odblokowane.\n🤖 Nasz agent może znów się logować.`,
             tip: "🔓 Dlatego agenci powinni używać kluczy SSH – wtedy fail2ban ich nie zablokuje!",
+            explain: [
+              { code: "sudo fail2ban-client set sshd unbanip 192.168.1.99", area: "security", tokens: [{type:"command",text:"sudo"},{text:" "},{type:"command",text:"fail2ban-client"},{text:" "},{type:"command",text:"set"},{text:" "},{type:"argument",text:"sshd"},{text:" "},{type:"command",text:"unbanip"},{text:" "},{type:"argument",text:"192.168.1.99"}], explain: "Odblokuj IP naszego agenta", effect: "Usuwa IP z listy zablokowanych" },
+            ],
           },
         ],
       },
@@ -401,18 +493,27 @@ const LESSONS = [
             command: "chmod 700 ~/misja-tajna.txt",
             expectedOutput: () => `✅ Teczka: rwx------\n🔐 Tylko Ty masz dostęp!`,
             tip: "🔐 700 = rwx dla Ciebie, --- dla oddziału, --- dla reszty. Ściśle tajne!",
+            explain: [
+              { code: "chmod 700 ~/misja-tajna.txt", area: "filesystem", tokens: [{type:"command",text:"chmod"},{text:" "},{type:"argument",text:"700"},{text:" "},{type:"path",text:"~/misja-tajna.txt"}], explain: "chmod = zmień uprawnienia. 7=rwx (właściciel), 0=--- (grupa), 0=--- (reszta).", effect: "Tylko właściciel może czytać, pisać i uruchamiać", link: {url:"https://pl.wikipedia.org/wiki/Chmod", label:"chmod – Wikipedia"} },
+            ],
           },
           {
             instruction: "Stwórz teczkę tajną dla oddziału:",
             command: "chmod 750 ~/raport-oddzialu.txt",
             expectedOutput: () => `✅ Teczka: rwxr-x---\n📁 Ty: pełny dostęp | Oddział: odczyt | Reszta: brak.`,
             tip: "📁 750 = rwx dla Ciebie, r-x dla oddziału, --- dla reszty.",
+            explain: [
+              { code: "chmod 750 ~/raport-oddzialu.txt", area: "filesystem", tokens: [{type:"command",text:"chmod"},{text:" "},{type:"argument",text:"750"},{text:" "},{type:"path",text:"~/raport-oddzialu.txt"}], explain: "7=rwx (Ty), 5=r-x (oddział: czytaj+uruchamiaj), 0=--- (reszta: brak)", effect: "Właściciel: pełny dostęp, grupa: odczyt, reszta: brak" },
+            ],
           },
           {
             instruction: "Sprawdź poziomy tajności swoich teczek:",
             command: "ls -la ~/",
             expectedOutput: (a) => `-rwx------  1 ${a.user} agenci  misja-tajna.txt      🔴 ŚCIŚLE TAJNE\n-rwxr-x---  1 ${a.user} agenci  raport-oddzialu.txt  🟡 TAJNE\n-rwxr-xr-x  1 ${a.user} agenci  komunikat.txt        🟢 JAWNE\ndrwx------  2 ${a.user} agenci  .ssh/                🔴 ŚCIŚLE TAJNE`,
             tip: "📋 🔴 700=ściśle tajne, 🟡 750=tajne, 🟢 755=jawne. Katalog .ssh MUSI być 700!",
+            explain: [
+              { code: "ls -la ~/", area: "filesystem", tokens: [{type:"command",text:"ls"},{text:" "},{type:"flag",text:"-la"},{text:" "},{type:"path",text:"~/"}], explain: "ls = lista plików. -l = szczegóły. -a = ukryte pliki. ~/ = katalog domowy.", effect: "Wyświetla pliki z uprawnieniami, właścicielem i grupą" },
+            ],
           },
         ],
       },
@@ -440,18 +541,28 @@ const LESSONS = [
             command: "echo 'Spotkanie o 15:00' | gpg --encrypt --recipient kuba",
             expectedOutput: () => `-----BEGIN PGP MESSAGE-----\nhQEMA7K3nR...zaszyfrowane...\n-----END PGP MESSAGE-----\n\n🔐 Tylko agent Kuba może odczytać!`,
             tip: "📦 Wiadomość zamknięta kluczem publicznym Kuby. Nawet Ty nie możesz jej teraz odczytać!",
+            explain: [
+              { code: "echo 'Spotkanie o 15:00'", area: "shell", tokens: [{type:"command",text:"echo"},{text:" "},{type:"string",text:"'Spotkanie o 15:00'"}], explain: "Przygotuj wiadomość do zaszyfrowania" },
+              { code: "| gpg --encrypt --recipient kuba", area: "security", tokens: [{type:"operator",text:"|"},{text:" "},{type:"command",text:"gpg"},{text:" "},{type:"flag",text:"--encrypt"},{text:" "},{type:"flag",text:"--recipient"},{text:" "},{type:"argument",text:"kuba"}], explain: "Zaszyfruj kluczem publicznym agenta Kuby. Tylko on odszyfruje.", effect: "Wiadomość zamieniona w zaszyfrowany tekst", link: {url:"https://pl.wikipedia.org/wiki/GNU_Privacy_Guard", label:"GPG – Wikipedia"} },
+            ],
           },
           {
             instruction: "Zaszyfruj plik z raportem misji:",
             command: "gpg --symmetric --cipher-algo AES256 raport-misji.txt",
             expectedOutput: () => `Enter passphrase: ********\n✅ Plik zaszyfrowany: raport-misji.txt.gpg\n🔐 AES-256 – standard wojskowy!`,
             tip: "🔐 AES-256 = szyfrowanie klasy wojskowej. Używane przez armie i banki.",
+            explain: [
+              { code: "gpg --symmetric --cipher-algo AES256 raport-misji.txt", area: "security", tokens: [{type:"command",text:"gpg"},{text:" "},{type:"flag",text:"--symmetric"},{text:" "},{type:"flag",text:"--cipher-algo"},{text:" "},{type:"argument",text:"AES256"},{text:" "},{type:"path",text:"raport-misji.txt"}], explain: "--symmetric = szyfrowanie hasłem. AES256 = algorytm klasy wojskowej.", effect: "Tworzy zaszyfrowany plik .gpg" },
+            ],
           },
           {
             instruction: "Sprawdź, że zaszyfrowany plik to bełkot:",
             command: "cat raport-misji.txt.gpg",
             expectedOutput: () => `\\x89\\x01\\x0c\\x03...binarny bełkot...\\x8a\\x02\\xff\n\n🔒 Nie da się odczytać bez klucza!`,
             tip: "👀 Binarny bełkot – bez klucza nikt tego nie odczyta.",
+            explain: [
+              { code: "cat raport-misji.txt.gpg", area: "filesystem", tokens: [{type:"command",text:"cat"},{text:" "},{type:"path",text:"raport-misji.txt.gpg"}], explain: "Próba odczytania zaszyfrowanego pliku – widoczny tylko binarny bełkot", effect: "Bez klucza plik jest nieczytelny" },
+            ],
           },
         ],
       },
@@ -487,18 +598,27 @@ const LESSONS = [
             command: "sudo apt update",
             expectedOutput: () => `Fetched 1,234 kB in 2s\n📋 47 packages can be upgraded.\n⚠️ 12 security updates available!\n\n🚨 12 łatek bezpieczeństwa czeka!`,
             tip: "📋 apt update = sprawdź listę łatek. 12 łatek bezpieczeństwa – trzeba instalować!",
+            explain: [
+              { code: "sudo apt update", area: "package", tokens: [{type:"command",text:"sudo"},{text:" "},{type:"command",text:"apt"},{text:" "},{type:"command",text:"update"}], explain: "Odśwież listę dostępnych pakietów i łatek", effect: "Sprawdza ile łatek czeka na instalację" },
+            ],
           },
           {
             instruction: "Zainstaluj wszystkie łatki:",
             command: "sudo apt upgrade -y",
             expectedOutput: () => `The following packages will be upgraded:\n  openssh-server openssl libssl3 nginx curl ...\n12 upgraded, 0 newly installed, 0 to remove.\n\n✅ Wszystkie łatki zainstalowane!\n🧱 12 dziur załatanych.`,
             tip: "🩹 Dziury załatane! Rób to regularnie – najlepiej codziennie.",
+            explain: [
+              { code: "sudo apt upgrade -y", area: "package", tokens: [{type:"command",text:"sudo"},{text:" "},{type:"command",text:"apt"},{text:" "},{type:"command",text:"upgrade"},{text:" "},{type:"flag",text:"-y"}], explain: "Zainstaluj wszystkie dostępne aktualizacje. -y = potwierdź automatycznie.", effect: "Aktualizuje pakiety i łata luki bezpieczeństwa" },
+            ],
           },
           {
             instruction: "Sprawdź, czy potrzebny restart:",
             command: "cat /var/run/reboot-required 2>/dev/null || echo 'Restart nie wymagany'",
             expectedOutput: () => `*** System restart required ***\n\n🔄 Niektóre łatki wymagają restartu.`,
             tip: "🔄 Jak wymiana zamka – musisz zamknąć i otworzyć drzwi, żeby nowy zamek zadziałał.",
+            explain: [
+              { code: "cat /var/run/reboot-required 2>/dev/null || echo 'Restart nie wymagany'", area: "shell", tokens: [{type:"command",text:"cat"},{text:" "},{type:"path",text:"/var/run/reboot-required"},{text:" "},{type:"operator",text:"2>/dev/null"},{text:" "},{type:"operator",text:"||"},{text:" "},{type:"command",text:"echo"},{text:" "},{type:"string",text:"'Restart nie wymagany'"}], explain: "Sprawdź plik reboot-required. 2>/dev/null = ukryj błędy. || = jeśli nie istnieje, wypisz tekst.", effect: "Informuje czy system wymaga restartu po aktualizacji" },
+            ],
           },
         ],
       },
@@ -887,12 +1007,13 @@ function App() {
           {step && (!layerDone || showNextConfirm) && (
             <div className="instruction-box" style={{background:"#f7768e08",border:"2px solid #f7768e22"}} data-testid="instruction">
               <div className="text">🎯 {step.instruction}</div>
-              <div className="code-row"><code>{step.command}</code><CopyCode text={step.command}/>{step.explain && <ExplainButton explain={step.explain} command={step.command}/>}</div>
+              <div className="code-row"><ColorizedCode text={step.command}/><CopyCode text={step.command}/>{step.explain && <ExplainButton explain={step.explain} command={step.command}/>}</div>
             </div>
           )}
           <Terminal agent={agent} step={step} onSuccess={onSuccess} showNextConfirm={showNextConfirm} confirmReady={confirmReady} proceedToNext={proceedToNext} layerDone={layerDone} nextLayer={nextLayer}/>
         </div>
         <div className="right-panel">
+          <CodeLegend/>
           <ThreatMap agent={agent}/>
           <GlossaryCard/>
         </div>

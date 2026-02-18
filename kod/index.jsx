@@ -20,6 +20,9 @@ const LESSONS = [
             command: 'python3 -c "print(\'Cześć z Planety X!\')"',
             expectedOutput: () => `Cześć z Planety X!`,
             tip: "🗣️ print() = 'powiedz to głośno'. Komputer wypisał tekst na ekranie – Twój pierwszy program!",
+            explain: [
+              { code: 'python3 -c "print(...)"', area: "python", tokens: [{type:"command",text:"python3"},{text:" "},{type:"flag",text:"-c"},{text:" "},{type:"string",text:'"print(\'Cześć z Planety X!\')"'}], explain: "python3 = uruchom Pythona. -c = wykonaj kod podany w cudzysłowie. print() = wypisz tekst.", effect: "Uruchamia jednolinijkowy program Python", link: {url:"https://docs.python.org/3/using/cmdline.html", label:"Python CLI – dokumentacja"} },
+            ],
           },
           {
             instruction: "Stwórz plik z programem Python:",
@@ -31,12 +34,22 @@ print(f"2 + 2 = {2 + 2}")
 EOF`,
             expectedOutput: () => ``,
             tip: "📝 cat << 'EOF' > plik = 'zapisz wszystko aż do słowa EOF do pliku'. Plik .py = notatnik z programem. f\"...\" = tekst z wstawkami.",
+            explain: [
+              { code: "cat << 'EOF' > hello.py", area: "shell", tokens: [{type:"command",text:"cat"},{text:" "},{type:"operator",text:"<< 'EOF'"},{text:" "},{type:"operator",text:">"},{text:" "},{type:"path",text:"hello.py"}], explain: "Zapisz tekst do pliku hello.py", effect: "Tworzy plik hello.py" },
+              { code: 'imie = "Odkrywca"', area: "python", tokens: [{type:"variable",text:"imie"},{text:" "},{type:"operator",text:"="},{text:" "},{type:"string",text:'"Odkrywca"'}], explain: "Tworzy zmienną imie z wartością 'Odkrywca'" },
+              { code: 'planeta = "X"', area: "python", tokens: [{type:"variable",text:"planeta"},{text:" "},{type:"operator",text:"="},{text:" "},{type:"string",text:'"X"'}], explain: "Tworzy zmienną planeta" },
+              { code: 'print(f"Jestem {imie} z Planety {planeta}!")', area: "python", tokens: [{type:"command",text:"print"},{text:"("},{type:"string",text:'f"Jestem '},{type:"variable",text:"{imie}"},{type:"string",text:" z Planety "},{type:"variable",text:"{planeta}"},{type:"string",text:'!"'},{text:")"}], explain: "f-string: {imie} i {planeta} zostaną zamienione na wartości zmiennych" },
+              { code: 'print(f"2 + 2 = {2 + 2}")', area: "python", tokens: [{type:"command",text:"print"},{text:"("},{type:"string",text:'f"2 + 2 = '},{type:"variable",text:"{2 + 2}"},{type:"string",text:'"'},{text:")"}], explain: "Python policzy 2+2 i wstawi wynik (4) w tekst" },
+            ],
           },
           {
             instruction: "Uruchom swój program:",
             command: "python3 hello.py",
             expectedOutput: () => `Jestem Odkrywca z Planety X!\n2 + 2 = 4`,
             tip: "🎉 Python przeczytał notatnik i wykonał oba zdania po kolei. Zmienne to karteczki – {imie} zamienił na 'Odkrywca'.",
+            explain: [
+              { code: "python3 hello.py", area: "python", tokens: [{type:"command",text:"python3"},{text:" "},{type:"path",text:"hello.py"}], explain: "Uruchom plik hello.py w interpreterze Python 3", effect: "Wykonuje program linia po linii i wypisuje wyniki" },
+            ],
           },
         ],
       },
@@ -58,6 +71,12 @@ print(f"Razem: {len(planety)} planet")
 EOF`,
             expectedOutput: () => `🪐 Merkury\n🪐 Wenus\n🪐 Ziemia\n🪐 Mars\nRazem: 4 planet`,
             tip: "📚 for p in planety = 'dla każdej książki na półce'. len() = 'ile jest na półce?'.",
+            explain: [
+              { code: 'planety = ["Merkury", "Wenus", "Ziemia", "Mars"]', area: "python", tokens: [{type:"variable",text:"planety"},{text:" "},{type:"operator",text:"="},{text:" "},{type:"string",text:'["Merkury", "Wenus", "Ziemia", "Mars"]'}], explain: "Tworzy listę (półkę) z 4 planetami. Indeksy od 0." },
+              { code: "for p in planety:", area: "python", tokens: [{type:"keyword",text:"for"},{text:" "},{type:"variable",text:"p"},{text:" "},{type:"keyword",text:"in"},{text:" "},{type:"variable",text:"planety"},{text:":"}], explain: "Karuzela: dla każdego elementu z listy, włóż go do zmiennej p" },
+              { code: '    print(f"🪐 {p}")', area: "python", tokens: [{type:"command",text:"print"},{text:"("},{type:"string",text:'f"🪐 '},{type:"variable",text:"{p}"},{type:"string",text:'"'},{text:")"}], explain: "Wypisz nazwę planety – powtarza się 4 razy" },
+              { code: 'print(f"Razem: {len(planety)} planet")', area: "python", tokens: [{type:"command",text:"print"},{text:"("},{type:"string",text:'f"Razem: '},{type:"variable",text:"{len(planety)}"},{type:"string",text:' planet"'},{text:")"}], explain: "len() = policz ile elementów na liście" },
+            ],
           },
           {
             instruction: "Stwórz słownik załogi Planety X:",
@@ -68,6 +87,11 @@ for imie, rola in zaloga.items():
 EOF`,
             expectedOutput: () => `👤 Ania → pilot\n👤 Kuba → inżynier\n👤 Ola → naukowiec`,
             tip: "📖 Słownik = pary klucz:wartość. .items() = 'pokaż wszystkie wpisy z książki telefonicznej'.",
+            explain: [
+              { code: 'zaloga = {"Ania": "pilot", ...}', area: "python", tokens: [{type:"variable",text:"zaloga"},{text:" "},{type:"operator",text:"="},{text:" "},{type:"string",text:'{"Ania": "pilot", "Kuba": "inżynier", "Ola": "naukowiec"}'}], explain: "Słownik = książka telefoniczna. Klucz (imię) → wartość (rola)." },
+              { code: "for imie, rola in zaloga.items():", area: "python", tokens: [{type:"keyword",text:"for"},{text:" "},{type:"variable",text:"imie"},{text:", "},{type:"variable",text:"rola"},{text:" "},{type:"keyword",text:"in"},{text:" "},{type:"variable",text:"zaloga"},{text:"."},{type:"command",text:"items"},{text:"():"}], explain: ".items() = pokaż wszystkie pary. Każda para trafia do imie i rola." },
+              { code: '    print(f"👤 {imie} → {rola}")', area: "python", tokens: [{type:"command",text:"print"},{text:"("},{type:"string",text:'f"👤 '},{type:"variable",text:"{imie}"},{type:"string",text:" → "},{type:"variable",text:"{rola}"},{type:"string",text:'"'},{text:")"}], explain: "Wypisz imię i rolę – powtarza się dla każdego wpisu" },
+            ],
           },
         ],
       },
@@ -99,6 +123,11 @@ print(powitaj("Ola"))
 EOF`,
             expectedOutput: () => `🚀 Witaj na Planecie X, Ania!\n🚀 Witaj na Planecie X, Kuba!\n🚀 Witaj na Planecie X, Ola!`,
             tip: "🔧 def = 'zbuduj narzędzie'. return = 'oddaj wynik'. Użyłeś go 3 razy – nie musiałeś pisać tego samego!",
+            explain: [
+              { code: "def powitaj(imie):", area: "python", tokens: [{type:"keyword",text:"def"},{text:" "},{type:"command",text:"powitaj"},{text:"("},{type:"variable",text:"imie"},{text:"):"}], explain: "def = zbuduj narzędzie. powitaj = nazwa. imie = materiał, który podajesz.", link: {url:"https://docs.python.org/3/tutorial/controlflow.html#defining-functions", label:"Funkcje Python – dokumentacja"} },
+              { code: '    return f"🚀 Witaj na Planecie X, {imie}!"', area: "python", tokens: [{type:"keyword",text:"return"},{text:" "},{type:"string",text:'f"🚀 Witaj na Planecie X, '},{type:"variable",text:"{imie}"},{type:"string",text:'!"'}], explain: "return = oddaj wynik. Narzędzie zwraca tekst z wstawionym imieniem." },
+              { code: 'print(powitaj("Ania"))', area: "python", tokens: [{type:"command",text:"print"},{text:"("},{type:"command",text:"powitaj"},{text:"("},{type:"string",text:'"Ania"'},{text:"))"}], explain: "Użyj narzędzia z materiałem 'Ania' i wypisz wynik" },
+            ],
           },
           {
             instruction: "Zbuduj kalkulator paliwa kosmicznego:",
@@ -114,6 +143,13 @@ for nazwa, km in planety.items():
 EOF`,
             expectedOutput: () => `🪐 Mars: 225 mln km → 112.5 mln litrów paliwa\n🪐 Jowisz: 628 mln km → 314.0 mln litrów paliwa\n🪐 Saturn: 1275 mln km → 637.5 mln litrów paliwa`,
             tip: "🧮 Funkcja paliwo() to kalkulator – podajesz dystans, dostajesz litry. Użyłeś go dla każdej planety ze słownika.",
+            explain: [
+              { code: "def paliwo(dystans_km):", area: "python", tokens: [{type:"keyword",text:"def"},{text:" "},{type:"command",text:"paliwo"},{text:"("},{type:"variable",text:"dystans_km"},{text:"):"}], explain: "Budujemy kalkulator paliwa. dystans_km = dane wejściowe." },
+              { code: "    litry = dystans_km * 0.5", area: "python", tokens: [{type:"variable",text:"litry"},{text:" "},{type:"operator",text:"="},{text:" "},{type:"variable",text:"dystans_km"},{text:" "},{type:"operator",text:"*"},{text:" "},{type:"argument",text:"0.5"}], explain: "Oblicz litry: dystans razy 0.5" },
+              { code: "    return litry", area: "python", tokens: [{type:"keyword",text:"return"},{text:" "},{type:"variable",text:"litry"}], explain: "Zwróć wynik obliczeń" },
+              { code: "for nazwa, km in planety.items():", area: "python", tokens: [{type:"keyword",text:"for"},{text:" "},{type:"variable",text:"nazwa"},{text:", "},{type:"variable",text:"km"},{text:" "},{type:"keyword",text:"in"},{text:" "},{type:"variable",text:"planety"},{text:"."},{type:"command",text:"items"},{text:"():"}], explain: "Dla każdej planety ze słownika..." },
+              { code: "    p = paliwo(km)", area: "python", tokens: [{type:"variable",text:"p"},{text:" "},{type:"operator",text:"="},{text:" "},{type:"command",text:"paliwo"},{text:"("},{type:"variable",text:"km"},{text:")"}], explain: "Użyj kalkulatora z dystansem danej planety" },
+            ],
           },
         ],
       },
@@ -250,11 +286,11 @@ function App() {
         <div className={`sidebar${menuOpen?" open":""}`}>{LESSONS.map((les,l)=>(<div key={les.id} style={{marginBottom:16}}><div className="lesson-title" style={{color:les.color}}>{les.icon} {les.title}</div>{les.layers.map((lay,la)=>{const active=l===li&&la===lai,allDone=lay.steps.every((_,s)=>done.has(`${l}-${la}-${s}`));return(<button key={lay.id} className="layer-btn" onClick={()=>goTo(l,la)} style={{background:active?`${les.color}18`:"transparent",border:active?`2px solid ${les.color}44`:"2px solid transparent",color:"#c0caf5"}}><div className="name">{allDone?"✅":active?"▶":"○"} {lay.title}</div><div className="count">{lay.steps.filter((_,s)=>done.has(`${l}-${la}-${s}`)).length}/{lay.steps.length}</div></button>);})}</div>))}</div>
         <div className="content">
           <div className="lesson-header" style={{background:`${lesson.color}08`,border:`2px solid ${lesson.color}22`}}><div className="cat" style={{color:lesson.color}}>{layer.categoryLabel}</div><h2>{layer.title}</h2><p className="desc">{layer.description}</p>{layer.analogy&&(<div className="analogy" style={{borderLeft:`4px solid ${lesson.color}`}}>{layer.analogy}</div>)}</div>
-          {step&&(!layerDone||showNextConfirm)&&(<div className="instruction-box" style={{background:`${lesson.color}08`,border:`2px solid ${lesson.color}22`}} data-testid="instruction"><div className="text">🧬 {step.instruction}</div><div className="code-row"><code>{step.command}</code><CopyCode text={step.command}/>{step.explain && <ExplainButton explain={step.explain} command={step.command}/>}</div></div>)}
+          {step&&(!layerDone||showNextConfirm)&&(<div className="instruction-box" style={{background:`${lesson.color}08`,border:`2px solid ${lesson.color}22`}} data-testid="instruction"><div className="text">🧬 {step.instruction}</div><div className="code-row"><ColorizedCode text={step.command}/><CopyCode text={step.command}/>{step.explain && <ExplainButton explain={step.explain} command={step.command}/>}</div></div>)}
           <Terminal step={step} onSuccess={onSuccess} showNextConfirm={showNextConfirm} confirmReady={confirmReady} proceedToNext={proceedToNext} layerDone={layerDone}/>
           {step?.tip&&(<div style={{background:`${lesson.color}08`,border:`2px solid ${lesson.color}22`,borderRadius:"14px",padding:"14px",marginTop:"16px"}}><div style={{fontSize:"14px",color:"#a9b1d6",lineHeight:"1.7"}}>{step.tip}</div></div>)}
         </div>
-        <div className="right-panel"><GlossaryCard/></div>
+        <div className="right-panel"><CodeLegend/><GlossaryCard/></div>
       </div>
     </div>
   );

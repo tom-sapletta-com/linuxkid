@@ -79,18 +79,27 @@ const LESSONS = [
             command: "hostname",
             expectedOutput: (pc) => pc.name,
             tip: "🚗 Nazwa auta = hostname komputera. To potoczna nazwa, jaką wszyscy nazywają Twój samochód.",
+            explain: [
+              { code: "hostname", area: "network", tokens: [{type:"command",text:"hostname"}], explain: "Pokaż nazwę tego komputera (jak imię samochodu)", effect: "Wyświetla nazwę hosta z pliku /etc/hostname", link: {url:"https://pl.wikipedia.org/wiki/Nazwa_hosta", label:"Nazwa hosta – Wikipedia"} },
+            ],
           },
           {
             instruction: "Sprawdź tablicę rejestracyjną (adres IP):",
             command: "hostname -I",
             expectedOutput: (pc) => pc.ip,
             tip: "🏷️ Tablica rejestracyjna = adres IP. Dzięki niej inne auta Cię znajdują na drodze.",
+            explain: [
+              { code: "hostname -I", area: "network", tokens: [{type:"command",text:"hostname"},{text:" "},{type:"flag",text:"-I"}], explain: "hostname = nazwa komputera. -I = pokaż adres IP (tablica rejestracyjna).", effect: "Wyświetla adresy IP przypisane do interfejsów sieciowych", link: {url:"https://pl.wikipedia.org/wiki/Adres_IP", label:"Adres IP – Wikipedia"} },
+            ],
           },
           {
             instruction: "Kto siedzi za kierownicą?",
             command: "whoami",
             expectedOutput: (pc) => pc.user,
             tip: "🧑 Kierowca = użytkownik. Komputer wie, kto nim steruje!",
+            explain: [
+              { code: "whoami", area: "security", tokens: [{type:"command",text:"whoami"}], explain: "Pokaż nazwę aktualnie zalogowanego użytkownika (kto siedzi za kierownicą)", effect: "Wyświetla nazwę użytkownika z /etc/passwd" },
+            ],
           },
         ],
       },
@@ -146,12 +155,18 @@ const LESSONS = [
             command: "arp -a",
             expectedOutput: () => COMPUTERS.map(c => `${c.emoji} ${c.name} (${c.ip})`).join("\n"),
             tip: "📋 To lista aut, które Twój samochód widział na drodze. Jak spis tablic rejestracyjnych!",
+            explain: [
+              { code: "arp -a", area: "network", tokens: [{type:"command",text:"arp"},{text:" "},{type:"flag",text:"-a"}], explain: "arp = tablica ARP (spis tablic rejestracyjnych). -a = pokaż wszystkie.", effect: "Wyświetla listę komputerów, które widziałeś w sieci lokalnej", link: {url:"https://pl.wikipedia.org/wiki/Address_Resolution_Protocol", label:"ARP – Wikipedia"} },
+            ],
           },
           {
             instruction: "Zatrąb do samochodu Kuby – sprawdź, czy jest na drodze:",
             command: "ping -c 3 auto-kuby",
             expectedOutput: () => `PING auto-kuby (192.168.1.11): 56 bytes\n64 bytes from 192.168.1.11: time=1.2ms\n64 bytes from 192.168.1.11: time=0.8ms\n64 bytes from 192.168.1.11: time=1.0ms\n--- ping: 3 wysłane, 3 odebrane, 0% strat`,
             tip: "📯 Ping = trąbienie. Trąbisz 3 razy (-c 3), Kuba trąbi z powrotem. Czas (ms) = jak daleko jest.",
+            explain: [
+              { code: "ping -c 3 auto-kuby", area: "network", tokens: [{type:"command",text:"ping"},{text:" "},{type:"flag",text:"-c"},{text:" "},{type:"argument",text:"3"},{text:" "},{type:"argument",text:"auto-kuby"}], explain: "ping = zatrąb do innego komputera. -c 3 = zatrąb 3 razy. auto-kuby = nazwa celu.", effect: "Wysyła 3 pakiety ICMP i mierzy czas odpowiedzi", link: {url:"https://pl.wikipedia.org/wiki/Ping", label:"Ping – Wikipedia"} },
+            ],
           },
         ],
       },
@@ -197,18 +212,30 @@ const LESSONS = [
             command: 'echo "Cześć z mojego auta!"',
             expectedOutput: () => "Cześć z mojego auta!",
             tip: "📢 echo = megafon. Powtarza to, co powiesz.",
+            explain: [
+              { code: 'echo "Cześć z mojego auta!"', area: "shell", tokens: [{type:"command",text:"echo"},{text:" "},{type:"string",text:'"Cześć z mojego auta!"'}], explain: "echo = megafon. Wypisuje tekst na ekranie (stdout).", effect: "Wyświetla tekst w terminalu" },
+            ],
           },
           {
             instruction: "Wyślij paczkę do auta Kuby (brama 1234):",
             command: 'echo "Hej Kuba!" | nc auto-kuby 1234',
             expectedOutput: () => "✅ Paczka dostarczona do auto-kuby, brama 1234",
             tip: "📦 Paczka jedzie pod adres (auto-kuby) do bramy (1234). Znak | to taśma – przekazuje paczkę dalej.",
+            explain: [
+              { code: 'echo "Hej Kuba!"', area: "shell", tokens: [{type:"command",text:"echo"},{text:" "},{type:"string",text:'"Hej Kuba!"'}], explain: "Przygotuj paczkę z tekstem" },
+              { code: "|", area: "shell", tokens: [{type:"operator",text:"|"}], explain: "Taśma transportowa – przekazuje wynik z lewej strony na prawą" },
+              { code: "nc auto-kuby 1234", area: "network", tokens: [{type:"command",text:"nc"},{text:" "},{type:"argument",text:"auto-kuby"},{text:" "},{type:"argument",text:"1234"}], explain: "nc (netcat) = kurier. Dostarcza paczkę pod adres auto-kuby, brama (port) 1234.", effect: "Wysyła dane TCP do portu 1234 na auto-kuby", link: {url:"https://pl.wikipedia.org/wiki/Netcat", label:"Netcat – Wikipedia"} },
+            ],
           },
           {
             instruction: "Nadaj komunikat przez radio do WSZYSTKICH aut:",
             command: 'echo "Uwaga, objazd!" | nc -b -u 192.168.1.255 1234',
             expectedOutput: () => `📻 Nadano do wszystkich:\n  ${COMPUTERS.slice(1).map(c => `${c.emoji} ${c.name}`).join("\n  ")}`,
             tip: "📻 Broadcast = radio FM. -b = nadaj do wszystkich, -u = przez radio (UDP). Jedna stacja nadaje, wszystkie auta słyszą!",
+            explain: [
+              { code: 'echo "Uwaga, objazd!"', area: "shell", tokens: [{type:"command",text:"echo"},{text:" "},{type:"string",text:'"Uwaga, objazd!"'}], explain: "Przygotuj komunikat" },
+              { code: "| nc -b -u 192.168.1.255 1234", area: "network", tokens: [{type:"operator",text:"|"},{text:" "},{type:"command",text:"nc"},{text:" "},{type:"flag",text:"-b"},{text:" "},{type:"flag",text:"-u"},{text:" "},{type:"argument",text:"192.168.1.255"},{text:" "},{type:"argument",text:"1234"}], explain: "-b = broadcast (do wszystkich). -u = UDP (radio). 192.168.1.255 = adres rozgłoszeniowy sieci.", effect: "Wysyła pakiet UDP do wszystkich komputerów w sieci" },
+            ],
           },
         ],
       },
@@ -233,30 +260,45 @@ const LESSONS = [
             command: "env",
             expectedOutput: (pc) => `USER=${pc.user}\nHOME=/home/${pc.user}\nHOSTNAME=${pc.name}\nPATH=/usr/local/bin:/usr/bin:/bin\nSHELL=/bin/bash\nLANG=pl_PL.UTF-8`,
             tip: "👛 Każda karta ma nazwę (np. USER) i wartość (np. ania). To portfel Twojego terminala.",
+            explain: [
+              { code: "env", area: "shell", tokens: [{type:"command",text:"env"}], explain: "Pokaż wszystkie zmienne środowiskowe (karty w portfelu)", effect: "Lista par NAZWA=wartość" },
+            ],
           },
           {
             instruction: "Wyjmij dowód z portfela – kto jest kierowcą:",
             command: "echo $USER",
             expectedOutput: (pc) => pc.user,
             tip: "🪪 $USER = dowód kierowcy w portfelu. Znak $ mówi: 'wyjmij tę kartę i pokaż jej wartość'.",
+            explain: [
+              { code: "echo $USER", area: "shell", tokens: [{type:"command",text:"echo"},{text:" "},{type:"variable",text:"$USER"}], explain: "$ = wyjmij kartę z portfela. USER = nazwa użytkownika.", effect: "Wyświetla wartość zmiennej USER" },
+            ],
           },
           {
             instruction: "Sprawdź adres domowy na karcie:",
             command: "echo $HOME",
             expectedOutput: (pc) => `/home/${pc.user}`,
             tip: "🏠 $HOME = karta z adresem domowym w portfelu. Tu trzymasz swoje pliki.",
+            explain: [
+              { code: "echo $HOME", area: "shell", tokens: [{type:"command",text:"echo"},{text:" "},{type:"variable",text:"$HOME"}], explain: "$HOME = ścieżka do katalogu domowego użytkownika", effect: "Wyświetla np. /home/ania" },
+            ],
           },
           {
             instruction: "Włóż nową kartę do portfela – ulubiony kolor auta:",
             command: 'export KOLOR="czerwony"',
             expectedOutput: () => "",
             tip: "📝 export = wkładasz nową kartę do portfela. Inne programy też ją zobaczą.",
+            explain: [
+              { code: 'export KOLOR="czerwony"', area: "shell", tokens: [{type:"command",text:"export"},{text:" "},{type:"variable",text:"KOLOR"},{type:"operator",text:"="},{type:"string",text:'"czerwony"'}], explain: "export = włóż kartę do portfela widoczną dla wszystkich programów", effect: "Tworzy zmienną środowiskową KOLOR=czerwony" },
+            ],
           },
           {
             instruction: "Wyjmij nową kartę z portfela:",
             command: "echo $KOLOR",
             expectedOutput: () => "czerwony",
             tip: "✅ Zapamiętane! Ale uwaga – jak wyłączysz silnik (zamkniesz terminal), tymczasowe karty znikają z portfela.",
+            explain: [
+              { code: "echo $KOLOR", area: "shell", tokens: [{type:"command",text:"echo"},{text:" "},{type:"variable",text:"$KOLOR"}], explain: "Wyjmij kartę KOLOR z portfela i pokaż wartość", effect: "Wyświetla 'czerwony'" },
+            ],
           },
         ],
       },
@@ -273,12 +315,18 @@ const LESSONS = [
             command: "ls -a ~",
             expectedOutput: () => `.  ..  .bashrc  .profile  .bash_history  Dokumenty  Obrazy`,
             tip: "🔍 Pliki z kropką (.) to ukryte schowki. .bashrc to najważniejszy – instrukcja obsługi terminala!",
+            explain: [
+              { code: "ls -a ~", area: "filesystem", tokens: [{type:"command",text:"ls"},{text:" "},{type:"flag",text:"-a"},{text:" "},{type:"path",text:"~"}], explain: "ls = lista plików. -a = pokaż ukryte (z kropką). ~ = katalog domowy.", effect: "Wyświetla wszystkie pliki, w tym ukryte" },
+            ],
           },
           {
             instruction: "Otwórz instrukcję obsługi:",
             command: "cat ~/.bashrc",
             expectedOutput: (pc) => `# Instrukcja obsługi terminala: ${pc.user}\n# Co ma się włączyć po przekręceniu kluczyka\n\nexport PS1="${pc.user}@${pc.name}:$ "\n\n# Tu dodaj swoje skróty:`,
             tip: "📓 To się odpala za każdym razem, gdy włączasz terminal. Jak lista 'co zrobić po przekręceniu kluczyka'.",
+            explain: [
+              { code: "cat ~/.bashrc", area: "filesystem", tokens: [{type:"command",text:"cat"},{text:" "},{type:"path",text:"~/.bashrc"}], explain: "Pokaż zawartość pliku .bashrc – instrukcji obsługi terminala", effect: "Wyświetla skrypt uruchamiany przy każdym starcie terminala" },
+            ],
           },
         ],
       },
@@ -303,18 +351,27 @@ const LESSONS = [
             command: `alias czesc='echo "Cześć, jestem $HOSTNAME"'`,
             expectedOutput: () => "",
             tip: "🏷️ Nakleiliśmy 'czesc' na przycisk, który odpala echo z nazwą auta.",
+            explain: [
+              { code: "alias czesc='echo ...'", area: "shell", tokens: [{type:"command",text:"alias"},{text:" "},{type:"variable",text:"czesc"},{type:"operator",text:"="},{type:"string",text:"'echo \"Cześć, jestem $HOSTNAME\"'"}], explain: "alias = stwórz skrót. czesc = nazwa naklejki. Po = to co się uruchomi.", effect: "Tworzy skrót 'czesc' w bieżącej sesji" },
+            ],
           },
           {
             instruction: "Naciśnij przycisk!",
             command: "czesc",
             expectedOutput: (pc) => `Cześć, jestem ${pc.name}`,
             tip: "🎉 Jedno słowo zamiast długiej komendy!",
+            explain: [
+              { code: "czesc", area: "shell", tokens: [{type:"command",text:"czesc"}], explain: "Uruchom alias 'czesc' – zamienia się w echo z nazwą komputera", effect: "Wyświetla powitanie z hostname" },
+            ],
           },
           {
             instruction: "Naklejka 'droga' – kto jest na drodze:",
             command: "alias droga='arp -a'",
             expectedOutput: () => "",
             tip: "🏷️ 'droga' jest łatwiejsze niż 'arp -a'!",
+            explain: [
+              { code: "alias droga='arp -a'", area: "shell", tokens: [{type:"command",text:"alias"},{text:" "},{type:"variable",text:"droga"},{type:"operator",text:"="},{type:"string",text:"'arp -a'"}], explain: "Naklejka 'droga' uruchomi 'arp -a' (lista komputerów w sieci)" },
+            ],
           },
           {
             instruction: "Sprawdź drogę:",
@@ -327,6 +384,9 @@ const LESSONS = [
             command: "alias trabi='ping -c 3'",
             expectedOutput: () => "",
             tip: "📯 Teraz 'trabi auto-kuby' = 'ping -c 3 auto-kuby'.",
+            explain: [
+              { code: "alias trabi='ping -c 3'", area: "shell", tokens: [{type:"command",text:"alias"},{text:" "},{type:"variable",text:"trabi"},{type:"operator",text:"="},{type:"string",text:"'ping -c 3'"}], explain: "Naklejka 'trabi' = ping 3 razy. Dodajesz nazwę celu po spacji.", effect: "trabi auto-kuby = ping -c 3 auto-kuby" },
+            ],
           },
           {
             instruction: "Zatrąb do Oli!",
@@ -361,6 +421,9 @@ const LESSONS = [
             command: "source ~/.bashrc",
             expectedOutput: () => "✅ Instrukcja wczytana! Naklejki działają.",
             tip: "🔑 source = przekręcenie kluczyka. Terminal czyta instrukcję od nowa.",
+            explain: [
+              { code: "source ~/.bashrc", area: "shell", tokens: [{type:"command",text:"source"},{text:" "},{type:"path",text:"~/.bashrc"}], explain: "Wczytaj plik .bashrc ponownie bez zamykania terminala", effect: "Nowe aliasy i ustawienia są od razu aktywne" },
+            ],
           },
         ],
       },
@@ -385,18 +448,27 @@ const LESSONS = [
             command: "whoami",
             expectedOutput: (pc) => pc.user,
             tip: "🧑 Twoje imię kierowcy. Masz kluczyki do swojego auta, ale nie do cudzego.",
+            explain: [
+              { code: "whoami", area: "security", tokens: [{type:"command",text:"whoami"}], explain: "Pokaż nazwę zalogowanego użytkownika", effect: "Wyświetla Twoje imię kierowcy" },
+            ],
           },
           {
             instruction: "Do jakich grup należysz?",
             command: "groups",
             expectedOutput: (pc) => `${pc.user} uczniowie siec`,
             tip: "👥 Grupy = grupy społeczne, do których należysz. Jak w życiu: rodzina, klasa szkolna, drużyna sportowa – każda daje Ci inne prawa i dostęp.",
+            explain: [
+              { code: "groups", area: "security", tokens: [{type:"command",text:"groups"}], explain: "Pokaż grupy, do których należysz", effect: "Każda grupa daje inne uprawnienia" },
+            ],
           },
           {
             instruction: "Sprawdź zamki na pliku:",
             command: "ls -l ~/Dokumenty/notatki.txt",
             expectedOutput: (pc) => `-rw-r--r-- 1 ${pc.user} uczniowie 42 sty 15 notatki.txt`,
             tip: "🔑 r=czytanie 📖  w=pisanie ✏️  x=uruchamianie 🏃\nPierwsze rw- = Ty, drugie r-- = Twoja grupa, trzecie r-- = wszyscy.",
+            explain: [
+              { code: "ls -l ~/Dokumenty/notatki.txt", area: "filesystem", tokens: [{type:"command",text:"ls"},{text:" "},{type:"flag",text:"-l"},{text:" "},{type:"path",text:"~/Dokumenty/notatki.txt"}], explain: "-l = szczegóły z uprawnieniami. rwx = czytaj/pisz/uruchamiaj.", effect: "Wyświetla uprawnienia, właściciela, grupę i rozmiar pliku" },
+            ],
           },
         ],
       },
@@ -413,24 +485,37 @@ const LESSONS = [
             command: "cat /etc/shadow",
             expectedOutput: () => "❌ Brak pozwolenia! Tylko mechanik (root) tu wjedzie.",
             tip: "🚧 Strefa zamknięta – tylko administrator (root) ma klucz. Szlaban nie podniesie się!",
+            explain: [
+              { code: "cat /etc/shadow", area: "security", tokens: [{type:"command",text:"cat"},{text:" "},{type:"path",text:"/etc/shadow"}], explain: "/etc/shadow = plik z hasłami. Tylko root ma dostęp.", effect: "Błąd: Permission denied (brak uprawnień)" },
+            ],
           },
           {
             instruction: "Kto jest głównym mechanikiem?",
             command: "cat /etc/passwd | grep root",
             expectedOutput: () => "root:x:0:0:root:/root:/bin/bash",
             tip: "🔧 root = główny mechanik. Ma klucze do WSZYSTKIEGO. Numer 0 = szef.",
+            explain: [
+              { code: "cat /etc/passwd", area: "security", tokens: [{type:"command",text:"cat"},{text:" "},{type:"path",text:"/etc/passwd"}], explain: "Plik z listą użytkowników (bez haseł)" },
+              { code: "| grep root", area: "shell", tokens: [{type:"operator",text:"|"},{text:" "},{type:"command",text:"grep"},{text:" "},{type:"argument",text:"root"}], explain: "Filtruj – pokaż tylko linię z 'root'", effect: "Wyświetla dane konta root (UID=0)" },
+            ],
           },
           {
             instruction: "Zamknij swoje notatki na klucz (tylko Ty masz dostęp):",
             command: "chmod 700 ~/tajne-notatki.txt",
             expectedOutput: () => "",
             tip: "🔐 chmod 700 = zamykasz auto na klucz. 7=Ty wszystko, 0=grupa nic, 0=inni nic.",
+            explain: [
+              { code: "chmod 700 ~/tajne-notatki.txt", area: "filesystem", tokens: [{type:"command",text:"chmod"},{text:" "},{type:"argument",text:"700"},{text:" "},{type:"path",text:"~/tajne-notatki.txt"}], explain: "7=rwx (Ty), 0=--- (grupa), 0=--- (reszta). Zamknij na klucz!", effect: "Tylko właściciel ma dostęp do pliku" },
+            ],
           },
           {
             instruction: "Sprawdź, czy zamek działa:",
             command: "ls -l ~/tajne-notatki.txt",
             expectedOutput: (pc) => `-rwx------ 1 ${pc.user} uczniowie 0 sty 15 tajne-notatki.txt`,
             tip: "✅ rwx dla Ciebie, --- dla reszty. Auto zamknięte na klucz – nikt nie wsiądzie!",
+            explain: [
+              { code: "ls -l ~/tajne-notatki.txt", area: "filesystem", tokens: [{type:"command",text:"ls"},{text:" "},{type:"flag",text:"-l"},{text:" "},{type:"path",text:"~/tajne-notatki.txt"}], explain: "Sprawdź uprawnienia – rwx------ = tylko właściciel", effect: "Potwierdza, że plik jest zamknięty na klucz" },
+            ],
           },
         ],
       },
@@ -455,6 +540,9 @@ const LESSONS = [
             command: "uname -a",
             expectedOutput: () => "Linux auto-ani 6.1.0 #1 SMP x86_64 GNU/Linux",
             tip: "🐧 Masz Linuxa! Darmowy system. Większość serwerów na świecie to Linuxy.",
+            explain: [
+              { code: "uname -a", area: "shell", tokens: [{type:"command",text:"uname"},{text:" "},{type:"flag",text:"-a"}], explain: "uname = informacje o systemie. -a = wszystkie szczegóły.", effect: "Wyświetla nazwę systemu, wersję jądra, architekturę" },
+            ],
           },
           {
             instruction: "Porównaj komendy w różnych systemach:",
@@ -889,7 +977,7 @@ function App(){
           {step&&(!layerDone||showNextConfirm)&&(
             <div className="instruction-box" style={{background:"#7aa2f708",border:"2px solid #7aa2f722"}} data-testid="instruction">
               <div className="text">👉 {step.instruction}</div>
-              <div className="code-row"><code>{step.command}</code><CopyCode text={step.command}/>{step.explain && <ExplainButton explain={step.explain} command={step.command}/>}</div>
+              <div className="code-row"><ColorizedCode text={step.command}/><CopyCode text={step.command}/>{step.explain && <ExplainButton explain={step.explain} command={step.command}/>}</div>
             </div>
           )}
           <Terminal pc={pc} step={step} onSuccess={onSuccess} aliases={aliases} showNextConfirm={showNextConfirm} confirmReady={confirmReady} proceedToNext={proceedToNext} layerDone={layerDone} nextLayer={nextLayer}/>
@@ -917,6 +1005,7 @@ function App(){
           )}
         </div>
         <div className="right-panel">
+          <CodeLegend/>
           <CityMap computers={COMPUTERS} active={pc}/>
           <AnalogyCard/>
           <div className="os-table">

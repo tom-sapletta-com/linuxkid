@@ -21,18 +21,27 @@ const LESSONS = [
             command: "sudo apt update",
             expectedOutput: () => `Pobieranie:1 http://archive.ubuntu.com/ubuntu jammy InRelease\nPobieranie:2 http://archive.ubuntu.com/ubuntu jammy-updates InRelease\nGotowe. Wszystkie pakiety są aktualne.`,
             tip: "📦 apt update = sprawdzasz katalog sklepu z narzędziami. Nie instalujesz nic – tylko aktualizujesz listę tego, co jest dostępne.",
+            explain: [
+              { code: "sudo apt update", area: "package", tokens: [{type:"command",text:"sudo"},{text:" "},{type:"command",text:"apt"},{text:" "},{type:"command",text:"update"}], explain: "sudo = jako administrator. apt = menedżer pakietów. update = odśwież listę dostępnych paczek.", effect: "Pobiera najnowszy katalog pakietów z serwerów", link: {url:"https://pl.wikipedia.org/wiki/APT_(program)", label:"APT – Wikipedia"} },
+            ],
           },
           {
             instruction: "Zainstaluj serwer Nginx:",
             command: "sudo apt install nginx -y",
             expectedOutput: () => `Czytanie listy pakietów... Gotowe\nBudowanie drzewa zależności... Gotowe\nNastępujące NOWE pakiety zostaną zainstalowane:\n  nginx nginx-common\n0 aktualizowanych, 2 nowo instalowanych\nRozpakowywanie nginx...\n✅ nginx zainstalowany pomyślnie!`,
             tip: "🏗️ apt install = kupujesz narzędzie ze sklepu i montujesz je. -y = 'tak, na pewno chcę'.",
+            explain: [
+              { code: "sudo apt install nginx -y", area: "package", tokens: [{type:"command",text:"sudo"},{text:" "},{type:"command",text:"apt"},{text:" "},{type:"command",text:"install"},{text:" "},{type:"argument",text:"nginx"},{text:" "},{type:"flag",text:"-y"}], explain: "Zainstaluj pakiet nginx. -y = potwierdź automatycznie.", effect: "Instaluje serwer Nginx i uruchamia go", link: {url:"https://nginx.org/en/", label:"Nginx – oficjalna strona"} },
+            ],
           },
           {
             instruction: "Sprawdź czy Nginx działa:",
             command: "systemctl status nginx",
             expectedOutput: () => `● nginx.service - A high performance web server\n   Loaded: loaded (/lib/systemd/system/nginx.service)\n   Active: active (running) since Mon 2025-01-01 12:00:00 UTC\n   Main PID: 1234 (nginx)\n   Tasks: 2\n   Memory: 4.5M\n   CGroup: /system.slice/nginx.service`,
             tip: "🔍 systemctl status = pytasz: 'Czy budynek jest otwarty?'. active (running) = tak, recepcjonista pracuje!",
+            explain: [
+              { code: "systemctl status nginx", area: "process", tokens: [{type:"command",text:"systemctl"},{text:" "},{type:"command",text:"status"},{text:" "},{type:"argument",text:"nginx"}], explain: "systemctl = zarządzaj usługami systemowymi. status = sprawdź czy działa.", effect: "Wyświetla status usługi nginx (active/inactive)", link: {url:"https://pl.wikipedia.org/wiki/Systemd", label:"systemd – Wikipedia"} },
+            ],
           },
         ],
       },
@@ -49,18 +58,27 @@ const LESSONS = [
             command: "ls /var/www/html/",
             expectedOutput: () => `index.nginx-debian.html`,
             tip: "📁 /var/www/html/ = witryna budynku. Tu wkładasz plakaty (strony), które goście zobaczą.",
+            explain: [
+              { code: "ls /var/www/html/", area: "filesystem", tokens: [{type:"command",text:"ls"},{text:" "},{type:"path",text:"/var/www/html/"}], explain: "ls = pokaż zawartość folderu. /var/www/html/ = domyślny katalog stron Nginx.", effect: "Wyświetla pliki w katalogu serwera WWW" },
+            ],
           },
           {
             instruction: "Stwórz swoją pierwszą stronę Planety X:",
             command: 'echo "<h1>Witaj na Planecie X!</h1>" > /var/www/html/index.html',
             expectedOutput: () => ``,
             tip: "📝 echo > plik = piszesz nowy plakat i wkładasz go do witryny. > nadpisuje stary plik.",
+            explain: [
+              { code: 'echo "<h1>Witaj na Planecie X!</h1>" > /var/www/html/index.html', area: "filesystem", tokens: [{type:"command",text:"echo"},{text:" "},{type:"string",text:'"<h1>Witaj na Planecie X!</h1>"'},{text:" "},{type:"operator",text:">"},{text:" "},{type:"path",text:"/var/www/html/index.html"}], explain: "Zapisz HTML do pliku index.html w katalogu serwera", effect: "Tworzy stronę główną serwera Nginx" },
+            ],
           },
           {
             instruction: "Sprawdź czy strona działa – odwiedź serwer:",
             command: "curl localhost",
             expectedOutput: () => `<h1>Witaj na Planecie X!</h1>`,
             tip: "🌐 curl = wysyłasz gościa do budynku. localhost = 'ten budynek, w którym stoję'. Gość wraca z treścią plakatu!",
+            explain: [
+              { code: "curl localhost", area: "network", tokens: [{type:"command",text:"curl"},{text:" "},{type:"argument",text:"localhost"}], explain: "curl = pobierz stronę z serwera. localhost = ten komputer (127.0.0.1).", effect: "Pobiera i wyświetla treść strony z lokalnego serwera", link: {url:"https://curl.se/", label:"curl – oficjalna strona"} },
+            ],
           },
         ],
       },
@@ -85,24 +103,36 @@ const LESSONS = [
             command: "nslookup google.com",
             expectedOutput: () => `Server:    8.8.8.8\nAddress:   8.8.8.8#53\n\nNon-authoritative answer:\nName:    google.com\nAddress: 142.250.74.206`,
             tip: "🔍 nslookup = otwierasz książkę adresową i szukasz numeru telefonu (IP) dla danej nazwy.",
+            explain: [
+              { code: "nslookup google.com", area: "network", tokens: [{type:"command",text:"nslookup"},{text:" "},{type:"argument",text:"google.com"}], explain: "Zapytaj serwer DNS: jaki adres IP ma domena google.com?", effect: "Wyświetla adres IP powiązany z domeną", link: {url:"https://pl.wikipedia.org/wiki/Domain_Name_System", label:"DNS – Wikipedia"} },
+            ],
           },
           {
             instruction: "Sprawdź rekordy DNS dla planetax.galaktyka:",
             command: "dig planetax.galaktyka",
             expectedOutput: () => `;; ANSWER SECTION:\nplanetax.galaktyka.    300    IN    A    192.168.1.100\n\n;; Query time: 12 msec\n;; SERVER: 8.8.8.8#53`,
             tip: "📖 dig = bardziej szczegółowe szukanie w książce adresowej. Rekord A = 'ten adres prowadzi do tego numeru IP'.",
+            explain: [
+              { code: "dig planetax.galaktyka", area: "network", tokens: [{type:"command",text:"dig"},{text:" "},{type:"argument",text:"planetax.galaktyka"}], explain: "dig = szczegółowe zapytanie DNS. Pokazuje rekordy, czas odpowiedzi, serwer.", effect: "Wyświetla pełną odpowiedź DNS z rekordami" },
+            ],
           },
           {
             instruction: "Dodaj wpis do lokalnej książki adresowej:",
             command: 'echo "192.168.1.100 planetax.galaktyka" >> /etc/hosts',
             expectedOutput: () => ``,
             tip: "📝 /etc/hosts = prywatna książeczka adresowa Twojego komputera. Ma pierwszeństwo przed globalnym DNS!",
+            explain: [
+              { code: 'echo "192.168.1.100 planetax.galaktyka" >> /etc/hosts', area: "network", tokens: [{type:"command",text:"echo"},{text:" "},{type:"string",text:'"192.168.1.100 planetax.galaktyka"'},{text:" "},{type:"operator",text:">>"},{text:" "},{type:"path",text:"/etc/hosts"}], explain: "Dopisz wpis do lokalnej książki adresowej. >> = dopisz (nie nadpisuj).", effect: "Komputer będzie tłumaczyć 'planetax.galaktyka' na 192.168.1.100", link: {url:"https://pl.wikipedia.org/wiki/Hosts_(plik)", label:"/etc/hosts – Wikipedia"} },
+            ],
           },
           {
             instruction: "Sprawdź czy działa – odwiedź stronę po nazwie:",
             command: "curl planetax.galaktyka",
             expectedOutput: () => `<h1>Witaj na Planecie X!</h1>`,
             tip: "🎉 Działa! Zamiast numeru IP użyłeś nazwy – DNS (w tym przypadku /etc/hosts) przetłumaczył ją na adres.",
+            explain: [
+              { code: "curl planetax.galaktyka", area: "network", tokens: [{type:"command",text:"curl"},{text:" "},{type:"argument",text:"planetax.galaktyka"}], explain: "Pobierz stronę używając nazwy domeny zamiast IP", effect: "Komputer sprawdza /etc/hosts, tłumaczy nazwę na IP i pobiera stronę" },
+            ],
           },
         ],
       },
@@ -127,18 +157,27 @@ const LESSONS = [
             command: "sudo apt install certbot python3-certbot-nginx -y",
             expectedOutput: () => `Czytanie listy pakietów... Gotowe\nNastępujące NOWE pakiety zostaną zainstalowane:\n  certbot python3-certbot-nginx\n✅ Certbot zainstalowany!`,
             tip: "🛠️ Certbot = urzędnik, który za Ciebie idzie do Let's Encrypt i załatwia dowód tożsamości (certyfikat SSL).",
+            explain: [
+              { code: "sudo apt install certbot python3-certbot-nginx -y", area: "package", tokens: [{type:"command",text:"sudo"},{text:" "},{type:"command",text:"apt"},{text:" "},{type:"command",text:"install"},{text:" "},{type:"argument",text:"certbot"},{text:" "},{type:"argument",text:"python3-certbot-nginx"},{text:" "},{type:"flag",text:"-y"}], explain: "Zainstaluj Certbot i jego wtyczkę do Nginx", effect: "Certbot gotowy do generowania certyfikatów SSL", link: {url:"https://certbot.eff.org/", label:"Certbot – oficjalna strona"} },
+            ],
           },
           {
             instruction: "Wygeneruj certyfikat SSL dla Planety X:",
             command: "sudo certbot --nginx -d planetax.galaktyka",
             expectedOutput: () => `Requesting a certificate for planetax.galaktyka\n\nSuccessfully received certificate.\nCertificate is saved at: /etc/letsencrypt/live/planetax.galaktyka/fullchain.pem\nKey is saved at: /etc/letsencrypt/live/planetax.galaktyka/privkey.pem\n\n✅ Certyfikat SSL zainstalowany!\n🔒 https://planetax.galaktyka`,
             tip: "🪪 Certbot poprosił Let's Encrypt o dowód tożsamości i automatycznie skonfigurował Nginx do szyfrowania.",
+            explain: [
+              { code: "sudo certbot --nginx -d planetax.galaktyka", area: "security", tokens: [{type:"command",text:"sudo"},{text:" "},{type:"command",text:"certbot"},{text:" "},{type:"flag",text:"--nginx"},{text:" "},{type:"flag",text:"-d"},{text:" "},{type:"argument",text:"planetax.galaktyka"}], explain: "--nginx = konfiguruj Nginx automatycznie. -d = domena, dla której chcesz certyfikat.", effect: "Generuje certyfikat SSL i konfiguruje HTTPS w Nginx", link: {url:"https://letsencrypt.org/", label:"Let's Encrypt – darmowe certyfikaty"} },
+            ],
           },
           {
             instruction: "Sprawdź czy HTTPS działa:",
             command: "curl -I https://planetax.galaktyka",
             expectedOutput: () => `HTTP/2 200\nserver: nginx/1.24.0\nstrict-transport-security: max-age=31536000\nx-content-type-options: nosniff\ncontent-type: text/html`,
             tip: "🔒 HTTP/2 200 + strict-transport-security = budynek ma zamknięte drzwi i dowód tożsamości. Bezpiecznie!",
+            explain: [
+              { code: "curl -I https://planetax.galaktyka", area: "network", tokens: [{type:"command",text:"curl"},{text:" "},{type:"flag",text:"-I"},{text:" "},{type:"argument",text:"https://planetax.galaktyka"}], explain: "curl -I = pobierz tylko nagłówki (nie treść). https:// = połączenie szyfrowane.", effect: "Sprawdza czy serwer odpowiada po HTTPS z certyfikatem" },
+            ],
           },
         ],
       },
@@ -447,7 +486,7 @@ function App() {
           {step && (!layerDone || showNextConfirm) && (
             <div className="instruction-box" style={{background:"#9ece6a08",border:"2px solid #9ece6a22"}} data-testid="instruction">
               <div className="text">🖥️ {step.instruction}</div>
-              <div className="code-row"><code>{step.command}</code><CopyCode text={step.command}/>{step.explain && <ExplainButton explain={step.explain} command={step.command}/>}</div>
+              <div className="code-row"><ColorizedCode text={step.command}/><CopyCode text={step.command}/>{step.explain && <ExplainButton explain={step.explain} command={step.command}/>}</div>
             </div>
           )}
           <Terminal step={step} onSuccess={onSuccess} showNextConfirm={showNextConfirm} confirmReady={confirmReady} proceedToNext={proceedToNext} layerDone={layerDone}/>
@@ -458,6 +497,7 @@ function App() {
           )}
         </div>
         <div className="right-panel">
+          <CodeLegend/>
           <ServerMap/>
           <GlossaryCard/>
         </div>

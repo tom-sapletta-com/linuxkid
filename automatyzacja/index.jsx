@@ -141,12 +141,24 @@ fi
 EOF`,
             expectedOutput: () => ``,
             tip: "🚦 if [ warunek ]; then → 'jeśli tak, to...'. -lt = less than (mniej niż). fi = koniec warunku.",
+            explain: [
+              { code: "cat << 'EOF' > poranek.sh && chmod +x poranek.sh", area: "shell", tokens: [{type:"command",text:"cat"},{text:" "},{type:"operator",text:"<< 'EOF'"},{text:" "},{type:"operator",text:">"},{text:" "},{type:"path",text:"poranek.sh"},{text:" "},{type:"operator",text:"&&"},{text:" "},{type:"command",text:"chmod"},{text:" "},{type:"flag",text:"+x"},{text:" "},{type:"path",text:"poranek.sh"}], explain: "Zapisz skrypt i daj prawo uruchamiania", effect: "Tworzy wykonywalny plik poranek.sh" },
+              { code: "GODZINA=$(date +%H)", area: "shell", tokens: [{type:"variable",text:"GODZINA"},{type:"operator",text:"="},{type:"variable",text:"$(date +%H)"}], explain: "Uruchom komendę date +%H (aktualna godzina) i włóż wynik do pudełka GODZINA", effect: "Zmienna GODZINA = np. 14" },
+              { code: "if [ $GODZINA -lt 12 ]; then", area: "shell", tokens: [{type:"keyword",text:"if"},{text:" "},{type:"operator",text:"["},{text:" "},{type:"variable",text:"$GODZINA"},{text:" "},{type:"flag",text:"-lt"},{text:" "},{type:"argument",text:"12"},{text:" "},{type:"operator",text:"]"},{text:"; "},{type:"keyword",text:"then"}], explain: "Jeśli godzina jest mniejsza niż 12 (rano), to...", link: {url:"https://www.gnu.org/software/bash/manual/html_node/Bash-Conditional-Expressions.html", label:"Warunki Bash – GNU"} },
+              { code: '  echo "☀️ Dzień dobry!..."', area: "shell", tokens: [{type:"command",text:"echo"},{text:" "},{type:"string",text:'"☀️ Dzień dobry! Rano na Planecie X."'}], explain: "Wypisz powitanie poranne" },
+              { code: "else", area: "shell", tokens: [{type:"keyword",text:"else"}], explain: "W przeciwnym razie (godzina >= 12)..." },
+              { code: '  echo "🌙 Dobry wieczór!..."', area: "shell", tokens: [{type:"command",text:"echo"},{text:" "},{type:"string",text:'"🌙 Dobry wieczór! Wieczór na Planecie X."'}], explain: "Wypisz powitanie wieczorne" },
+              { code: "fi", area: "shell", tokens: [{type:"keyword",text:"fi"}], explain: "Koniec warunku (if czytane od tyłu = fi)" },
+            ],
           },
           {
             instruction: "Uruchom – komputer sprawdzi, jaka jest pora dnia:",
             command: "./poranek.sh",
             expectedOutput: () => `☀️ Dzień dobry! Rano na Planecie X.`,
             tip: "✅ Komputer sprawdził godzinę i wybrał odpowiednią wiadomość – jak sygnalizacja!",
+            explain: [
+              { code: "./poranek.sh", area: "shell", tokens: [{type:"path",text:"./poranek.sh"}], explain: "Uruchom skrypt poranek.sh – komputer sprawdzi godzinę i wybierze powitanie", effect: "Wyświetla powitanie zależne od pory dnia" },
+            ],
           },
           {
             instruction: "Sprawdź, czy plik istnieje:",
@@ -160,6 +172,13 @@ fi
 EOF`,
             expectedOutput: () => `✅ Plik hello.sh istnieje!`,
             tip: "📁 -f = 'czy ten plik istnieje?'. Komputer zajrzał i odpowiedział.",
+            explain: [
+              { code: "cat << 'EOF' > sprawdz.sh && chmod +x sprawdz.sh && ./sprawdz.sh", area: "shell", tokens: [{type:"command",text:"cat"},{text:" "},{type:"operator",text:"<< 'EOF'"},{text:" "},{type:"operator",text:">"},{text:" "},{type:"path",text:"sprawdz.sh"},{text:" "},{type:"operator",text:"&&"},{text:" "},{type:"command",text:"chmod"},{text:" "},{type:"flag",text:"+x"},{text:" "},{type:"path",text:"sprawdz.sh"},{text:" "},{type:"operator",text:"&&"},{text:" "},{type:"path",text:"./sprawdz.sh"}], explain: "Zapisz, daj prawo uruchamiania i od razu uruchom", effect: "Tworzy, ustawia i uruchamia skrypt jednym poleceniem" },
+              { code: "if [ -f hello.sh ]; then", area: "filesystem", tokens: [{type:"keyword",text:"if"},{text:" "},{type:"operator",text:"["},{text:" "},{type:"flag",text:"-f"},{text:" "},{type:"path",text:"hello.sh"},{text:" "},{type:"operator",text:"]"},{text:"; "},{type:"keyword",text:"then"}], explain: "-f = czy plik istnieje? Komputer sprawdza system plików.", effect: "Sprawdza istnienie pliku hello.sh na dysku" },
+              { code: '  echo "✅ Plik hello.sh istnieje!"', area: "shell", tokens: [{type:"command",text:"echo"},{text:" "},{type:"string",text:'"✅ Plik hello.sh istnieje!"'}], explain: "Jeśli plik istnieje – wypisz sukces" },
+              { code: '  echo "❌ Nie znaleziono hello.sh"', area: "shell", tokens: [{type:"command",text:"echo"},{text:" "},{type:"string",text:'"❌ Nie znaleziono hello.sh"'}], explain: "Jeśli nie istnieje – wypisz błąd" },
+              { code: "fi", area: "shell", tokens: [{type:"keyword",text:"fi"}], explain: "Koniec warunku" },
+            ],
           },
         ],
       },
@@ -181,6 +200,11 @@ done
 EOF`,
             expectedOutput: () => `🪐 Cześć, Merkury!\n🪐 Cześć, Wenus!\n🪐 Cześć, Ziemia!\n🪐 Cześć, Mars!`,
             tip: "🎠 Karuzela zatrzymała się 4 razy – raz przy każdej planecie. done = karuzela się skończyła.",
+            explain: [
+              { code: "for PLANETA in Merkury Wenus Ziemia Mars; do", area: "shell", tokens: [{type:"keyword",text:"for"},{text:" "},{type:"variable",text:"PLANETA"},{text:" "},{type:"keyword",text:"in"},{text:" "},{type:"argument",text:"Merkury Wenus Ziemia Mars"},{text:"; "},{type:"keyword",text:"do"}], explain: "Karuzela: dla każdej planety z listy, włóż jej nazwę do pudełka PLANETA i wykonaj...", link: {url:"https://www.gnu.org/software/bash/manual/html_node/Looping-Constructs.html", label:"Pętle Bash – GNU"} },
+              { code: '  echo "🪐 Cześć, $PLANETA!"', area: "shell", tokens: [{type:"command",text:"echo"},{text:" "},{type:"string",text:'"🪐 Cześć, '},{type:"variable",text:"$PLANETA"},{type:"string",text:'!"'}], explain: "Wypisz powitanie z nazwą aktualnej planety", effect: "Powtarza się 4 razy – raz dla każdej planety" },
+              { code: "done", area: "shell", tokens: [{type:"keyword",text:"done"}], explain: "Koniec karuzeli – wróć na początek lub zakończ" },
+            ],
           },
           {
             instruction: "Policz od 1 do 5 z pętlą while:",
@@ -195,6 +219,14 @@ echo "🚀 Start!"
 EOF`,
             expectedOutput: () => `Odliczanie: 1\nOdliczanie: 2\nOdliczanie: 3\nOdliczanie: 4\nOdliczanie: 5\n🚀 Start!`,
             tip: "🔁 while = 'kręć się, dopóki warunek jest prawdziwy'. -le = less or equal (mniejsze lub równe 5).",
+            explain: [
+              { code: "LICZNIK=1", area: "shell", tokens: [{type:"variable",text:"LICZNIK"},{type:"operator",text:"="},{type:"argument",text:"1"}], explain: "Ustaw licznik na 1 – zaczynamy odliczanie" },
+              { code: "while [ $LICZNIK -le 5 ]; do", area: "shell", tokens: [{type:"keyword",text:"while"},{text:" "},{type:"operator",text:"["},{text:" "},{type:"variable",text:"$LICZNIK"},{text:" "},{type:"flag",text:"-le"},{text:" "},{type:"argument",text:"5"},{text:" "},{type:"operator",text:"]"},{text:"; "},{type:"keyword",text:"do"}], explain: "Dopóki licznik <= 5, powtarzaj...", link: {url:"https://www.gnu.org/software/bash/manual/html_node/Looping-Constructs.html", label:"Pętle Bash – GNU"} },
+              { code: '  echo "Odliczanie: $LICZNIK"', area: "shell", tokens: [{type:"command",text:"echo"},{text:" "},{type:"string",text:'"Odliczanie: '},{type:"variable",text:"$LICZNIK"},{type:"string",text:'"'}], explain: "Wypisz aktualną wartość licznika" },
+              { code: "  LICZNIK=$((LICZNIK + 1))", area: "shell", tokens: [{type:"variable",text:"LICZNIK"},{type:"operator",text:"="},{type:"variable",text:"$((LICZNIK + 1))"}], explain: "Zwiększ licznik o 1. $(( )) = kalkulator.", effect: "LICZNIK rośnie: 1→2→3→4→5→6 (i pętla się kończy)" },
+              { code: "done", area: "shell", tokens: [{type:"keyword",text:"done"}], explain: "Koniec pętli – wróć do while i sprawdź warunek" },
+              { code: 'echo "🚀 Start!"', area: "shell", tokens: [{type:"command",text:"echo"},{text:" "},{type:"string",text:'"🚀 Start!"'}], explain: "Po zakończeniu pętli – wypisz 'Start!'" },
+            ],
           },
         ],
       },
@@ -219,18 +251,29 @@ EOF`,
             command: "crontab -l",
             expectedOutput: () => `no crontab for user`,
             tip: "📋 crontab -l = 'pokaż moje budziki'. Na razie nie masz żadnych – pora to zmienić!",
+            explain: [
+              { code: "crontab -l", area: "cron", tokens: [{type:"command",text:"crontab"},{text:" "},{type:"flag",text:"-l"}], explain: "crontab = zarządzaj budzikami. -l = wyświetl listę (list).", effect: "Pokazuje wszystkie zaplanowane zadania użytkownika", link: {url:"https://pl.wikipedia.org/wiki/Cron", label:"Cron – Wikipedia"} },
+            ],
           },
           {
             instruction: "Dodaj budzik – co minutę zapisuj datę do pliku:",
             command: `echo '* * * * * echo "Ping: $(date)" >> /tmp/planeta-log.txt' | crontab -`,
             expectedOutput: () => ``,
             tip: "⏰ Pięć gwiazdek = 'co minutę, co godzinę, co dzień'. >> = dopisz na koniec pliku (nie kasuj starego).",
+            explain: [
+              { code: "echo '* * * * * ...' | crontab -", area: "cron", tokens: [{type:"command",text:"echo"},{text:" "},{type:"string",text:"'* * * * * ...'"},{text:" "},{type:"operator",text:"|"},{text:" "},{type:"command",text:"crontab"},{text:" "},{type:"flag",text:"-"}], explain: "Wyślij tekst do crontab. | = taśma transportowa. crontab - = wczytaj z wejścia.", effect: "Ustawia nowy harmonogram zadań" },
+              { code: "* * * * *", area: "cron", tokens: [{type:"argument",text:"* * * * *"}], explain: "5 pól: minuta godzina dzień miesiąc dzień_tygodnia. Gwiazdka = 'każdy'. Czyli: co minutę, każdego dnia.", link: {url:"https://crontab.guru/", label:"Crontab Guru – interaktywny kalkulator"} },
+              { code: 'echo "Ping: $(date)" >> /tmp/planeta-log.txt', area: "filesystem", tokens: [{type:"command",text:"echo"},{text:" "},{type:"string",text:'"Ping: '},{type:"variable",text:"$(date)"},{type:"string",text:'"'},{text:" "},{type:"operator",text:">>"},{text:" "},{type:"path",text:"/tmp/planeta-log.txt"}], explain: "Dopisz datę na koniec pliku. >> = dopisz (nie nadpisuj).", effect: "Co minutę nowa linia z datą w /tmp/planeta-log.txt" },
+            ],
           },
           {
             instruction: "Sprawdź, czy budzik został ustawiony:",
             command: "crontab -l",
             expectedOutput: () => `* * * * * echo "Ping: $(date)" >> /tmp/planeta-log.txt`,
             tip: "✅ Budzik działa! Co minutę komputer dopisze linijkę z datą do pliku. To Twój pierwszy automatyczny robot!",
+            explain: [
+              { code: "crontab -l", area: "cron", tokens: [{type:"command",text:"crontab"},{text:" "},{type:"flag",text:"-l"}], explain: "Sprawdź listę budzików – teraz powinien być jeden wpis.", effect: "Wyświetla zaplanowane zadanie z gwiazdkami" },
+            ],
           },
         ],
       },
@@ -472,7 +515,7 @@ function App() {
           {step && (!layerDone || showNextConfirm) && (
             <div className="instruction-box" style={{background:`${lesson.color}08`,border:`2px solid ${lesson.color}22`}} data-testid="instruction">
               <div className="text">🤖 {step.instruction}</div>
-              <div className="code-row"><code>{step.command}</code><CopyCode text={step.command}/>{step.explain && <ExplainButton explain={step.explain} command={step.command}/>}</div>
+              <div className="code-row"><ColorizedCode text={step.command}/><CopyCode text={step.command}/>{step.explain && <ExplainButton explain={step.explain} command={step.command}/>}</div>
             </div>
           )}
           <Terminal step={step} onSuccess={onSuccess} showNextConfirm={showNextConfirm} confirmReady={confirmReady} proceedToNext={proceedToNext} layerDone={layerDone}/>
@@ -483,6 +526,7 @@ function App() {
           )}
         </div>
         <div className="right-panel">
+          <CodeLegend/>
           <GlossaryCard/>
         </div>
       </div>
