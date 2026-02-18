@@ -581,7 +581,7 @@ function Terminal({ agent, step, onSuccess, showNextConfirm, confirmReady, proce
       </div>
       {(step||showNextConfirm||layerDone)&&(
         <div className="footer" style={{justifyContent:"space-between"}}>
-          <div>{step&&!layerDone&&<button className="hint-btn hint-ask" onClick={copyCmd} data-testid="hint-btn">💡 Podpowiedź</button>}</div>
+          <div>{step&&!showNextConfirm&&<button className="hint-btn hint-ask" onClick={copyCmd} data-testid="hint-btn">💡 Podpowiedź</button>}</div>
           <div>
             {showNextConfirm&&<button className="hint-btn" onClick={proceedToNext} data-testid="next-step-btn" disabled={!confirmReady} style={{background:layerDone?"linear-gradient(135deg,#73daca,#7aa2f7)":"linear-gradient(135deg,#f7768e,#ff9e64)",color:"#0a0b10",border:"none",fontWeight:800,opacity:confirmReady?1:0.5,cursor:confirmReady?"pointer":"default"}}>{layerDone?"🎉 Następny etap →":"✅ Następna misja →"}</button>}
           </div>
@@ -696,8 +696,6 @@ function App() {
   const layerDone = si >= layer.steps.length - 1 && done.has(`${li}-${lai}-${layer.steps.length - 1}`);
 
   const nextLayer = () => {
-    if (!confirmReady) return;
-    setConfirmReady(false);
     if (lai < lesson.layers.length - 1) { setLAI(lai + 1); setSI(0); updateURL(li, lai + 1, 0); }
     else if (li < LESSONS.length - 1) { setLI(li + 1); setLAI(0); setSI(0); updateURL(li + 1, 0, 0); }
   };
@@ -847,13 +845,13 @@ function App() {
             <p className="desc">{layer.description}</p>
             {layer.analogy && (<div className="analogy" style={{borderLeft:`4px solid ${lesson.color}`}}>{layer.analogy}</div>)}
           </div>
-          {step && !layerDone && (
+          {step && (!layerDone || showNextConfirm) && (
             <div className="instruction-box" style={{background:"#f7768e08",border:"2px solid #f7768e22"}} data-testid="instruction">
               <div className="text">🎯 {step.instruction}</div>
               <code>{step.command}</code>
             </div>
           )}
-          <Terminal agent={agent} step={layerDone ? null : step} onSuccess={onSuccess} showNextConfirm={showNextConfirm} confirmReady={confirmReady} proceedToNext={proceedToNext} layerDone={layerDone} nextLayer={nextLayer}/>
+          <Terminal agent={agent} step={(layerDone && !showNextConfirm) ? null : step} onSuccess={onSuccess} showNextConfirm={showNextConfirm} confirmReady={confirmReady} proceedToNext={proceedToNext} layerDone={layerDone} nextLayer={nextLayer}/>
         </div>
         <div className="right-panel">
           <ThreatMap agent={agent}/>

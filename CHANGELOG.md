@@ -1,3 +1,17 @@
+## [1.0.12] - 2026-02-18
+
+### Summary
+
+feat(serwer): deep code analysis engine
+
+### Other
+
+- update cyberquest/index.jsx
+- update przylot/index.jsx
+- update serwer/index.html
+- update serwer/style.css
+
+
 ## [1.0.11] - 2026-02-18
 
 ### Summary

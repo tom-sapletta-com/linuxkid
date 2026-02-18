@@ -546,7 +546,7 @@ function Terminal({ pc, step, onSuccess, aliases, incomingMessage, showNextConfi
       </div>
       {(step||showNextConfirm||layerDone)&&(
         <div className="footer" style={{justifyContent:"space-between"}}>
-          <div>{step&&!layerDone&&<button className="hint-btn hint-ask" onClick={copyCmd} data-testid="hint-btn">💡 Podpowiedź</button>}</div>
+          <div>{step&&!showNextConfirm&&<button className="hint-btn hint-ask" onClick={copyCmd} data-testid="hint-btn">💡 Podpowiedź</button>}</div>
           <div>
             {showNextConfirm&&<button className="hint-btn" onClick={proceedToNext} data-testid="next-step-btn" disabled={!confirmReady} style={{background:layerDone?"linear-gradient(135deg,#73daca,#7aa2f7)":"linear-gradient(135deg,#7aa2f7,#73daca)",color:"#0a0b10",border:"none",fontWeight:800,opacity:confirmReady?1:0.5,cursor:confirmReady?"pointer":"default"}}>{layerDone?"🎉 Następny etap →":"✅ Następny krok →"}</button>}
           </div>
@@ -682,8 +682,6 @@ function App(){
   const layerDone=si>=layer.steps.length-1&&done.has(`${li}-${lai}-${layer.steps.length-1}`);
   
   const nextLayer=()=>{
-    if(!confirmReady)return;
-    setConfirmReady(false);
     if(lai<lesson.layers.length-1){
       setLAI(lai+1);setSI(0);
       updateURL(li, lai+1, 0);
@@ -844,13 +842,13 @@ function App(){
             <p className="desc">{layer.description}</p>
             {layer.analogy&&(<div className="analogy" style={{borderLeft:`4px solid ${lesson.color}`}}>{layer.analogy}</div>)}
           </div>
-          {step&&!layerDone&&(
+          {step&&(!layerDone||showNextConfirm)&&(
             <div className="instruction-box" style={{background:"#7aa2f708",border:"2px solid #7aa2f722"}} data-testid="instruction">
               <div className="text">👉 {step.instruction}</div>
               <code>{step.command}</code>
             </div>
           )}
-          <Terminal pc={pc} step={layerDone?null:step} onSuccess={onSuccess} aliases={aliases} showNextConfirm={showNextConfirm} confirmReady={confirmReady} proceedToNext={proceedToNext} layerDone={layerDone} nextLayer={nextLayer}/>
+          <Terminal pc={pc} step={(layerDone&&!showNextConfirm)?null:step} onSuccess={onSuccess} aliases={aliases} showNextConfirm={showNextConfirm} confirmReady={confirmReady} proceedToNext={proceedToNext} layerDone={layerDone} nextLayer={nextLayer}/>
           
           {/* Second terminal for receiver in talking layer */}
           {layer.id === "talking" && (
