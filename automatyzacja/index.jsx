@@ -398,7 +398,7 @@ function App() {
               <div className="code-row"><code>{step.command}</code><CopyCode text={step.command}/></div>
             </div>
           )}
-          <Terminal step={(layerDone && !showNextConfirm) ? null : step} onSuccess={onSuccess} showNextConfirm={showNextConfirm} confirmReady={confirmReady} proceedToNext={proceedToNext} layerDone={layerDone}/>
+          <Terminal step={step} onSuccess={onSuccess} showNextConfirm={showNextConfirm} confirmReady={confirmReady} proceedToNext={proceedToNext} layerDone={layerDone}/>
           {step?.tip && (
             <div style={{background:`${lesson.color}08`,border:`2px solid ${lesson.color}22`,borderRadius:"14px",padding:"14px",marginTop:"16px"}}>
               <div style={{fontSize:"14px",color:"#a9b1d6",lineHeight:"1.7"}}>{step.tip}</div>

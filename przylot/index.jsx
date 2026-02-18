@@ -892,7 +892,7 @@ function App(){
               <div className="code-row"><code>{step.command}</code><CopyCode text={step.command}/></div>
             </div>
           )}
-          <Terminal pc={pc} step={(layerDone&&!showNextConfirm)?null:step} onSuccess={onSuccess} aliases={aliases} showNextConfirm={showNextConfirm} confirmReady={confirmReady} proceedToNext={proceedToNext} layerDone={layerDone} nextLayer={nextLayer}/>
+          <Terminal pc={pc} step={step} onSuccess={onSuccess} aliases={aliases} showNextConfirm={showNextConfirm} confirmReady={confirmReady} proceedToNext={proceedToNext} layerDone={layerDone} nextLayer={nextLayer}/>
           
           {/* Second terminal for receiver in talking layer */}
           {layer.id === "talking" && (
