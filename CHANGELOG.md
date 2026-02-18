@@ -1,3 +1,16 @@
+## [1.0.8] - 2026-02-18
+
+### Summary
+
+docs(docs): deep code analysis engine with 2 supporting modules
+
+### Docs
+
+- docs: update README
+- docs: update README
+- docs: update TODO.md
+
+
 ## [1.0.7] - 2026-02-18
 
 ### Summary

@@ -84,18 +84,29 @@ Każda grupa daje inne prawa – dokładnie jak w Linuxie, gdzie przynależnoś�
 
 ```
 linuxkid/
-├── przylot/              # Część 1: Przylot na Planetę X (podstawy terminala)
+├── index.html            # 🪐 Centrum Misji – strona startowa z listą wszystkich misji
+├── style.css             # Style dla strony głównej
+│
+├── przylot/              # ✅ Misja 01: Przylot na Planetę X (podstawy terminala)
 │   ├── index.html        # HTML (ładuje style.css + index.jsx)
 │   ├── style.css         # Style CSS
 │   ├── index.jsx         # Aplikacja React
+│   ├── playwright.config.js
 │   └── tests/
 │       └── app.spec.js   # Testy E2E
-├── cyberquest/           # Część 2: CyberQuest (cyberbezpieczeństwo)
-│   ├── index.html        # HTML
-│   ├── style.css         # Style CSS
-│   ├── index.jsx         # Aplikacja React
+│
+├── cyberquest/           # ✅ Misja 02: CyberQuest (cyberbezpieczeństwo)
+│   ├── index.html
+│   ├── style.css
+│   ├── index.jsx
+│   ├── playwright.config.js
 │   └── tests/
-│       └── app.spec.js   # Testy E2E
+│       └── app.spec.js
+│
+├── serwer/               # 🔧 Misja 03: Serwer Planety X (w przygotowaniu)
+│   ├── README.md         # Opis misji i analogii
+│   └── TODO.md           # Plan implementacji dla deweloperów
+│
 ├── package.json          # Zależności (Playwright)
 ├── README.md             # Dokumentacja główna
 └── LICENSE
@@ -104,6 +115,17 @@ linuxkid/
 **Stack:** React 18 (CDN) + Babel (transpilacja w przeglądarce) + Vanilla CSS
 
 **Standaryzacja:** Każdy projekt ma identyczną strukturę: `index.html` + `style.css` + `index.jsx`
+
+## 🗺️ Mapa misji
+
+| # | Folder | Tytuł | Status | Temat |
+|---|---|---|---|---|
+| 01 | `przylot/` | Przylot na Planetę X | ✅ Dostępna | Terminal, sieć, pliki, uprawnienia |
+| 02 | `cyberquest/` | CyberQuest | ✅ Dostępna | Firewall, SSH, szyfrowanie, logi |
+| 03 | `serwer/` | Serwer Planety X | 🔧 W przygotowaniu | Nginx, DNS, SSL, Docker |
+| 04 | *(planowane)* | Automatyzacja | 📋 Planowana | Bash, Cron, Ansible, CI/CD |
+| 05 | *(planowane)* | Konteneryzacja | 📋 Planowana | Docker, Kubernetes, Helm |
+| 06 | *(planowane)* | Kod Planety X | 📋 Planowana | Python, API, SQLite, Git |
 
 ## License
 
