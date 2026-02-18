@@ -4,3 +4,6 @@ test-results/
 .idea/
 *.db
 progress.db
+.env
+electron/node_modules/
+dist-electron/
