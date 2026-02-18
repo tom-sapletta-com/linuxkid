@@ -471,7 +471,7 @@ const LESSONS = [
 const ALL_LAYERS = LESSONS.flatMap(l => l.layers);
 const TOTAL_STEPS = ALL_LAYERS.reduce((s, l) => s + l.steps.length, 0);
 
-function Terminal({ pc, step, onSuccess, aliases, incomingMessage, showNextConfirm, proceedToNext, layerDone, nextLayer }) {
+function Terminal({ pc, step, onSuccess, aliases, incomingMessage, showNextConfirm, confirmReady, proceedToNext, layerDone, nextLayer }) {
   const [history, setHistory] = useState([]);
   const [input, setInput] = useState("");
   const [hint, setHint] = useState(false);
@@ -548,8 +548,7 @@ function Terminal({ pc, step, onSuccess, aliases, incomingMessage, showNextConfi
         <div className="footer" style={{justifyContent:"space-between"}}>
           <div>{step&&!layerDone&&<button className="hint-btn hint-ask" onClick={copyCmd} data-testid="hint-btn">💡 Podpowiedź</button>}</div>
           <div>
-            {showNextConfirm&&<button className="hint-btn" onClick={proceedToNext} data-testid="next-step-btn" style={{background:"linear-gradient(135deg,#7aa2f7,#73daca)",color:"#0a0b10",border:"none",fontWeight:800}}>✅ Następny krok →</button>}
-            {layerDone&&<button className="hint-btn" onClick={nextLayer} data-testid="next-layer" style={{background:"linear-gradient(135deg,#73daca,#7aa2f7)",color:"#0a0b10",border:"none",fontWeight:800}}>🎉 Następny etap →</button>}
+            {showNextConfirm&&<button className="hint-btn" onClick={proceedToNext} data-testid="next-step-btn" disabled={!confirmReady} style={{background:layerDone?"linear-gradient(135deg,#73daca,#7aa2f7)":"linear-gradient(135deg,#7aa2f7,#73daca)",color:"#0a0b10",border:"none",fontWeight:800,opacity:confirmReady?1:0.5,cursor:confirmReady?"pointer":"default"}}>{layerDone?"🎉 Następny etap →":"✅ Następny krok →"}</button>}
           </div>
         </div>
       )}
@@ -683,6 +682,8 @@ function App(){
   const layerDone=si>=layer.steps.length-1&&done.has(`${li}-${lai}-${layer.steps.length-1}`);
   
   const nextLayer=()=>{
+    if(!confirmReady)return;
+    setConfirmReady(false);
     if(lai<lesson.layers.length-1){
       setLAI(lai+1);setSI(0);
       updateURL(li, lai+1, 0);
@@ -706,7 +707,9 @@ function App(){
       }
     }
     
-    if(si<layer.steps.length-1){setShowNextConfirm(true);setConfirmReady(false);setTimeout(()=>setConfirmReady(true),700);}
+    setConfirmReady(false);
+    setTimeout(()=>setConfirmReady(true),700);
+    setShowNextConfirm(true);
   };
   
   const goTo=(l,la)=>{
@@ -717,8 +720,12 @@ function App(){
   const proceedToNext=()=>{
     if(!confirmReady)return;
     setShowNextConfirm(false);setConfirmReady(false);
-    setSI(si+1);
-    updateURL(li, lai, si+1);
+    if(si<layer.steps.length-1){
+      setSI(si+1);
+      updateURL(li, lai, si+1);
+    }else{
+      nextLayer();
+    }
   };
 
   if(picking){
@@ -799,7 +806,7 @@ function App(){
         <div className="logo">
           <button className="menu-toggle" onClick={()=>setMenuOpen(!menuOpen)} data-testid="menu-toggle">☰</button>
           <span className="logo-icon">🚗</span>
-          <span className="logo-text">Planeta X</span>
+          <a href="../index.html" style={{textDecoration:"none",color:"inherit"}}><span className="logo-text">Planeta X</span></a>
         </div>
         <div className="nav-center">
           <div className="step-dots">
