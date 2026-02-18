@@ -1,3 +1,16 @@
+## [1.0.9] - 2026-02-18
+
+### Summary
+
+refactor(tests): deep code analysis engine
+
+### Other
+
+- update cyberquest/index.jsx
+- update przylot/index.jsx
+- update przylot/tests/app.spec.js
+
+
 ## [1.0.8] - 2026-02-18
 
 ### Summary

@@ -124,11 +124,12 @@ test.describe('Szkoła Terminala - Terminal Interaction', () => {
     await input.fill('whoami');
     await input.press('Enter');
 
+    // 'Następny etap' button appears in terminal footer after last step
     await expect(page.getByTestId('next-layer')).toBeVisible({ timeout: 5000 });
     await page.getByTestId('next-layer').click();
 
     // Should now be on the network lesson
-    await expect(page.getByTestId('instruction')).toContainText('arp');
+    await expect(page.getByTestId('instruction')).toContainText('arp', { timeout: 5000 });
   });
 });
 

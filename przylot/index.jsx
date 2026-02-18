@@ -471,7 +471,7 @@ const LESSONS = [
 const ALL_LAYERS = LESSONS.flatMap(l => l.layers);
 const TOTAL_STEPS = ALL_LAYERS.reduce((s, l) => s + l.steps.length, 0);
 
-function Terminal({ pc, step, onSuccess, aliases, incomingMessage, showNextConfirm, proceedToNext }) {
+function Terminal({ pc, step, onSuccess, aliases, incomingMessage, showNextConfirm, proceedToNext, layerDone, nextLayer }) {
   const [history, setHistory] = useState([]);
   const [input, setInput] = useState("");
   const [hint, setHint] = useState(false);
@@ -537,10 +537,13 @@ function Terminal({ pc, step, onSuccess, aliases, incomingMessage, showNextConfi
             data-testid="terminal-input" autoComplete="off" autoCapitalize="off"/>
         </div>
       </div>
-      {(step||showNextConfirm)&&(
+      {(step||showNextConfirm||layerDone)&&(
         <div className="footer" style={{justifyContent:"space-between"}}>
-          <div>{step&&<button className="hint-btn hint-ask" onClick={copyCmd} data-testid="hint-btn">💡 Podpowiedź</button>}</div>
-          <div>{showNextConfirm&&<button className="hint-btn" onClick={proceedToNext} data-testid="next-step-btn" style={{background:"linear-gradient(135deg,#7aa2f7,#73daca)",color:"#0a0b10",border:"none",fontWeight:800}}>✅ Następny krok →</button>}</div>
+          <div>{step&&!layerDone&&<button className="hint-btn hint-ask" onClick={copyCmd} data-testid="hint-btn">💡 Podpowiedź</button>}</div>
+          <div>
+            {showNextConfirm&&<button className="hint-btn" onClick={proceedToNext} data-testid="next-step-btn" style={{background:"linear-gradient(135deg,#7aa2f7,#73daca)",color:"#0a0b10",border:"none",fontWeight:800}}>✅ Następny krok →</button>}
+            {layerDone&&<button className="hint-btn" onClick={nextLayer} data-testid="next-layer" style={{background:"linear-gradient(135deg,#73daca,#7aa2f7)",color:"#0a0b10",border:"none",fontWeight:800}}>🎉 Następny etap →</button>}
+          </div>
         </div>
       )}
     </div>
@@ -600,7 +603,6 @@ function App(){
   const[aliases,setAliases]=useState([]);
   const[picking,setPicking]=useState(true);
   const[showTheoryIntro,setShowTheoryIntro]=useState(false);
-  const[layerComplete,setLayerComplete]=useState(false);
   const[receiverMessage,setReceiverMessage]=useState(null);
   const[showNextConfirm,setShowNextConfirm]=useState(false);
   const[menuOpen,setMenuOpen]=useState(false);
@@ -651,7 +653,6 @@ function App(){
         setLAI(la);
         setSI(s);
         setShowTheoryIntro(false);
-        setLayerComplete(false);
         setShowNextConfirm(false);
       }
     };
@@ -673,6 +674,16 @@ function App(){
   const lesson=LESSONS[li],layer=lesson?.layers[lai],step=layer?.steps[si];
   const layerDone=si>=layer.steps.length-1&&done.has(`${li}-${lai}-${layer.steps.length-1}`);
   
+  const nextLayer=()=>{
+    if(lai<lesson.layers.length-1){
+      setLAI(lai+1);setSI(0);
+      updateURL(li, lai+1, 0);
+    }else if(li<LESSONS.length-1){
+      setLI(li+1);setLAI(0);setSI(0);
+      updateURL(li+1, 0, 0);
+    }
+  };
+
   const onSuccess=()=>{
     const key=`${li}-${lai}-${si}`;
     setDone(p=>new Set([...p,key]));
@@ -687,24 +698,11 @@ function App(){
       }
     }
     
-    if(si<layer.steps.length-1)setShowNextConfirm(true);else{
-      setLayerComplete(true);
-    }
-  };
-  
-  const nextLayer=()=>{
-    setLayerComplete(false);
-    if(lai<lesson.layers.length-1){
-      setLAI(lai+1);setSI(0);
-      updateURL(li, lai+1, 0);
-    }else if(li<LESSONS.length-1){
-      setLI(li+1);setLAI(0);setSI(0);
-      updateURL(li+1, 0, 0);
-    }
+    if(si<layer.steps.length-1)setShowNextConfirm(true);
   };
   
   const goTo=(l,la)=>{
-    setLI(l);setLAI(la);setSI(0);setLayerComplete(false);setMenuOpen(false);
+    setLI(l);setLAI(la);setSI(0);setMenuOpen(false);
     updateURL(l, la, 0);
   };
   
@@ -836,7 +834,7 @@ function App(){
               <code>{step.command}</code>
             </div>
           )}
-          <Terminal pc={pc} step={layerDone?null:step} onSuccess={onSuccess} aliases={aliases} showNextConfirm={showNextConfirm} proceedToNext={proceedToNext}/>
+          <Terminal pc={pc} step={layerDone?null:step} onSuccess={onSuccess} aliases={aliases} showNextConfirm={showNextConfirm} proceedToNext={proceedToNext} layerDone={layerDone} nextLayer={nextLayer}/>
           
           {/* Second terminal for receiver in talking layer */}
           {layer.id === "talking" && (
@@ -857,12 +855,6 @@ function App(){
             <div className="aliases-box" style={{background:"#f59e0b0a",border:"2px solid #f59e0b22"}}>
               <div className="title" style={{color:"#f59e0b"}}>🏷️ Twoje naklejki</div>
               {aliases.map((a,i)=>(<div key={i} className="item"><span style={{color:"#73daca"}}>{a.name}</span> <span style={{color:"#5a6082"}}>→</span> {a.exp}</div>))}
-            </div>
-          )}
-          {(layerComplete)&&(
-            <div className="confirm-dialog" style={{background:"#73daca08",border:"2px solid #73daca22",borderRadius:"14px",padding:"16px",marginBottom:"16px",textAlign:"center"}}>
-              <div className="text" style={{fontSize:"16px",fontWeight:"700",color:"#c0caf5",marginBottom:"12px"}}>🎉 Ukończono etap!</div>
-              <button className="next-btn" onClick={nextLayer} data-testid="next-layer" style={{background:"linear-gradient(135deg,#73daca,#7aa2f7)",color:"#0a0b10",border:"none",borderRadius:"12px",padding:"12px 24px",fontWeight:"800",fontSize:"16px",cursor:"pointer",fontFamily:"inherit"}}>Następny etap →</button>
             </div>
           )}
         </div>

@@ -510,7 +510,7 @@ const ALL_LAYERS = LESSONS.flatMap(l => l.layers);
 const TOTAL_STEPS = ALL_LAYERS.reduce((s, l) => s + l.steps.length, 0);
 
 /* ───── Terminal Component ───── */
-function Terminal({ agent, step, onSuccess, showNextConfirm, proceedToNext }) {
+function Terminal({ agent, step, onSuccess, showNextConfirm, proceedToNext, layerDone, nextLayer }) {
   const [history, setHistory] = useState([]);
   const [input, setInput] = useState("");
   const [hint, setHint] = useState(false);
@@ -572,10 +572,13 @@ function Terminal({ agent, step, onSuccess, showNextConfirm, proceedToNext }) {
             data-testid="terminal-input" autoComplete="off" autoCapitalize="off"/>
         </div>
       </div>
-      {(step||showNextConfirm)&&(
+      {(step||showNextConfirm||layerDone)&&(
         <div className="footer" style={{justifyContent:"space-between"}}>
-          <div>{step&&<button className="hint-btn hint-ask" onClick={copyCmd} data-testid="hint-btn">💡 Podpowiedź</button>}</div>
-          <div>{showNextConfirm&&<button className="hint-btn" onClick={proceedToNext} data-testid="next-step-btn" style={{background:"linear-gradient(135deg,#f7768e,#ff9e64)",color:"#0a0b10",border:"none",fontWeight:800}}>✅ Następna misja →</button>}</div>
+          <div>{step&&!layerDone&&<button className="hint-btn hint-ask" onClick={copyCmd} data-testid="hint-btn">💡 Podpowiedź</button>}</div>
+          <div>
+            {showNextConfirm&&<button className="hint-btn" onClick={proceedToNext} data-testid="next-step-btn" style={{background:"linear-gradient(135deg,#f7768e,#ff9e64)",color:"#0a0b10",border:"none",fontWeight:800}}>✅ Następna misja →</button>}
+            {layerDone&&<button className="hint-btn" onClick={nextLayer} data-testid="next-layer" style={{background:"linear-gradient(135deg,#73daca,#7aa2f7)",color:"#0a0b10",border:"none",fontWeight:800}}>🎉 Następny etap →</button>}
+          </div>
         </div>
       )}
     </div>
@@ -641,7 +644,6 @@ function App() {
   const [done, setDone] = useState(new Set());
   const [picking, setPicking] = useState(true);
   const [showTheoryIntro, setShowTheoryIntro] = useState(false);
-  const [layerComplete, setLayerComplete] = useState(false);
   const [showNextConfirm, setShowNextConfirm] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -672,7 +674,7 @@ function App() {
     const handlePopState = () => {
       const { isIntro, li: l, lai: la, si: s } = parseURL();
       if (isIntro) { setShowTheoryIntro(true); setPicking(false); }
-      else { setLI(l); setLAI(la); setSI(s); setShowTheoryIntro(false); setLayerComplete(false); setShowNextConfirm(false); }
+      else { setLI(l); setLAI(la); setSI(s); setShowTheoryIntro(false); setShowNextConfirm(false); }
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
@@ -686,23 +688,19 @@ function App() {
   const lesson = LESSONS[li], layer = lesson?.layers[lai], step = layer?.steps[si];
   const layerDone = si >= layer.steps.length - 1 && done.has(`${li}-${lai}-${layer.steps.length - 1}`);
 
-  const onSuccess = () => {
-    const key = `${li}-${lai}-${si}`;
-    setDone(p => new Set([...p, key]));
-    if (si < layer.steps.length - 1) setShowNextConfirm(true);
-    else {
-      setLayerComplete(true);
-    }
-  };
-
   const nextLayer = () => {
-    setLayerComplete(false);
     if (lai < lesson.layers.length - 1) { setLAI(lai + 1); setSI(0); updateURL(li, lai + 1, 0); }
     else if (li < LESSONS.length - 1) { setLI(li + 1); setLAI(0); setSI(0); updateURL(li + 1, 0, 0); }
   };
 
+  const onSuccess = () => {
+    const key = `${li}-${lai}-${si}`;
+    setDone(p => new Set([...p, key]));
+    if (si < layer.steps.length - 1) setShowNextConfirm(true);
+  };
+
   const goTo = (l, la) => {
-    setLI(l); setLAI(la); setSI(0); setLayerComplete(false); setMenuOpen(false);
+    setLI(l); setLAI(la); setSI(0); setMenuOpen(false);
     updateURL(l, la, 0);
   };
 
@@ -839,13 +837,7 @@ function App() {
               <code>{step.command}</code>
             </div>
           )}
-          <Terminal agent={agent} step={layerDone ? null : step} onSuccess={onSuccess} showNextConfirm={showNextConfirm} proceedToNext={proceedToNext}/>
-          {layerComplete && (
-            <div style={{background:"#73daca08",border:"2px solid #73daca22",borderRadius:"14px",padding:"16px",marginTop:"16px",textAlign:"center"}}>
-              <div style={{fontSize:"16px",fontWeight:"700",color:"#c0caf5",marginBottom:"12px"}}>🎉 Etap ukończony!</div>
-              <button onClick={nextLayer} data-testid="next-layer" style={{background:"linear-gradient(135deg,#73daca,#7aa2f7)",color:"#0a0b10",border:"none",borderRadius:"12px",padding:"12px 24px",fontWeight:"800",fontSize:"16px",cursor:"pointer",fontFamily:"inherit"}}>Następny etap →</button>
-            </div>
-          )}
+          <Terminal agent={agent} step={layerDone ? null : step} onSuccess={onSuccess} showNextConfirm={showNextConfirm} proceedToNext={proceedToNext} layerDone={layerDone} nextLayer={nextLayer}/>
         </div>
         <div className="right-panel">
           <ThreatMap agent={agent}/>

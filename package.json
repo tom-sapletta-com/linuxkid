@@ -1,6 +1,6 @@
 {
   "name": "planetax",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Planeta X - Interactive terminal learning app using car/city analogies",
   "main": "index.jsx",
   "scripts": {
