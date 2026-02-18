@@ -2,6 +2,8 @@
 
 Interactive terminal learning app using car/city analogies. Learn Linux commands while traveling through a virtual planet!
 
+> 🛡️ **Kontynuacja:** [Planeta X: CyberQuest](cyberquest/) – zostań tajnym agentem cyberbezpieczeństwa!
+
 ## 🗺️ Legenda analogii: Linux → Świat realny
 
 Projekt uczy architektury Linuxa przez porównania do świata samochodów, dróg i miasta.
@@ -82,15 +84,26 @@ Każda grupa daje inne prawa – dokładnie jak w Linuxie, gdzie przynależnoś�
 
 ```
 linuxkid/
-├── index.html      # Strona główna z CSS
-├── index.jsx       # Aplikacja React (logika, lekcje, terminal)
-├── package.json    # Zależności (Playwright do testów)
-├── tests/
-│   └── app.spec.js # Testy E2E
-└── README.md       # Dokumentacja
+├── przylot/              # Część 1: Przylot na Planetę X (podstawy terminala)
+│   ├── index.html        # HTML (ładuje style.css + index.jsx)
+│   ├── style.css         # Style CSS
+│   ├── index.jsx         # Aplikacja React
+│   └── tests/
+│       └── app.spec.js   # Testy E2E
+├── cyberquest/           # Część 2: CyberQuest (cyberbezpieczeństwo)
+│   ├── index.html        # HTML
+│   ├── style.css         # Style CSS
+│   ├── index.jsx         # Aplikacja React
+│   └── tests/
+│       └── app.spec.js   # Testy E2E
+├── package.json          # Zależności (Playwright)
+├── README.md             # Dokumentacja główna
+└── LICENSE
 ```
 
 **Stack:** React 18 (CDN) + Babel (transpilacja w przeglądarce) + Vanilla CSS
+
+**Standaryzacja:** Każdy projekt ma identyczną strukturę: `index.html` + `style.css` + `index.jsx`
 
 ## License
 

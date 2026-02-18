@@ -471,21 +471,18 @@ const LESSONS = [
 const ALL_LAYERS = LESSONS.flatMap(l => l.layers);
 const TOTAL_STEPS = ALL_LAYERS.reduce((s, l) => s + l.steps.length, 0);
 
-function Terminal({ pc, step, onSuccess, aliases, celebration, incomingMessage }) {
+function Terminal({ pc, step, onSuccess, aliases, incomingMessage, showNextConfirm, proceedToNext }) {
   const [history, setHistory] = useState([]);
   const [input, setInput] = useState("");
   const [hint, setHint] = useState(false);
   const inputRef = useRef(null);
   const bodyRef = useRef(null);
-  useEffect(() => { setHistory([]); setInput(""); setHint(false); }, [step?.command]);
-  useEffect(() => { bodyRef.current && (bodyRef.current.scrollTop = bodyRef.current.scrollHeight); }, [history]);
+  const successTimerRef = useRef(null);
   useEffect(() => {
-    if (celebration) {
-      const cmd = `echo "${celebration}"`;
-      setHistory(h => [...h, { t: "in", v: cmd }, { t: "out", v: celebration, ok: true }]);
-      setTimeout(() => bodyRef.current.scrollTop = bodyRef.current.scrollHeight, 50);
-    }
-  }, [celebration]);
+    if (successTimerRef.current) { clearTimeout(successTimerRef.current); successTimerRef.current = null; }
+    setHistory([]); setInput(""); setHint(false);
+  }, [step?.command]);
+  useEffect(() => { bodyRef.current && (bodyRef.current.scrollTop = bodyRef.current.scrollHeight); }, [history]);
   useEffect(() => {
     if (incomingMessage) {
       setHistory(h => [...h, { t: "in", v: incomingMessage.from, isRemote: true }, { t: "out", v: incomingMessage.msg, ok: true }]);
@@ -501,38 +498,21 @@ function Terminal({ pc, step, onSuccess, aliases, celebration, incomingMessage }
       else { const a = aliases.find(x => x.name === cmd.split(" ")[0]); if (a) { out = `→ ${a.exp} ${cmd.split(" ").slice(1).join(" ")}\n${step.expectedOutput(pc) || "✅"}`; ok = true; } else out = `❓ Wpisz: ${step.command}`; }
     }
     setHistory(h => [...h, { t: "in", v: cmd }, ...(out ? [{ t: "out", v: out, ok }] : [])]);
-    if (ok && onSuccess) setTimeout(onSuccess, 500);
+    if (ok && onSuccess) { successTimerRef.current = setTimeout(onSuccess, 500); }
     setInput(""); setHint(false);
   }, [input, step, pc, aliases, onSuccess]);
-  const prompt = `${pc.user}@${pc.name}:~$`;
-  const copyCmd = () => { 
-    setInput(step.command); 
-    inputRef.current?.focus();
-    setTimeout(() => {
-      const cmd = step.command;
-      setInput(cmd);
-      setTimeout(() => {
-        // Execute the command directly
-        let out = "", ok = false;
-        if (step) {
-          const norm = s => s.replace(/\s+/g, " ").trim();
-          if (norm(cmd) === norm(step.command) || cmd.startsWith(step.command.split(" ")[0])) { 
-            out = step.expectedOutput(pc); 
-            ok = true; 
-          }
-          else { 
-            const a = aliases.find(x => x.name === cmd.split(" ")[0]); 
-            if (a) { 
-              out = `→ ${a.exp} ${cmd.split(" ").slice(1).join(" ")}\n${step.expectedOutput(pc)||"✅"}`; 
-              ok = true; 
-            } else out = `❓ Wpisz: ${step.command}`; 
-          }
-        }
-        setHistory(h => [...h, { t:"in", v:cmd }, ...(out?[{t:"out",v:out,ok}]:[])]);
-        if (ok && onSuccess) setTimeout(onSuccess, 500);
-        setInput(""); setHint(false);
-      }, 100);
-    }, 50);
+  const prompt = "~$";
+  const copyCmd = () => {
+    const cmd = step.command;
+    let out = "", ok = false;
+    if (step) {
+      const norm = s => s.replace(/\s+/g, " ").trim();
+      if (norm(cmd) === norm(step.command) || cmd.startsWith(step.command.split(" ")[0])) { out = step.expectedOutput(pc); ok = true; }
+      else { const a = aliases.find(x => x.name === cmd.split(" ")[0]); if (a) { out = `→ ${a.exp} ${cmd.split(" ").slice(1).join(" ")}\n${step.expectedOutput(pc)||"✅"}`; ok = true; } else out = `❓ Wpisz: ${step.command}`; }
+    }
+    setHistory(h => [...h, { t:"in", v:cmd }, ...(out?[{t:"out",v:out,ok}]:[])]);
+    if (ok && onSuccess) { successTimerRef.current = setTimeout(onSuccess, 500); }
+    setInput(""); setHint(false);
   };
   return (
     <div className="terminal" data-testid="terminal">
@@ -540,7 +520,7 @@ function Terminal({ pc, step, onSuccess, aliases, celebration, incomingMessage }
         <div className="dot" style={{background:"#ff5f57"}}/>
         <div className="dot" style={{background:"#febc2e"}}/>
         <div className="dot" style={{background:"#28c840"}}/>
-        <span className="bar-label">{pc.emoji} {pc.name}</span>
+        <span className="bar-label">{pc.emoji}</span>
       </div>
       <div className="body" ref={bodyRef} onClick={()=>inputRef.current?.focus()}>
         <div className="placeholder">Wpisz komendę i naciśnij Enter ⏎</div>
@@ -557,13 +537,10 @@ function Terminal({ pc, step, onSuccess, aliases, celebration, incomingMessage }
             data-testid="terminal-input" autoComplete="off" autoCapitalize="off"/>
         </div>
       </div>
-      {step&&(
-        <div className="footer">
-          {hint?(
-            <button className="hint-btn hint-show" onClick={copyCmd} data-testid="hint-copy">📋 {step.command}</button>
-          ):(
-            <button className="hint-btn hint-ask" onClick={()=>setHint(true)} data-testid="hint-btn">💡 Podpowiedź</button>
-          )}
+      {(step||showNextConfirm)&&(
+        <div className="footer" style={{justifyContent:"space-between"}}>
+          <div>{step&&<button className="hint-btn hint-ask" onClick={copyCmd} data-testid="hint-btn">💡 Podpowiedź</button>}</div>
+          <div>{showNextConfirm&&<button className="hint-btn" onClick={proceedToNext} data-testid="next-step-btn" style={{background:"linear-gradient(135deg,#7aa2f7,#73daca)",color:"#0a0b10",border:"none",fontWeight:800}}>✅ Następny krok →</button>}</div>
         </div>
       )}
     </div>
@@ -623,7 +600,6 @@ function App(){
   const[aliases,setAliases]=useState([]);
   const[picking,setPicking]=useState(true);
   const[showTheoryIntro,setShowTheoryIntro]=useState(false);
-  const[celebrationMsg,setCelebrationMsg]=useState(null);
   const[layerComplete,setLayerComplete]=useState(false);
   const[receiverMessage,setReceiverMessage]=useState(null);
   const[showNextConfirm,setShowNextConfirm]=useState(false);
@@ -712,21 +688,11 @@ function App(){
     }
     
     if(si<layer.steps.length-1)setShowNextConfirm(true);else{
-      const celebrations = [
-        "🎉 Super! Teraz spróbuj: echo 'Jestem mistrzem terminala!'",
-        "🚀 Brawo! Wpisz: echo 'Umiem sterować komputerem!'",
-        "⭐ Świetnie! Spróbuj: echo 'Linux to prosta sprawa!'",
-        "🎯 Doskonale! Wpisz: echo 'Kolejny etap czeka!'",
-        "🏆 Tak trzymaj! Spróbuj: echo 'Jadę dalej!'"
-      ];
-      setCelebrationMsg(celebrations[Math.floor(Math.random()*celebrations.length)]);
-      setTimeout(()=>setCelebrationMsg(null),5000);
       setLayerComplete(true);
     }
   };
   
   const nextLayer=()=>{
-    setCelebrationMsg(null);
     setLayerComplete(false);
     if(lai<lesson.layers.length-1){
       setLAI(lai+1);setSI(0);
@@ -738,7 +704,7 @@ function App(){
   };
   
   const goTo=(l,la)=>{
-    setLI(l);setLAI(la);setSI(0);setCelebrationMsg(null);setLayerComplete(false);setMenuOpen(false);
+    setLI(l);setLAI(la);setSI(0);setLayerComplete(false);setMenuOpen(false);
     updateURL(l, la, 0);
   };
   
@@ -828,6 +794,14 @@ function App(){
           <span className="logo-icon">🚗</span>
           <span className="logo-text">Planeta X</span>
         </div>
+        <div className="nav-center">
+          <div className="step-dots">
+            <span className="label">Krok:</span>
+            {layer.steps.map((_,s)=>{const d=done.has(`${li}-${lai}-${s}`),a=s===si;return<button key={s} onClick={()=>setSI(s)} className={`step-dot${a?" active":""}`} style={{background:d?"#73daca":a?"#7aa2f7":"#1e2030"}} data-testid={`step-${s}`}/>;
+            })}
+            <span className="label">{si+1}/{layer.steps.length}</span>
+          </div>
+        </div>
         <div style={{display:"flex",alignItems:"center",gap:14}}>
           <span className="progress-text">{done.size}/{TOTAL_STEPS}</span>
           <div className="progress-bar"><div className="progress-fill" style={{width:`${(done.size/TOTAL_STEPS)*100}%`}}/></div>
@@ -852,16 +826,9 @@ function App(){
         </div>
         <div className="content">
           <div className="lesson-header" style={{background:`${lesson.color}08`,border:`2px solid ${lesson.color}22`}}>
-            <div className="cat" style={{color:lesson.color}}>{layer.categoryLabel}</div>
             <h2>{layer.title}</h2>
             <p className="desc">{layer.description}</p>
             {layer.analogy&&(<div className="analogy" style={{borderLeft:`4px solid ${lesson.color}`}}>{layer.analogy}</div>)}
-          </div>
-          <div className="step-dots">
-            <span className="label">Krok:</span>
-            {layer.steps.map((_,s)=>{const d=done.has(`${li}-${lai}-${s}`),a=s===si;return<button key={s} onClick={()=>setSI(s)} className={`step-dot${a?" active":""}`} style={{background:d?"#73daca":a?"#7aa2f7":"#1e2030"}} data-testid={`step-${s}`}/>;
-            })}
-            <span className="label">{si+1}/{layer.steps.length}</span>
           </div>
           {step&&!layerDone&&(
             <div className="instruction-box" style={{background:"#7aa2f708",border:"2px solid #7aa2f722"}} data-testid="instruction">
@@ -869,7 +836,7 @@ function App(){
               <code>{step.command}</code>
             </div>
           )}
-          <Terminal pc={pc} step={layerDone?null:step} onSuccess={onSuccess} aliases={aliases} celebration={celebrationMsg}/>
+          <Terminal pc={pc} step={layerDone?null:step} onSuccess={onSuccess} aliases={aliases} showNextConfirm={showNextConfirm} proceedToNext={proceedToNext}/>
           
           {/* Second terminal for receiver in talking layer */}
           {layer.id === "talking" && (
@@ -884,12 +851,6 @@ function App(){
                 aliases={[]} 
                 incomingMessage={receiverMessage}
               />
-            </div>
-          )}
-          {showNextConfirm&&(
-            <div className="confirm-dialog" style={{background:"#7aa2f708",border:"2px solid #7aa2f722",borderRadius:"14px",padding:"16px",marginBottom:"16px",textAlign:"center"}}>
-              <div className="text" style={{fontSize:"16px",fontWeight:"700",color:"#c0caf5",marginBottom:"12px"}}>✅ Komenda poprawna!</div>
-              <button className="next-btn" onClick={proceedToNext} style={{background:"linear-gradient(135deg,#7aa2f7,#73daca)",color:"#0a0b10",border:"none",borderRadius:"12px",padding:"12px 24px",fontWeight:"800",fontSize:"16px",cursor:"pointer",fontFamily:"inherit"}}>Następny krok →</button>
             </div>
           )}
           {aliases.length>0&&(

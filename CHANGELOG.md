@@ -1,3 +1,29 @@
+## [1.0.6] - 2026-02-18
+
+### Summary
+
+feat(docs): deep code analysis engine with 3 supporting modules
+
+### Docs
+
+- docs: update README
+- docs: update README
+
+### Other
+
+- update cyberquest/index.html
+- update cyberquest/index.jsx
+- update cyberquest/playwright.config.js
+- update cyberquest/style.css
+- update cyberquest/tests/app.spec.js
+- update index.html
+- update przylot/index.html
+- update przylot/index.jsx
+- update przylot/playwright.config.js
+- update przylot/style.css
+- ... and 1 more
+
+
 ## [1.0.5] - 2026-02-18
 
 ### Summary
